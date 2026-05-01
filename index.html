@@ -323,7 +323,8 @@ function init(){
   loadState();
   const today=new Date().toDateString();
   const sd=localStorage.getItem('ldts_v2_date');
-  if(sd!==today){S.answered=false;S.answer='';S.day=(S.day||0)+1;localStorage.setItem('ldts_v2_date',today);saveState();}
+  if(!sd){S.day=1;S.answered=false;S.answer='';localStorage.setItem('ldts_v2_date',today);saveState();}
+  else if(sd!==today){S.answered=false;S.answer='';S.day=(S.day||1)+1;localStorage.setItem('ldts_v2_date',today);saveState();}
   renderHome();renderWishlist();renderArchive();renderUs();fetchWeather();
   setTimeout(initHomeMap,200);
   setTimeout(initLeafletMap,300);
