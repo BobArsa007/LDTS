@@ -153,7 +153,7 @@ html,body{height:100%;background:#F0E8E2;display:flex;justify-content:center;ali
 <div class="app" id="app">
   <div class="header">
     <div class="logo">LD<em>TS</em></div>
-    <div class="streak-pill" id="streak-pill">🔥 Day 1</div>
+
   </div>
   <nav class="tab-nav">
     <button class="tab-btn active" data-tab="home" onclick="switchTab('home')">
@@ -195,7 +195,7 @@ html,body{height:100%;background:#F0E8E2;display:flex;justify-content:center;ali
         <div class="q-card">
           <div class="q-top">
             <div class="q-day-row">
-              <span style="font-size:11px;color:var(--muted)" id="q-day-label">Day 1</span>
+
               <span style="font-size:11px;color:var(--purple-deep);font-weight:500">answer to reveal</span>
             </div>
             <div class="q-text" id="q-text"></div>
@@ -211,6 +211,7 @@ html,body{height:100%;background:#F0E8E2;display:flex;justify-content:center;ali
           <div class="answered-wrap" id="answered-wrap">
             <div class="answered-bubble" id="answered-bubble"></div>
             <div class="waiting-row">Waiting for Yuddit <div class="dots"><span></span><span></span><span></span></div></div>
+            <button class="submit-btn" style="margin-top:10px;background:var(--pink-deep);" onclick="nextQuestion()">Next question →</button>
           </div>
         </div>
       </div>
@@ -274,7 +275,7 @@ html,body{height:100%;background:#F0E8E2;display:flex;justify-content:center;ali
         <div class="us-names">Bobby &amp; <em>Yuddit</em></div>
         <div class="us-since" id="us-since">Since today</div>
         <div class="us-stats">
-          <div class="us-stat"><div class="us-stat-num" id="stat-days">1</div><div class="us-stat-lbl">Days</div></div>
+
           <div class="us-stat"><div class="us-stat-num" id="stat-qs">0</div><div class="us-stat-lbl">Questions</div></div>
           <div class="us-stat"><div class="us-stat-num" id="stat-places">0</div><div class="us-stat-lbl">Places</div></div>
         </div>
@@ -309,7 +310,7 @@ html,body{height:100%;background:#F0E8E2;display:flex;justify-content:center;ali
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const S={day:1,answered:false,answer:'',meetup:null,places:[],archive:[],memories:[],selectedCat:'city'};
+const S={qIndex:0,answered:false,answer:'',meetup:null,places:[],archive:[],memories:[],selectedCat:'city'};
 const QUESTIONS=["What's a small, everyday thing that always makes you smile?","If you could only eat one meal for the rest of your life, what would it be?","What's something you're quietly proud of that you rarely talk about?","Describe your perfect lazy Sunday.","What song has been living in your head lately?","What's a fear you've never really told anyone?","What does your dream future look like, in the simplest terms?","If you could master any skill overnight, what would you pick?","What's the last thing that made you laugh out loud, alone?","What's something about yourself you're still figuring out?","What would your 10-year-old self think of you now?","What's a place you've been that changed how you see things?","If you could go back and relive one day, which would it be?","What's a movie, book, or song that shaped who you are?","What's something you want to get better at?"];
 const CAT_EMOJI={city:'🏙',nature:'🌿',beach:'🌊',culture:'🏛',food:'🍜'};
 const CAT_CLASS={city:'city',nature:'nature',beach:'beach',culture:'culture',food:'food'};
@@ -320,17 +321,8 @@ function loadState(){try{const s=localStorage.getItem('ldts_v2');if(s)Object.ass
 function saveState(){try{localStorage.setItem('ldts_v2',JSON.stringify(S));}catch(e){}}
 
 function init(){
-  const today=new Date().toDateString();
-  const sd=localStorage.getItem('ldts_v2_date');
-  if(!sd){
-    // Truly first ever open — reset everything and start at Day 1
-    localStorage.removeItem('ldts_v2');
-    S.day=1;S.answered=false;S.answer='';
-    localStorage.setItem('ldts_v2_date',today);saveState();
-  } else {
-    loadState();
-    if(sd!==today){S.answered=false;S.answer='';S.day=(S.day||1)+1;localStorage.setItem('ldts_v2_date',today);saveState();}
-  }
+  loadState();
+  if(!S.answered){S.answered=false;S.answer='';}
   renderHome();renderWishlist();renderArchive();renderUs();fetchWeather();
   setTimeout(initHomeMap,200);
   setTimeout(initLeafletMap,300);
@@ -346,9 +338,7 @@ function switchTab(tab){
 }
 
 function renderHome(){
-  document.getElementById('streak-pill').textContent='🔥 Day '+S.day;
-  document.getElementById('q-day-label').textContent='Day '+S.day;
-  document.getElementById('q-text').textContent='"'+QUESTIONS[(S.day-1)%QUESTIONS.length]+'"';
+  document.getElementById('q-text').textContent='"'+QUESTIONS[S.qIndex%QUESTIONS.length]+'"';
   if(S.answered){document.getElementById('q-input-area').style.display='none';document.getElementById('answered-wrap').style.display='block';document.getElementById('answered-bubble').textContent=S.answer;}
   if(S.meetup){document.getElementById('cd-title').textContent=S.meetup.place;const d=new Date(S.meetup.date);document.getElementById('cd-sub').textContent=d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});startCountdown();}
 }
@@ -356,8 +346,8 @@ function renderHome(){
 function submitAnswer(){
   const val=document.getElementById('q-textarea').value.trim();if(!val)return;
   S.answered=true;S.answer=val;
-  const qi=(S.day-1)%QUESTIONS.length;
-  if(!S.archive.find(a=>a.day===S.day))S.archive.unshift({day:S.day,q:QUESTIONS[qi],myAns:val,herAns:null,date:new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short'})});
+  const qi=S.qIndex%QUESTIONS.length;
+  if(!S.archive.find(a=>a.qi===qi))S.archive.unshift({qi,q:QUESTIONS[qi],myAns:val,herAns:null,date:new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short'})});
   saveState();
   document.getElementById('q-input-area').style.display='none';
   document.getElementById('answered-wrap').style.display='block';
@@ -365,7 +355,15 @@ function submitAnswer(){
   renderArchive();renderUs();
 }
 
-let cdTimer=null;
+function nextQuestion(){
+  S.qIndex=(S.qIndex||0)+1;S.answered=false;S.answer='';saveState();
+  document.getElementById('q-text').textContent='"'+QUESTIONS[S.qIndex%QUESTIONS.length]+'"';
+  document.getElementById('answered-wrap').style.display='none';
+  document.getElementById('q-input-area').style.display='block';
+  document.getElementById('q-textarea').value='';
+}
+
+
 function startCountdown(){if(cdTimer)clearInterval(cdTimer);cdTimer=setInterval(tickCountdown,1000);tickCountdown();}
 function tickCountdown(){if(!S.meetup)return;const diff=new Date(S.meetup.date)-new Date();if(diff<=0){['cd-d','cd-h','cd-m','cd-s'].forEach(id=>document.getElementById(id).textContent='0');return;}document.getElementById('cd-d').textContent=Math.floor(diff/86400000);document.getElementById('cd-h').textContent=Math.floor((diff%86400000)/3600000);document.getElementById('cd-m').textContent=Math.floor((diff%3600000)/60000);document.getElementById('cd-s').textContent=Math.floor((diff%60000)/1000);}
 
@@ -463,13 +461,12 @@ function renderArchive(){
   const body=document.getElementById('archive-body');const empty=document.getElementById('archive-empty');const answered=S.archive.filter(a=>a.myAns);
   if(answered.length===0){if(empty)empty.style.display='block';body.querySelectorAll('.archive-item').forEach(el=>el.remove());return;}
   if(empty)empty.style.display='none';body.querySelectorAll('.archive-item').forEach(el=>el.remove());
-  answered.forEach(a=>{const el=document.createElement('div');el.className='archive-item';el.innerHTML=`<div class="archive-q"><div class="archive-day">Day ${a.day} · ${a.date||''}</div><div class="archive-qtext">"${a.q}"</div></div><div class="archive-answers"><div class="archive-ans"><div class="archive-who">Bobby</div><div class="archive-atext">${a.myAns}</div></div><div class="archive-ans"><div class="archive-who">Yuddit</div><div class="archive-atext" style="color:var(--muted);font-style:italic">${a.herAns||'Waiting for her answer...'}</div></div></div>`;body.appendChild(el);});
+  answered.forEach(a=>{const el=document.createElement('div');el.className='archive-item';el.innerHTML=`<div class="archive-q"><div class="archive-day">${a.date||''}</div><div class="archive-qtext">"${a.q}"</div></div><div class="archive-answers"><div class="archive-ans"><div class="archive-who">Bobby</div><div class="archive-atext">${a.myAns}</div></div><div class="archive-ans"><div class="archive-who">Yuddit</div><div class="archive-atext" style="color:var(--muted);font-style:italic">${a.herAns||'Waiting for her answer...'}</div></div></div>`;body.appendChild(el);});
 }
 
 function addMemory(){const text=document.getElementById('memory-input').value.trim();if(!text)return;S.memories.unshift({text,date:new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})});document.getElementById('memory-input').value='';saveState();renderUs();}
 function renderUs(){
-  document.getElementById('stat-days').textContent=S.day;document.getElementById('stat-qs').textContent=S.archive.filter(a=>a.myAns).length;document.getElementById('stat-places').textContent=S.places.length;
-  const since=new Date();since.setDate(since.getDate()-(S.day-1));document.getElementById('us-since').textContent='Since '+since.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('stat-qs').textContent=S.archive.filter(a=>a.myAns).length;document.getElementById('stat-places').textContent=S.places.length;
   const mem=document.getElementById('us-memories');
   if(S.memories.length===0){mem.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0;">Add your first memory above ✦</div>';}
   else{mem.innerHTML=S.memories.map(m=>`<div class="memory-item"><div class="memory-dot"></div><div><div class="memory-date">${m.date}</div><div class="memory-text">${m.text}</div></div></div>`).join('');}
