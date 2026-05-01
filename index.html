@@ -320,11 +320,17 @@ function loadState(){try{const s=localStorage.getItem('ldts_v2');if(s)Object.ass
 function saveState(){try{localStorage.setItem('ldts_v2',JSON.stringify(S));}catch(e){}}
 
 function init(){
-  loadState();
   const today=new Date().toDateString();
   const sd=localStorage.getItem('ldts_v2_date');
-  if(!sd){S.day=1;S.answered=false;S.answer='';localStorage.setItem('ldts_v2_date',today);saveState();}
-  else if(sd!==today){S.answered=false;S.answer='';S.day=(S.day||1)+1;localStorage.setItem('ldts_v2_date',today);saveState();}
+  if(!sd){
+    // Truly first ever open — reset everything and start at Day 1
+    localStorage.removeItem('ldts_v2');
+    S.day=1;S.answered=false;S.answer='';
+    localStorage.setItem('ldts_v2_date',today);saveState();
+  } else {
+    loadState();
+    if(sd!==today){S.answered=false;S.answer='';S.day=(S.day||1)+1;localStorage.setItem('ldts_v2_date',today);saveState();}
+  }
   renderHome();renderWishlist();renderArchive();renderUs();fetchWeather();
   setTimeout(initHomeMap,200);
   setTimeout(initLeafletMap,300);
