@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LDTS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --pink:#F2C4CE;--pink-mid:#E8A0B0;--pink-deep:#C97B8A;
+  --purple:#9B8EC4;--purple-light:#EAE7F8;--purple-deep:#5C4E8A;
+  --cream:#FDF6F0;--cream-dark:#F5EDE4;--text:#2A1F2D;--muted:#8C7B8E;
+  --border:rgba(42,31,45,0.1);--border-mid:rgba(42,31,45,0.18);--card:#FFFFFF;
+}
+html,body{height:100%;background:#F0E8E2;display:flex;justify-content:center;align-items:flex-start;padding:20px 0 40px;}
+.app{font-family:'DM Sans',sans-serif;background:var(--cream);width:100%;max-width:420px;min-height:100vh;border-radius:28px;overflow:hidden;border:0.5px solid var(--border-mid);display:flex;flex-direction:column;position:relative;}
+.header{padding:18px 20px 14px;background:var(--card);border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.logo{font-family:'Instrument Serif',serif;font-size:22px;color:var(--text);letter-spacing:-0.5px;}
+.logo em{font-style:italic;color:var(--purple-deep);}
+.streak-pill{font-size:11px;font-weight:500;background:var(--pink);color:#7A3A48;padding:4px 11px;border-radius:20px;}
+.tab-nav{display:flex;background:var(--card);border-bottom:0.5px solid var(--border);flex-shrink:0;}
+.tab-btn{flex:1;padding:10px 4px 9px;text-align:center;background:transparent;border:none;font-family:'DM Sans',sans-serif;font-size:10px;color:var(--muted);cursor:pointer;transition:color 0.15s;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.tab-btn.active{color:var(--purple-deep);font-weight:500;}
+.tab-btn svg{width:16px;height:16px;flex-shrink:0;}
+.page{display:none;flex:1;overflow-y:auto;}
+.page.active{display:block;}
+.map-canvas{width:100%;height:168px;background:#DFF0E8;position:relative;overflow:hidden;}
+.map-bg-layer{position:absolute;inset:0;background:radial-gradient(ellipse at 28% 65%,#C8E8DC 0%,transparent 55%),radial-gradient(ellipse at 72% 38%,#D4E8F5 0%,transparent 55%);}
+.map-svg{position:absolute;top:0;left:0;width:100%;height:100%;}
+.city-pin{position:absolute;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%);}
+.pin-dot{width:11px;height:11px;border-radius:50%;border:2.5px solid white;}
+.pin-label{font-size:9px;font-weight:500;margin-top:3px;padding:2px 7px;border-radius:8px;background:white;border:0.5px solid var(--border);white-space:nowrap;}
+.pin-smg{left:64%;top:36%;}.pin-smg .pin-dot{background:var(--purple-deep);}.pin-smg .pin-label{color:var(--purple-deep);}
+.pin-bgr{left:27%;top:54%;}.pin-bgr .pin-dot{background:var(--pink-deep);}.pin-bgr .pin-label{color:var(--pink-deep);}
+.dist-tag{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:white;border:0.5px solid var(--border);border-radius:12px;padding:4px 11px;font-size:10px;color:var(--muted);white-space:nowrap;}
+.weather-strip{display:flex;background:var(--card);border-bottom:0.5px solid var(--border);}
+.w-cell{flex:1;padding:11px 16px;display:flex;align-items:center;gap:10px;}
+.w-cell+.w-cell{border-left:0.5px solid var(--border);}
+.w-icon{font-size:20px;line-height:1;flex-shrink:0;}
+.w-who{font-size:10px;color:var(--muted);}
+.w-temp{font-size:15px;font-weight:500;color:var(--text);}
+.w-sky{font-size:10px;color:var(--muted);}
+.home-body{padding:16px;display:flex;flex-direction:column;gap:14px;}
+.section-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
+.q-card{background:var(--card);border:0.5px solid var(--border);border-radius:16px;overflow:hidden;}
+.q-top{padding:14px 16px 12px;border-bottom:0.5px solid var(--border);}
+.q-day-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.q-text{font-family:'Instrument Serif',serif;font-size:15px;color:var(--text);line-height:1.55;margin-bottom:8px;}
+.q-hint{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;}
+.lock-svg{width:10px;height:12px;flex-shrink:0;}
+.q-body{padding:12px 16px;}
+.q-textarea{width:100%;border:0.5px solid var(--border-mid);border-radius:10px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--cream);resize:none;height:74px;outline:none;line-height:1.6;}
+.q-textarea::placeholder{color:var(--muted);}
+.q-textarea:focus{border-color:var(--purple);}
+.submit-btn{margin-top:10px;width:100%;padding:10px;background:var(--purple-deep);color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:opacity 0.15s;}
+.submit-btn:hover{opacity:0.87;}
+.answered-wrap{padding:12px 16px;display:none;}
+.answered-bubble{font-size:13px;color:var(--text);background:var(--cream);border-radius:10px;padding:10px 12px;line-height:1.6;margin-bottom:8px;}
+.waiting-row{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.dots span{display:inline-block;width:4px;height:4px;background:var(--muted);border-radius:50%;animation:blink 1.3s infinite;}
+.dots span:nth-child(2){animation-delay:.2s;}.dots span:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:.2;}40%{opacity:1;}}
+.cd-card{background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:14px 16px;}
+.cd-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.cd-title{font-family:'Instrument Serif',serif;font-size:14px;color:var(--text);}
+.cd-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.edit-btn{font-size:11px;color:var(--purple-deep);border:0.5px solid var(--purple);border-radius:8px;padding:3px 9px;background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.cd-nums{display:flex;gap:8px;}
+.cd-box{flex:1;background:var(--cream);border-radius:10px;padding:10px 4px;text-align:center;}
+.cd-num{font-family:'Instrument Serif',serif;font-size:26px;color:var(--text);line-height:1;}
+.cd-lbl{font-size:9px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.05em;}
+.wishlist-page{display:flex;flex-direction:column;}
+.wishlist-page.active{display:flex;}
+#leaflet-map{width:100%;height:260px;min-height:260px;flex-shrink:0;z-index:1;}
+.leaflet-container{font-family:'DM Sans',sans-serif;}
+.leaflet-popup-content-wrapper{border-radius:10px;border:0.5px solid rgba(42,31,45,0.12);box-shadow:0 2px 8px rgba(42,31,45,0.1);}
+.leaflet-popup-content{font-family:'DM Sans',sans-serif;font-size:12px;color:#2A1F2D;margin:8px 12px;}
+.leaflet-popup-tip-container{display:none;}
+.wmap-legend{position:absolute;bottom:10px;right:10px;background:white;z-index:9;border:0.5px solid rgba(42,31,45,0.12);border-radius:8px;padding:6px 10px;display:flex;flex-direction:column;gap:4px;pointer-events:none;}
+.legend-row{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--muted);}
+.legend-dot{width:8px;height:8px;border-radius:50%;}
+.legend-dot.done{background:#1D9E75;}.legend-dot.wish{background:var(--purple-deep);}
+.wishlist-body{padding:14px 16px;display:flex;flex-direction:column;gap:12px;flex:1;}
+.add-place-card{background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:12px 14px;}
+.add-row{display:flex;gap:8px;margin-bottom:8px;}
+.place-input{flex:1;border:0.5px solid var(--border-mid);border-radius:8px;padding:8px 10px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--cream);outline:none;}
+.place-input:focus{border-color:var(--purple);}
+.add-btn{padding:8px 14px;background:var(--purple-deep);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;}
+.category-pills{display:flex;gap:6px;flex-wrap:wrap;}
+.cat-pill{font-size:11px;padding:4px 10px;border-radius:20px;border:0.5px solid var(--border-mid);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.cat-pill.selected{background:var(--purple-light);color:var(--purple-deep);border-color:var(--purple);}
+.places-list{display:flex;flex-direction:column;gap:8px;}
+.place-item{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:12px;}
+.place-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;}
+.place-icon.food{background:#FFF0E0;}.place-icon.nature{background:#E0F5EA;}.place-icon.culture{background:#EAE7F8;}.place-icon.city{background:#E0EEF8;}.place-icon.beach{background:#E0F0FF;}
+.place-info{flex:1;min-width:0;}
+.place-name{font-size:13px;font-weight:500;color:var(--text);}
+.place-meta{font-size:11px;color:var(--muted);}
+.place-actions{display:flex;gap:6px;align-items:center;}
+.check-btn{width:26px;height:26px;border-radius:50%;border:0.5px solid var(--border-mid);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.check-btn:hover{background:#E0F5EA;border-color:#1D9E75;}.check-btn.done{background:#E0F5EA;border-color:#1D9E75;}
+.del-btn{width:26px;height:26px;border-radius:50%;border:0.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;transition:all .15s;}
+.del-btn:hover{background:#FFF0F0;border-color:#E24B4A;color:#E24B4A;}
+.done-badge{font-size:9px;padding:2px 7px;background:#E0F5EA;color:#0F6E56;border-radius:10px;font-weight:500;}
+.archive-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+.archive-item{background:var(--card);border:0.5px solid var(--border);border-radius:14px;overflow:hidden;}
+.archive-q{padding:12px 14px 10px;border-bottom:0.5px solid var(--border);}
+.archive-day{font-size:10px;color:var(--muted);margin-bottom:4px;}
+.archive-qtext{font-family:'Instrument Serif',serif;font-size:13px;color:var(--text);line-height:1.45;}
+.archive-answers{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.archive-ans{padding:10px 12px;}
+.archive-ans+.archive-ans{border-left:0.5px solid var(--border);}
+.archive-who{font-size:9px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em;}
+.archive-atext{font-size:12px;color:var(--text);line-height:1.5;}
+.archive-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;}
+.archive-empty-title{font-family:'Instrument Serif',serif;font-size:18px;color:var(--text);margin-bottom:6px;}
+.us-body{padding:16px;display:flex;flex-direction:column;gap:14px;}
+.us-hero{background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:20px;text-align:center;}
+.us-names{font-family:'Instrument Serif',serif;font-size:20px;color:var(--text);margin-bottom:4px;}
+.us-names em{font-style:italic;color:var(--purple-deep);}
+.us-since{font-size:12px;color:var(--muted);}
+.us-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:16px;}
+.us-stat{background:var(--cream);border-radius:10px;padding:10px 6px;text-align:center;}
+.us-stat-num{font-family:'Instrument Serif',serif;font-size:22px;color:var(--text);}
+.us-stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
+.us-memories{display:flex;flex-direction:column;gap:8px;}
+.memory-item{background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;}
+.memory-dot{width:10px;height:10px;border-radius:50%;background:var(--pink-mid);margin-top:3px;flex-shrink:0;}
+.memory-date{font-size:10px;color:var(--muted);margin-bottom:2px;}
+.memory-text{font-size:13px;color:var(--text);line-height:1.5;}
+.add-memory-card{background:var(--card);border:0.5px dashed var(--border-mid);border-radius:14px;padding:12px 14px;}
+.add-memory-row{display:flex;gap:8px;}
+.memory-input{flex:1;border:0.5px solid var(--border-mid);border-radius:8px;padding:8px 10px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--cream);outline:none;}
+.memory-input:focus{border-color:var(--purple);}
+.memory-add-btn{padding:8px 14px;background:var(--pink-deep);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;}
+.modal-backdrop{display:none;position:absolute;inset:0;background:rgba(42,31,45,0.38);border-radius:28px;z-index:50;align-items:center;justify-content:center;}
+.modal-backdrop.open{display:flex;}
+.modal{background:var(--card);border-radius:18px;padding:20px;width:290px;border:0.5px solid var(--border-mid);}
+.modal-title{font-family:'Instrument Serif',serif;font-size:17px;color:var(--text);margin-bottom:14px;}
+.modal label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px;}
+.modal input[type=text],.modal input[type=date]{width:100%;border:0.5px solid var(--border-mid);border-radius:8px;padding:8px 10px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--cream);outline:none;margin-bottom:12px;}
+.modal input:focus{border-color:var(--purple);}
+.modal-btns{display:flex;gap:8px;}
+.modal-cancel{flex:1;padding:9px;border:0.5px solid var(--border-mid);border-radius:8px;background:transparent;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--muted);cursor:pointer;}
+.modal-save{flex:1;padding:9px;border:none;border-radius:8px;background:var(--purple-deep);color:white;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;}
+.page::-webkit-scrollbar{width:4px;}.page::-webkit-scrollbar-track{background:transparent;}.page::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="header">
+    <div class="logo">LD<em>TS</em></div>
+    <div class="streak-pill" id="streak-pill">🔥 Day 1</div>
+  </div>
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="home" onclick="switchTab('home')">
+      <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Home
+    </button>
+    <button class="tab-btn" data-tab="wishlist" onclick="switchTab('wishlist')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M8 2C5.8 2 4 3.8 4 6c0 3.2 4 8 4 8s4-4.8 4-8c0-2.2-1.8-4-4-4z" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg>
+      Wishlist
+    </button>
+    <button class="tab-btn" data-tab="archive" onclick="switchTab('archive')">
+      <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Archive
+    </button>
+    <button class="tab-btn" data-tab="us" onclick="switchTab('us')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M8 13s-5-3.2-5-7a3 3 0 0 1 5-2.24A3 3 0 0 1 13 6c0 3.8-5 7-5 7z" stroke="currentColor" stroke-width="1.2"/></svg>
+      Us
+    </button>
+  </nav>
+
+  <div class="page active" id="page-home">
+    <div style="position:relative;width:100%;height:168px;flex-shrink:0;">
+      <div id="home-map" style="width:100%;height:168px;z-index:1;"></div>
+      <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:white;border:0.5px solid rgba(42,31,45,0.12);border-radius:12px;padding:4px 11px;font-size:10px;color:#8C7B8E;white-space:nowrap;z-index:9;pointer-events:none;">~450 km apart</div>
+    </div>
+    <div class="weather-strip">
+      <div class="w-cell">
+        <div class="w-icon" id="smg-icon">⛅</div>
+        <div><div class="w-who">Bobby · Semarang</div><div class="w-temp" id="smg-temp">—</div><div class="w-sky" id="smg-sky">Loading...</div></div>
+      </div>
+      <div class="w-cell">
+        <div class="w-icon" id="bgr-icon">🌧</div>
+        <div><div class="w-who">Yuddit · Bogor</div><div class="w-temp" id="bgr-temp">—</div><div class="w-sky" id="bgr-sky">Loading...</div></div>
+      </div>
+    </div>
+    <div class="home-body">
+      <div>
+        <div class="section-label">Today's question</div>
+        <div class="q-card">
+          <div class="q-top">
+            <div class="q-day-row">
+              <span style="font-size:11px;color:var(--muted)" id="q-day-label">Day 1</span>
+              <span style="font-size:11px;color:var(--purple-deep);font-weight:500">answer to reveal</span>
+            </div>
+            <div class="q-text" id="q-text"></div>
+            <div class="q-hint">
+              <svg class="lock-svg" viewBox="0 0 10 12" fill="none"><rect x="1" y="5" width="8" height="7" rx="1.5" stroke="#8C7B8E" stroke-width="1.2"/><path d="M3 5V3.5a2 2 0 0 1 4 0V5" stroke="#8C7B8E" stroke-width="1.2"/></svg>
+              Your answer locks before you see hers
+            </div>
+          </div>
+          <div class="q-body" id="q-input-area">
+            <textarea class="q-textarea" id="q-textarea" placeholder="Write your answer here..."></textarea>
+            <button class="submit-btn" onclick="submitAnswer()">Lock in my answer</button>
+          </div>
+          <div class="answered-wrap" id="answered-wrap">
+            <div class="answered-bubble" id="answered-bubble"></div>
+            <div class="waiting-row">Waiting for Yuddit <div class="dots"><span></span><span></span><span></span></div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">Next meetup</div>
+        <div class="cd-card">
+          <div class="cd-header">
+            <div><div class="cd-title" id="cd-title">Set your next meetup</div><div class="cd-sub" id="cd-sub">tap edit to add a date →</div></div>
+            <button class="edit-btn" onclick="openModal()">Edit</button>
+          </div>
+          <div class="cd-nums">
+            <div class="cd-box"><div class="cd-num" id="cd-d">—</div><div class="cd-lbl">days</div></div>
+            <div class="cd-box"><div class="cd-num" id="cd-h">—</div><div class="cd-lbl">hours</div></div>
+            <div class="cd-box"><div class="cd-num" id="cd-m">—</div><div class="cd-lbl">mins</div></div>
+            <div class="cd-box"><div class="cd-num" id="cd-s">—</div><div class="cd-lbl">secs</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page wishlist-page" id="page-wishlist">
+    <div style="position:relative;">
+      <div id="leaflet-map"></div>
+      <button id="sat-btn" onclick="toggleSatellite()" style="position:absolute;top:10px;right:10px;z-index:9;background:white;border:0.5px solid rgba(42,31,45,0.18);border-radius:8px;padding:5px 10px;font-family:DM Sans,sans-serif;font-size:11px;cursor:pointer;color:#2A1F2D;">🛰 Satellite</button>
+      <div class="wmap-legend">
+        <div class="legend-row"><div class="legend-dot done"></div>Been there</div>
+        <div class="legend-row"><div class="legend-dot wish"></div>Wanna go</div>
+      </div>
+    </div>
+    <div class="wishlist-body">
+      <div class="add-place-card">
+        <div class="add-row">
+          <input class="place-input" id="place-input" placeholder="Add a place... (e.g. Bromo, Jogja)" onkeydown="if(event.key==='Enter')addPlace()"/>
+          <button class="add-btn" onclick="addPlace()">Add</button>
+        </div>
+        <div class="category-pills">
+          <button class="cat-pill selected" data-cat="city" onclick="selectCat(this,'city')">🏙 City</button>
+          <button class="cat-pill" data-cat="nature" onclick="selectCat(this,'nature')">🌿 Nature</button>
+          <button class="cat-pill" data-cat="beach" onclick="selectCat(this,'beach')">🌊 Beach</button>
+          <button class="cat-pill" data-cat="culture" onclick="selectCat(this,'culture')">🏛 Culture</button>
+          <button class="cat-pill" data-cat="food" onclick="selectCat(this,'food')">🍜 Food</button>
+        </div>
+      </div>
+      <div class="places-list" id="places-list"></div>
+    </div>
+  </div>
+
+  <div class="page" id="page-archive">
+    <div class="archive-body" id="archive-body">
+      <div class="archive-empty" id="archive-empty">
+        <div class="archive-empty-title">No answers yet</div>
+        <div>Answer today's question — it'll show up here once both of you have replied.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-us">
+    <div class="us-body">
+      <div class="us-hero">
+        <div class="us-names">Bobby &amp; <em>Yuddit</em></div>
+        <div class="us-since" id="us-since">Since today</div>
+        <div class="us-stats">
+          <div class="us-stat"><div class="us-stat-num" id="stat-days">1</div><div class="us-stat-lbl">Days</div></div>
+          <div class="us-stat"><div class="us-stat-num" id="stat-qs">0</div><div class="us-stat-lbl">Questions</div></div>
+          <div class="us-stat"><div class="us-stat-num" id="stat-places">0</div><div class="us-stat-lbl">Places</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label" style="margin-bottom:8px;">Memories</div>
+        <div class="add-memory-card" style="margin-bottom:8px;">
+          <div class="add-memory-row">
+            <input class="memory-input" id="memory-input" placeholder="Add a memory or milestone..." onkeydown="if(event.key==='Enter')addMemory()"/>
+            <button class="memory-add-btn" onclick="addMemory()">Add</button>
+          </div>
+        </div>
+        <div class="us-memories" id="us-memories"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <div class="modal-title">Plan your meetup</div>
+      <label>Where?</label>
+      <input type="text" id="modal-place" placeholder="e.g. Yogyakarta"/>
+      <label>When?</label>
+      <input type="date" id="modal-date"/>
+      <div class="modal-btns">
+        <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+        <button class="modal-save" onclick="saveMeetup()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const S={day:1,answered:false,answer:'',meetup:null,places:[],archive:[],memories:[],selectedCat:'city'};
+const QUESTIONS=["What's a small, everyday thing that always makes you smile?","If you could only eat one meal for the rest of your life, what would it be?","What's something you're quietly proud of that you rarely talk about?","Describe your perfect lazy Sunday.","What song has been living in your head lately?","What's a fear you've never really told anyone?","What does your dream future look like, in the simplest terms?","If you could master any skill overnight, what would you pick?","What's the last thing that made you laugh out loud, alone?","What's something about yourself you're still figuring out?","What would your 10-year-old self think of you now?","What's a place you've been that changed how you see things?","If you could go back and relive one day, which would it be?","What's a movie, book, or song that shaped who you are?","What's something you want to get better at?"];
+const CAT_EMOJI={city:'🏙',nature:'🌿',beach:'🌊',culture:'🏛',food:'🍜'};
+const CAT_CLASS={city:'city',nature:'nature',beach:'beach',culture:'culture',food:'food'};
+const PLACE_LATLNG={'yogyakarta':[-7.797,110.370],'jogja':[-7.797,110.370],'bromo':[-7.942,112.953],'bali':[-8.409,115.189],'lombok':[-8.650,116.324],'bandung':[-6.914,107.609],'jakarta':[-6.200,106.816],'surabaya':[-7.250,112.750],'malang':[-7.983,112.621],'solo':[-7.574,110.831],'semarang':[-6.993,110.420],'bogor':[-6.597,106.806],'dieng':[-7.202,109.921],'karimunjawa':[-5.867,110.450],'pangandaran':[-7.689,108.651],'labuan bajo':[-8.497,119.889],'raja ampat':[-0.234,130.525],'komodo':[-8.550,119.489],'flores':[-8.674,121.396],'nusa penida':[-8.728,115.544],'gili':[-8.352,116.045],'ubud':[-8.506,115.262],'ijen':[-8.058,114.242],'wakatobi':[-5.490,123.590],'belitung':[-2.770,107.580]};
+
+function getLatLng(name){const key=name.toLowerCase().trim();for(const k in PLACE_LATLNG){if(key===k||key.includes(k)||k.includes(key))return PLACE_LATLNG[k];}return null;}
+function loadState(){try{const s=localStorage.getItem('ldts_v2');if(s)Object.assign(S,JSON.parse(s));}catch(e){}}
+function saveState(){try{localStorage.setItem('ldts_v2',JSON.stringify(S));}catch(e){}}
+
+function init(){
+  loadState();
+  const today=new Date().toDateString();
+  const sd=localStorage.getItem('ldts_v2_date');
+  if(sd!==today){S.answered=false;S.answer='';S.day=(S.day||0)+1;localStorage.setItem('ldts_v2_date',today);saveState();}
+  renderHome();renderWishlist();renderArchive();renderUs();fetchWeather();
+  setTimeout(initHomeMap,200);
+  setTimeout(initLeafletMap,300);
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  document.querySelector('[data-tab='+tab+']').classList.add('active');
+  if(tab==='wishlist'){setTimeout(()=>{if(leafletMap)leafletMap.invalidateSize();},120);}
+  if(tab==='home'){setTimeout(()=>{if(homeMap)homeMap.invalidateSize();},120);}
+}
+
+function renderHome(){
+  document.getElementById('streak-pill').textContent='🔥 Day '+S.day;
+  document.getElementById('q-day-label').textContent='Day '+S.day;
+  document.getElementById('q-text').textContent='"'+QUESTIONS[(S.day-1)%QUESTIONS.length]+'"';
+  if(S.answered){document.getElementById('q-input-area').style.display='none';document.getElementById('answered-wrap').style.display='block';document.getElementById('answered-bubble').textContent=S.answer;}
+  if(S.meetup){document.getElementById('cd-title').textContent=S.meetup.place;const d=new Date(S.meetup.date);document.getElementById('cd-sub').textContent=d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});startCountdown();}
+}
+
+function submitAnswer(){
+  const val=document.getElementById('q-textarea').value.trim();if(!val)return;
+  S.answered=true;S.answer=val;
+  const qi=(S.day-1)%QUESTIONS.length;
+  if(!S.archive.find(a=>a.day===S.day))S.archive.unshift({day:S.day,q:QUESTIONS[qi],myAns:val,herAns:null,date:new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short'})});
+  saveState();
+  document.getElementById('q-input-area').style.display='none';
+  document.getElementById('answered-wrap').style.display='block';
+  document.getElementById('answered-bubble').textContent=val;
+  renderArchive();renderUs();
+}
+
+let cdTimer=null;
+function startCountdown(){if(cdTimer)clearInterval(cdTimer);cdTimer=setInterval(tickCountdown,1000);tickCountdown();}
+function tickCountdown(){if(!S.meetup)return;const diff=new Date(S.meetup.date)-new Date();if(diff<=0){['cd-d','cd-h','cd-m','cd-s'].forEach(id=>document.getElementById(id).textContent='0');return;}document.getElementById('cd-d').textContent=Math.floor(diff/86400000);document.getElementById('cd-h').textContent=Math.floor((diff%86400000)/3600000);document.getElementById('cd-m').textContent=Math.floor((diff%3600000)/60000);document.getElementById('cd-s').textContent=Math.floor((diff%60000)/1000);}
+
+function openModal(){if(S.meetup){document.getElementById('modal-place').value=S.meetup.place;document.getElementById('modal-date').value=S.meetup.date;}document.getElementById('modal').classList.add('open');}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+function saveMeetup(){const place=document.getElementById('modal-place').value.trim()||'Our meetup';const date=document.getElementById('modal-date').value;if(!date){closeModal();return;}S.meetup={place,date};saveState();document.getElementById('cd-title').textContent=place;const d=new Date(date);document.getElementById('cd-sub').textContent=d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});closeModal();startCountdown();}
+
+const WMO_DESC={0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',48:'Foggy',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',71:'Light snow',73:'Snow',75:'Heavy snow',80:'Rain showers',81:'Rain showers',82:'Heavy showers',95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'};
+const WMO_ICON={0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌦',63:'🌧',65:'🌧',71:'🌨',73:'❄️',75:'❄️',80:'🌦',81:'🌧',82:'🌧',95:'⛈',96:'⛈',99:'⛈'};
+function fetchWeather(){
+  const cities=[{lat:-6.9932,lon:110.4203,tempEl:'smg-temp',skyEl:'smg-sky',iconEl:'smg-icon'},{lat:-6.5971,lon:106.8060,tempEl:'bgr-temp',skyEl:'bgr-sky',iconEl:'bgr-icon'}];
+  cities.forEach(c=>{
+    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,weathercode&timezone=Asia%2FJakarta`)
+      .then(r=>r.json()).then(d=>{
+        const temp=Math.round(d.current.temperature_2m);
+        const code=d.current.weathercode;
+        document.getElementById(c.tempEl).textContent=temp+'°C';
+        document.getElementById(c.skyEl).textContent=WMO_DESC[code]||'Clear';
+        document.getElementById(c.iconEl).textContent=WMO_ICON[code]||'🌤';
+      }).catch(()=>{document.getElementById(c.tempEl).textContent='—';document.getElementById(c.skyEl).textContent='Unavailable';});
+  });
+}
+
+let homeMap=null;
+function initHomeMap(){
+  if(homeMap)return;
+  homeMap=L.map('home-map',{center:[-7.2,108.6],zoom:7,zoomControl:false,attributionControl:false,dragging:false,touchZoom:false,scrollWheelZoom:false,doubleClickZoom:false,boxZoom:false,keyboard:false});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd'}).addTo(homeMap);
+
+  // Dashed polyline between Bogor and Semarang
+  const smgLL=[-6.993,110.420];
+  const bgrLL=[-6.597,106.806];
+  L.polyline([bgrLL,smgLL],{color:'#9B8EC4',weight:2,dashArray:'6 5',opacity:0.8}).addTo(homeMap);
+
+  // Semarang pin (you)
+  const smgIcon=L.divIcon({html:`<div style="display:flex;flex-direction:column;align-items:center"><div style="width:11px;height:11px;border-radius:50%;background:#5C4E8A;border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2)"></div><div style="font-size:9px;font-weight:500;margin-top:3px;padding:2px 7px;border-radius:8px;background:white;border:0.5px solid rgba(42,31,45,0.12);color:#5C4E8A;white-space:nowrap;">Semarang · Bobby</div></div>`,className:'',iconAnchor:[5,5]});
+  L.marker(smgLL,{icon:smgIcon}).addTo(homeMap);
+
+  // Bogor pin (Yuddit)
+  const bgrIcon=L.divIcon({html:`<div style="display:flex;flex-direction:column;align-items:center"><div style="width:11px;height:11px;border-radius:50%;background:#C97B8A;border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2)"></div><div style="font-size:9px;font-weight:500;margin-top:3px;padding:2px 7px;border-radius:8px;background:white;border:0.5px solid rgba(42,31,45,0.12);color:#C97B8A;white-space:nowrap;">Bogor · Yuddit</div></div>`,className:'',iconAnchor:[5,5]});
+  L.marker(bgrLL,{icon:bgrIcon}).addTo(homeMap);
+
+  homeMap.fitBounds([bgrLL,smgLL],{padding:[28,28]});
+  [100,300,600].forEach(t=>setTimeout(()=>homeMap.invalidateSize(),t));
+}
+let leafletMap=null,leafletMarkers=[];
+function makePinIcon(done){const color=done?'#1D9E75':'#5C4E8A';const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="30" viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 18 12 18s12-9 12-18C24 5.4 18.6 0 12 0z" fill="${color}"/><circle cx="12" cy="12" r="5" fill="white"/></svg>`;return L.divIcon({html:svg,className:'',iconSize:[24,30],iconAnchor:[12,30],popupAnchor:[0,-32]});}
+
+let satelliteMode=false;
+let baseLayer=null,satLayer=null;
+function toggleSatellite(){
+  satelliteMode=!satelliteMode;
+  if(satelliteMode){leafletMap.removeLayer(baseLayer);satLayer.addTo(leafletMap);}
+  else{leafletMap.removeLayer(satLayer);baseLayer.addTo(leafletMap);}
+  leafletMap.invalidateSize();
+  document.getElementById('sat-btn').textContent=satelliteMode?'🗺 Map':'🛰 Satellite';
+}
+function initLeafletMap(){
+  if(leafletMap)return;
+  leafletMap=L.map('leaflet-map',{center:[-7.5,112],zoom:6,zoomControl:true,attributionControl:false});
+  baseLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd'}).addTo(leafletMap);
+  satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:''});
+  [100,300,600,1000].forEach(t=>setTimeout(()=>leafletMap.invalidateSize(),t));
+  const smgI=L.divIcon({html:`<div style="width:10px;height:10px;border-radius:50%;background:#5C4E8A;border:2px solid white;"></div>`,className:'',iconSize:[10,10],iconAnchor:[5,5]});
+  const bgrI=L.divIcon({html:`<div style="width:10px;height:10px;border-radius:50%;background:#C97B8A;border:2px solid white;"></div>`,className:'',iconSize:[10,10],iconAnchor:[5,5]});
+  L.marker([-6.993,110.420],{icon:smgI}).addTo(leafletMap).bindPopup('Semarang · Bobby');
+  L.marker([-6.597,106.806],{icon:bgrI}).addTo(leafletMap).bindPopup('Bogor · Yuddit');
+  renderLeafletMarkers();
+}
+
+function renderLeafletMarkers(){
+  if(!leafletMap)return;
+  leafletMarkers.forEach(m=>m.remove());leafletMarkers=[];
+  S.places.forEach(p=>{
+    const ll=p.latlng||getLatLng(p.name);if(!ll)return;if(!p.latlng)p.latlng=ll;
+    const m=L.marker(ll,{icon:makePinIcon(p.done)}).addTo(leafletMap).bindPopup(`<b>${p.name}</b><br><span style="color:#8C7B8E">${p.done?'✓ Been there':'Wanna go'}</span>`);
+    leafletMarkers.push(m);
+  });
+  if(S.places.length>0){const vl=S.places.filter(p=>p.latlng).map(p=>p.latlng);if(vl.length>0)leafletMap.fitBounds(L.latLngBounds(vl),{padding:[40,40],maxZoom:10});}
+}
+
+function selectCat(el,cat){document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('selected'));el.classList.add('selected');S.selectedCat=cat;}
+function addPlace(){const name=document.getElementById('place-input').value.trim();if(!name)return;S.places.unshift({id:Date.now(),name,cat:S.selectedCat,done:false,latlng:getLatLng(name)});document.getElementById('place-input').value='';saveState();renderWishlist();renderUs();}
+function toggleDone(id){const p=S.places.find(p=>p.id===id);if(p){p.done=!p.done;saveState();renderWishlist();}}
+function deletePlace(id){S.places=S.places.filter(p=>p.id!==id);saveState();renderWishlist();renderUs();}
+
+function renderWishlist(){
+  const list=document.getElementById('places-list');
+  if(S.places.length===0){list.innerHTML='<div style="text-align:center;padding:24px 0;color:var(--muted);font-size:13px;">Add places you both want to visit together ✦</div>';}
+  else{list.innerHTML=S.places.map(p=>`<div class="place-item"><div class="place-icon ${CAT_CLASS[p.cat]}">${CAT_EMOJI[p.cat]||'📍'}</div><div class="place-info"><div class="place-name" style="${p.done?'text-decoration:line-through;opacity:.6':''}">${p.name}</div><div class="place-meta">${p.cat.charAt(0).toUpperCase()+p.cat.slice(1)} · ${p.done?'visited':'wanna go'}</div></div><div class="place-actions">${p.done?'<span class="done-badge">✓ Done</span>':''}<button class="check-btn ${p.done?'done':''}" onclick="toggleDone(${p.id})"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="${p.done?'#0F6E56':'#8C7B8E'}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="del-btn" onclick="deletePlace(${p.id})">×</button></div></div>`).join('');}
+  renderLeafletMarkers();
+}
+
+function renderArchive(){
+  const body=document.getElementById('archive-body');const empty=document.getElementById('archive-empty');const answered=S.archive.filter(a=>a.myAns);
+  if(answered.length===0){if(empty)empty.style.display='block';body.querySelectorAll('.archive-item').forEach(el=>el.remove());return;}
+  if(empty)empty.style.display='none';body.querySelectorAll('.archive-item').forEach(el=>el.remove());
+  answered.forEach(a=>{const el=document.createElement('div');el.className='archive-item';el.innerHTML=`<div class="archive-q"><div class="archive-day">Day ${a.day} · ${a.date||''}</div><div class="archive-qtext">"${a.q}"</div></div><div class="archive-answers"><div class="archive-ans"><div class="archive-who">Bobby</div><div class="archive-atext">${a.myAns}</div></div><div class="archive-ans"><div class="archive-who">Yuddit</div><div class="archive-atext" style="color:var(--muted);font-style:italic">${a.herAns||'Waiting for her answer...'}</div></div></div>`;body.appendChild(el);});
+}
+
+function addMemory(){const text=document.getElementById('memory-input').value.trim();if(!text)return;S.memories.unshift({text,date:new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})});document.getElementById('memory-input').value='';saveState();renderUs();}
+function renderUs(){
+  document.getElementById('stat-days').textContent=S.day;document.getElementById('stat-qs').textContent=S.archive.filter(a=>a.myAns).length;document.getElementById('stat-places').textContent=S.places.length;
+  const since=new Date();since.setDate(since.getDate()-(S.day-1));document.getElementById('us-since').textContent='Since '+since.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+  const mem=document.getElementById('us-memories');
+  if(S.memories.length===0){mem.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0;">Add your first memory above ✦</div>';}
+  else{mem.innerHTML=S.memories.map(m=>`<div class="memory-item"><div class="memory-dot"></div><div><div class="memory-date">${m.date}</div><div class="memory-text">${m.text}</div></div></div>`).join('');}
+}
+
+init();
+</script>
+</body>
+</html>
