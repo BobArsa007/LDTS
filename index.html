@@ -256,13 +256,13 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:16px 0 4
         Kita
       </button>
     </nav>
-    <div class="sidebar-footer">Bobby &amp; Yuddit ✦</div>
+    <div class="sidebar-footer">Bobby &amp; Yuddit ✦<br><span id="sync-status" style="font-size:10px;"></span></div>
   </aside>
   <!-- Content area wraps all pages -->
   <div class="content-area">
   <div class="header">
     <div class="logo">LD<em>TS</em></div>
-
+    <span id="sync-status-m" style="font-size:10px;color:var(--muted);"></span>
   </div>
   <nav class="tab-nav">
     <button class="tab-btn active" data-tab="home" onclick="switchTab('home')">
@@ -449,15 +449,86 @@ const CAT_CLASS={city:'city',nature:'nature',beach:'beach',culture:'culture',foo
 const PLACE_LATLNG={'yogyakarta':[-7.797,110.370],'jogja':[-7.797,110.370],'bromo':[-7.942,112.953],'bali':[-8.409,115.189],'lombok':[-8.650,116.324],'bandung':[-6.914,107.609],'jakarta':[-6.200,106.816],'surabaya':[-7.250,112.750],'malang':[-7.983,112.621],'solo':[-7.574,110.831],'semarang':[-6.993,110.420],'bogor':[-6.597,106.806],'dieng':[-7.202,109.921],'karimunjawa':[-5.867,110.450],'pangandaran':[-7.689,108.651],'labuan bajo':[-8.497,119.889],'raja ampat':[-0.234,130.525],'komodo':[-8.550,119.489],'flores':[-8.674,121.396],'nusa penida':[-8.728,115.544],'gili':[-8.352,116.045],'ubud':[-8.506,115.262],'ijen':[-8.058,114.242],'wakatobi':[-5.490,123.590],'belitung':[-2.770,107.580]};
 
 function getLatLng(name){const key=name.toLowerCase().trim();for(const k in PLACE_LATLNG){if(key===k||key.includes(k)||k.includes(key))return PLACE_LATLNG[k];}return null;}
-function loadState(){try{const s=localStorage.getItem('ldts_v2');if(s)Object.assign(S,JSON.parse(s));}catch(e){}}
-function saveState(){try{localStorage.setItem('ldts_v2',JSON.stringify(S));}catch(e){}}
+// ── JSONBin Cloud Sync ──
+const JBIN_KEY='$2a$10$aOMy.0xdjfpp1ly5ZZWtCuD65YDOf8msitXmJj2FDeS5XT1AQcN1y';
+const JBIN_BASE='https://api.jsonbin.io/v3/b';
+let BIN_ID=localStorage.getItem('ldts_bin_id')||'69f5a28536566621a817060f';
+let syncTimer=null;
 
-function init(){
-  loadState();
-  if(!S.answered){S.answered=false;S.answer='';}
+function showSyncStatus(msg,color='var(--muted)'){
+  ['sync-status','sync-status-m'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.textContent=msg;el.style.color=color;}
+  });
+}
+
+async function cloudLoad(){
+  if(!BIN_ID)return false;
+  try{
+    const r=await fetch(`${JBIN_BASE}/${BIN_ID}/latest`,{headers:{'X-Master-Key':JBIN_KEY}});
+    if(!r.ok)return false;
+    const d=await r.json();
+    Object.assign(S,d.record);
+    localStorage.setItem('ldts_v2',JSON.stringify(S));
+    return true;
+  }catch(e){return false;}
+}
+
+async function cloudSave(){
+  showSyncStatus('Menyimpan...','var(--muted)');
+  try{
+    if(!BIN_ID){
+      // Create bin on first save
+      const r=await fetch(JBIN_BASE,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY,'X-Bin-Name':'LDTS-Bobby-Yuddit','X-Private':'true'},
+        body:JSON.stringify(S)
+      });
+      if(!r.ok)throw new Error('create failed');
+      const d=await r.json();
+      BIN_ID=d.metadata.id;
+      localStorage.setItem('ldts_bin_id',BIN_ID);
+    } else {
+      const r=await fetch(`${JBIN_BASE}/${BIN_ID}`,{
+        method:'PUT',
+        headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY},
+        body:JSON.stringify(S)
+      });
+      if(!r.ok)throw new Error('save failed');
+    }
+    localStorage.setItem('ldts_v2',JSON.stringify(S));
+    showSyncStatus('Tersinkron ✓','#1D9E75');
+    setTimeout(()=>showSyncStatus(''),3000);
+  }catch(e){
+    localStorage.setItem('ldts_v2',JSON.stringify(S));
+    showSyncStatus('Tersimpan lokal','var(--muted)');
+  }
+}
+
+function loadState(){try{const s=localStorage.getItem('ldts_v2');if(s)Object.assign(S,JSON.parse(s));}catch(e){}}
+function saveState(){
+  clearTimeout(syncTimer);
+  syncTimer=setTimeout(cloudSave,600);
+}
+
+async function init(){
+  loadState(); // load local cache first for instant render
   renderHome();renderWishlist();renderArchive();renderUs();fetchWeather();
   setTimeout(initHomeMap,200);
   setTimeout(initLeafletMap,300);
+  // Then sync from cloud
+  showSyncStatus('Memuat dari cloud...','var(--muted)');
+  const ok=await cloudLoad();
+  if(ok){
+    renderHome();renderWishlist();renderArchive();renderUs();
+    showSyncStatus('Tersinkron ✓','#1D9E75');
+    setTimeout(()=>showSyncStatus(''),3000);
+  } else if(!BIN_ID){
+    showSyncStatus('Belum terhubung — data pertama akan membuat bin','var(--muted)');
+    setTimeout(()=>showSyncStatus(''),5000);
+  } else {
+    showSyncStatus('Offline — data lokal','var(--muted)');
+  }
 }
 
 function switchTab(tab){
