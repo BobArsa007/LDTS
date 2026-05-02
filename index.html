@@ -241,7 +241,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:16px 0 4
     <nav class="sidebar-nav">
       <button class="sidebar-btn active" data-tab="home" onclick="switchTab('home')">
         <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-        Home
+        Beranda
       </button>
       <button class="sidebar-btn" data-tab="wishlist" onclick="switchTab('wishlist')">
         <svg viewBox="0 0 16 16" fill="none"><path d="M8 2C5.8 2 4 3.8 4 6c0 3.2 4 8 4 8s4-4.8 4-8c0-2.2-1.8-4-4-4z" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg>
@@ -249,11 +249,11 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:16px 0 4
       </button>
       <button class="sidebar-btn" data-tab="archive" onclick="switchTab('archive')">
         <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-        Archive
+        Arsip
       </button>
       <button class="sidebar-btn" data-tab="us" onclick="switchTab('us')">
         <svg viewBox="0 0 16 16" fill="none"><path d="M8 13s-5-3.2-5-7a3 3 0 0 1 5-2.24A3 3 0 0 1 13 6c0 3.8-5 7-5 7z" stroke="currentColor" stroke-width="1.2"/></svg>
-        Us
+        Kita
       </button>
     </nav>
     <div class="sidebar-footer">Bobby &amp; Yuddit ✦</div>
@@ -267,7 +267,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:16px 0 4
   <nav class="tab-nav">
     <button class="tab-btn active" data-tab="home" onclick="switchTab('home')">
       <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      Home
+      Beranda
     </button>
     <button class="tab-btn" data-tab="wishlist" onclick="switchTab('wishlist')">
       <svg viewBox="0 0 16 16" fill="none"><path d="M8 2C5.8 2 4 3.8 4 6c0 3.2 4 8 4 8s4-4.8 4-8c0-2.2-1.8-4-4-4z" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg>
@@ -275,11 +275,11 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:16px 0 4
     </button>
     <button class="tab-btn" data-tab="archive" onclick="switchTab('archive')">
       <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      Archive
+      Arsip
     </button>
     <button class="tab-btn" data-tab="us" onclick="switchTab('us')">
       <svg viewBox="0 0 16 16" fill="none"><path d="M8 13s-5-3.2-5-7a3 3 0 0 1 5-2.24A3 3 0 0 1 13 6c0 3.8-5 7-5 7z" stroke="currentColor" stroke-width="1.2"/></svg>
-      Us
+      Kita
     </button>
   </nav>
 
@@ -287,49 +287,49 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:16px 0 4
     <!-- Row 1: Map (full width) -->
     <div class="home-map-row">
       <div id="home-map" style="width:100%;height:168px;z-index:1;"></div>
-      <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:white;border:0.5px solid rgba(42,31,45,0.12);border-radius:12px;padding:4px 11px;font-size:10px;color:#8C7B8E;white-space:nowrap;z-index:9;pointer-events:none;">~450 km apart</div>
+      <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:white;border:0.5px solid rgba(42,31,45,0.12);border-radius:12px;padding:4px 11px;font-size:10px;color:#8C7B8E;white-space:nowrap;z-index:9;pointer-events:none;">~450 km jaraknya</div>
     </div>
     <!-- Row 2: Weather (full width) -->
     <div class="weather-strip">
       <div class="w-cell">
         <div class="w-icon" id="smg-icon">⛅</div>
-        <div><div class="w-who">Bobby · Semarang</div><div class="w-temp" id="smg-temp">—</div><div class="w-sky" id="smg-sky">Loading...</div></div>
+        <div><div class="w-who">Bobby · Semarang</div><div class="w-temp" id="smg-temp">—</div><div class="w-sky" id="smg-sky">Memuat...</div></div>
       </div>
       <div class="w-cell">
         <div class="w-icon" id="bgr-icon">🌧</div>
-        <div><div class="w-who">Yuddit · Bogor</div><div class="w-temp" id="bgr-temp">—</div><div class="w-sky" id="bgr-sky">Loading...</div></div>
+        <div><div class="w-who">Yuddit · Bogor</div><div class="w-temp" id="bgr-temp">—</div><div class="w-sky" id="bgr-sky">Memuat...</div></div>
       </div>
     </div>
     <!-- Row 3 left: Question -->
     <div class="home-body">
-      <div class="section-label">Today's question</div>
+      <div class="section-label">Pertanyaan hari ini</div>
       <div class="q-card">
         <div class="q-top">
           <div class="q-day-row">
-            <span style="font-size:11px;color:var(--purple-deep);font-weight:500">answer to reveal</span>
+            <span style="font-size:11px;color:var(--purple-deep);font-weight:500">jawab dulu untuk lihat</span>
           </div>
           <div class="q-text" id="q-text"></div>
           <div class="q-hint">
             <svg class="lock-svg" viewBox="0 0 10 12" fill="none"><rect x="1" y="5" width="8" height="7" rx="1.5" stroke="#8C7B8E" stroke-width="1.2"/><path d="M3 5V3.5a2 2 0 0 1 4 0V5" stroke="#8C7B8E" stroke-width="1.2"/></svg>
-            Your answer locks before you see hers
+            Jawabanmu terkunci sebelum kamu lihat punya dia
           </div>
         </div>
         <div class="q-body" id="q-input-area">
-          <textarea class="q-textarea" id="q-textarea" placeholder="Write your answer here..."></textarea>
-          <button class="submit-btn" onclick="submitAnswer()">Lock in my answer</button>
+          <textarea class="q-textarea" id="q-textarea" placeholder="Tulis jawabanmu di sini..."></textarea>
+          <button class="submit-btn" onclick="submitAnswer()">Kunci jawabanku</button>
         </div>
         <div class="answered-wrap" id="answered-wrap">
           <div class="answered-bubble" id="answered-bubble"></div>
-          <div class="waiting-row">Waiting for Yuddit <div class="dots"><span></span><span></span><span></span></div></div>
-          <button class="submit-btn" style="margin-top:10px;background:var(--pink-deep);" onclick="nextQuestion()">Next question →</button>
+          <div class="waiting-row">Menunggu Yuddit <div class="dots"><span></span><span></span><span></span></div></div>
+          <button class="submit-btn" style="margin-top:10px;background:var(--pink-deep);" onclick="nextQuestion()">Pertanyaan berikutnya →</button>
         </div>
       </div>
       <!-- Countdown (mobile only) -->
       <div class="mobile-only">
-        <div class="section-label" style="margin-top:4px;">Next meetup</div>
+        <div class="section-label" style="margin-top:4px;">Pertemuan berikutnya</div>
         <div class="cd-card">
           <div class="cd-header">
-            <div><div class="cd-title" id="cd-title">Set your next meetup</div><div class="cd-sub" id="cd-sub">tap edit to add a date →</div></div>
+            <div><div class="cd-title" id="cd-title">Atur pertemuan berikutnya</div><div class="cd-sub" id="cd-sub">ketuk edit untuk tambah tanggal →</div></div>
             <button class="edit-btn" onclick="openModal()">Edit</button>
           </div>
           <div class="cd-nums">
@@ -343,10 +343,10 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:16px 0 4
     </div>
     <!-- Row 3 right: Countdown + heart card (desktop only) -->
     <div id="desk-right-col">
-      <div class="section-label">Next meetup</div>
+      <div class="section-label">Pertemuan berikutnya</div>
       <div class="cd-card">
         <div class="cd-header">
-          <div><div class="cd-title" id="cd-title-d">Set your next meetup</div><div class="cd-sub" id="cd-sub-d">tap edit to add a date →</div></div>
+          <div><div class="cd-title" id="cd-title-d">Atur pertemuan berikutnya</div><div class="cd-sub" id="cd-sub-d">ketuk edit untuk tambah tanggal →</div></div>
           <button class="edit-btn" onclick="openModal()">Edit</button>
         </div>
         <div class="cd-nums">
@@ -359,7 +359,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:16px 0 4
       <div style="background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:24px 20px;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;text-align:center;">
         <div style="font-size:28px;">🔥</div>
         <div style="font-family:'Instrument Serif',serif;font-size:22px;color:var(--text);">Bobby &amp; <em style="font-style:italic;color:var(--purple-deep);">Yuddit</em></div>
-        <div style="font-size:12px;color:var(--muted);">Long distance, close hearts ✦</div>
+        <div style="font-size:12px;color:var(--muted);">Jauh di mata, dekat di hati ✦</div>
       </div>
     </div>
   </div>
@@ -367,24 +367,24 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:16px 0 4
   <div class="page wishlist-page" id="page-wishlist">
     <div class="wishlist-map-col" style="position:relative;">
       <div id="leaflet-map"></div>
-      <button id="sat-btn" onclick="toggleSatellite()" style="position:absolute;top:10px;right:10px;z-index:9;background:white;border:0.5px solid rgba(42,31,45,0.18);border-radius:8px;padding:5px 10px;font-family:DM Sans,sans-serif;font-size:11px;cursor:pointer;color:#2A1F2D;">🛰 Satellite</button>
+      <button id="sat-btn" onclick="toggleSatellite()" style="position:absolute;top:10px;right:10px;z-index:9;background:white;border:0.5px solid rgba(42,31,45,0.18);border-radius:8px;padding:5px 10px;font-family:DM Sans,sans-serif;font-size:11px;cursor:pointer;color:#2A1F2D;">🛰 Satelit</button>
       <div class="wmap-legend">
-        <div class="legend-row"><div class="legend-dot done"></div>Been there</div>
-        <div class="legend-row"><div class="legend-dot wish"></div>Wanna go</div>
+        <div class="legend-row"><div class="legend-dot done"></div>Sudah ke sini</div>
+        <div class="legend-row"><div class="legend-dot wish"></div>Mau ke sini</div>
       </div>
     </div>
     <div class="wishlist-body">
       <div class="add-place-card">
         <div class="add-row">
-          <input class="place-input" id="place-input" placeholder="Add a place... (e.g. Bromo, Jogja)" onkeydown="if(event.key==='Enter')addPlace()"/>
-          <button class="add-btn" onclick="addPlace()">Add</button>
+          <input class="place-input" id="place-input" placeholder="Tambah tempat... (mis. Bromo, Jogja)" onkeydown="if(event.key==='Enter')addPlace()"/>
+          <button class="add-btn" onclick="addPlace()">Tambah</button>
         </div>
         <div class="category-pills">
-          <button class="cat-pill selected" data-cat="city" onclick="selectCat(this,'city')">🏙 City</button>
-          <button class="cat-pill" data-cat="nature" onclick="selectCat(this,'nature')">🌿 Nature</button>
-          <button class="cat-pill" data-cat="beach" onclick="selectCat(this,'beach')">🌊 Beach</button>
-          <button class="cat-pill" data-cat="culture" onclick="selectCat(this,'culture')">🏛 Culture</button>
-          <button class="cat-pill" data-cat="food" onclick="selectCat(this,'food')">🍜 Food</button>
+          <button class="cat-pill selected" data-cat="city" onclick="selectCat(this,'city')">🏙 Kota</button>
+          <button class="cat-pill" data-cat="nature" onclick="selectCat(this,'nature')">🌿 Alam</button>
+          <button class="cat-pill" data-cat="beach" onclick="selectCat(this,'beach')">🌊 Pantai</button>
+          <button class="cat-pill" data-cat="culture" onclick="selectCat(this,'culture')">🏛 Budaya</button>
+          <button class="cat-pill" data-cat="food" onclick="selectCat(this,'food')">🍜 Kuliner</button>
         </div>
       </div>
       <div class="places-list" id="places-list"></div>
@@ -394,8 +394,8 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:16px 0 4
   <div class="page" id="page-archive">
     <div class="archive-body" id="archive-body">
       <div class="archive-empty" id="archive-empty">
-        <div class="archive-empty-title">No answers yet</div>
-        <div>Answer today's question — it'll show up here once both of you have replied.</div>
+        <div class="archive-empty-title">Belum ada jawaban</div>
+        <div>Jawab pertanyaan hari ini — akan muncul di sini setelah kalian berdua menjawab.</div>
       </div>
     </div>
   </div>
@@ -404,7 +404,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:16px 0 4
     <div class="us-body">
       <div class="us-hero">
         <div class="us-names">Bobby &amp; <em>Yuddit</em></div>
-        <div class="us-since" id="us-since">Since today</div>
+        <div class="us-since" id="us-since">Mulai hari ini</div>
         <div class="us-stats">
 
           <div class="us-stat"><div class="us-stat-num" id="stat-qs">0</div><div class="us-stat-lbl">Questions</div></div>
@@ -412,11 +412,11 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:16px 0 4
         </div>
       </div>
       <div>
-        <div class="section-label" style="margin-bottom:8px;">Memories</div>
+        <div class="section-label" style="margin-bottom:8px;">Kenangan</div>
         <div class="add-memory-card" style="margin-bottom:8px;">
           <div class="add-memory-row">
-            <input class="memory-input" id="memory-input" placeholder="Add a memory or milestone..." onkeydown="if(event.key==='Enter')addMemory()"/>
-            <button class="memory-add-btn" onclick="addMemory()">Add</button>
+            <input class="memory-input" id="memory-input" placeholder="Tambah kenangan atau momen penting..." onkeydown="if(event.key==='Enter')addMemory()"/>
+            <button class="memory-add-btn" onclick="addMemory()">Tambah</button>
           </div>
         </div>
         <div class="us-memories" id="us-memories"></div>
@@ -426,14 +426,14 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:16px 0 4
 
   <div class="modal-backdrop" id="modal" onclick="if(event.target===this)closeModal()">
     <div class="modal">
-      <div class="modal-title">Plan your meetup</div>
-      <label>Where?</label>
-      <input type="text" id="modal-place" placeholder="e.g. Yogyakarta"/>
-      <label>When?</label>
+      <div class="modal-title">Rencanakan pertemuan</div>
+      <label>Di mana?</label>
+      <input type="text" id="modal-place" placeholder="mis. Yogyakarta"/>
+      <label>Kapan?</label>
       <input type="date" id="modal-date"/>
       <div class="modal-btns">
-        <button class="modal-cancel" onclick="closeModal()">Cancel</button>
-        <button class="modal-save" onclick="saveMeetup()">Save</button>
+        <button class="modal-cancel" onclick="closeModal()">Batal</button>
+        <button class="modal-save" onclick="saveMeetup()">Simpan</button>
       </div>
     </div>
   </div>
@@ -443,7 +443,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:16px 0 4
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const S={qIndex:0,answered:false,answer:'',meetup:null,places:[],archive:[],memories:[],selectedCat:'city'};
-const QUESTIONS=["What's a small, everyday thing that always makes you smile?","If you could only eat one meal for the rest of your life, what would it be?","What's something you're quietly proud of that you rarely talk about?","Describe your perfect lazy Sunday.","What song has been living in your head lately?","What's a fear you've never really told anyone?","What does your dream future look like, in the simplest terms?","If you could master any skill overnight, what would you pick?","What's the last thing that made you laugh out loud, alone?","What's something about yourself you're still figuring out?","What would your 10-year-old self think of you now?","What's a place you've been that changed how you see things?","If you could go back and relive one day, which would it be?","What's a movie, book, or song that shaped who you are?","What's something you want to get better at?"];
+const QUESTIONS=["Hal kecil sehari-hari apa yang selalu bikin kamu senyum?","Kalau kamu cuma boleh makan satu makanan seumur hidup, apa yang kamu pilih?","Hal apa yang kamu diam-diam banggain tapi jarang kamu ceritain?","Ceritain Sunday santaimu yang sempurna.","Lagu apa yang lagi muter terus di kepalamu?","Ketakutan apa yang belum pernah kamu ceritain ke siapapun?","Seperti apa masa depan impianmu, dalam kata-kata paling sederhana?","Kalau kamu bisa kuasai satu skill dalam semalam, apa yang kamu pilih?","Hal terakhir apa yang bikin kamu ketawa keras-keras, sendirian?","Hal apa tentang dirimu yang masih kamu coba pahami?","Apa yang kira-kira dipikirkan dirimu yang umur 10 tahun melihat kamu sekarang?","Tempat mana yang pernah kamu kunjungi dan mengubah cara pandangmu?","Kalau kamu bisa kembali dan menghidupi satu hari lagi, hari mana yang kamu pilih?","Film, buku, atau lagu apa yang paling membentuk dirimu?","Hal apa yang ingin kamu tingkatkan dalam dirimu?"];
 const CAT_EMOJI={city:'🏙',nature:'🌿',beach:'🌊',culture:'🏛',food:'🍜'};
 const CAT_CLASS={city:'city',nature:'nature',beach:'beach',culture:'culture',food:'food'};
 const PLACE_LATLNG={'yogyakarta':[-7.797,110.370],'jogja':[-7.797,110.370],'bromo':[-7.942,112.953],'bali':[-8.409,115.189],'lombok':[-8.650,116.324],'bandung':[-6.914,107.609],'jakarta':[-6.200,106.816],'surabaya':[-7.250,112.750],'malang':[-7.983,112.621],'solo':[-7.574,110.831],'semarang':[-6.993,110.420],'bogor':[-6.597,106.806],'dieng':[-7.202,109.921],'karimunjawa':[-5.867,110.450],'pangandaran':[-7.689,108.651],'labuan bajo':[-8.497,119.889],'raja ampat':[-0.234,130.525],'komodo':[-8.550,119.489],'flores':[-8.674,121.396],'nusa penida':[-8.728,115.544],'gili':[-8.352,116.045],'ubud':[-8.506,115.262],'ijen':[-8.058,114.242],'wakatobi':[-5.490,123.590],'belitung':[-2.770,107.580]};
@@ -524,7 +524,7 @@ function fetchWeather(){
         document.getElementById(c.tempEl).textContent=temp+'°C';
         document.getElementById(c.skyEl).textContent=WMO_DESC[code]||'Clear';
         document.getElementById(c.iconEl).textContent=WMO_ICON[code]||'🌤';
-      }).catch(()=>{document.getElementById(c.tempEl).textContent='—';document.getElementById(c.skyEl).textContent='Unavailable';});
+      }).catch(()=>{document.getElementById(c.tempEl).textContent='—';document.getElementById(c.skyEl).textContent='Tidak tersedia';});
   });
 }
 
@@ -560,7 +560,7 @@ function toggleSatellite(){
   if(satelliteMode){leafletMap.removeLayer(baseLayer);satLayer.addTo(leafletMap);}
   else{leafletMap.removeLayer(satLayer);baseLayer.addTo(leafletMap);}
   leafletMap.invalidateSize();
-  document.getElementById('sat-btn').textContent=satelliteMode?'🗺 Map':'🛰 Satellite';
+  document.getElementById('sat-btn').textContent=satelliteMode?'🗺 Peta':'🛰 Satelit';
 }
 function initLeafletMap(){
   if(leafletMap)return;
@@ -580,7 +580,7 @@ function renderLeafletMarkers(){
   leafletMarkers.forEach(m=>m.remove());leafletMarkers=[];
   S.places.forEach(p=>{
     const ll=p.latlng||getLatLng(p.name);if(!ll)return;if(!p.latlng)p.latlng=ll;
-    const m=L.marker(ll,{icon:makePinIcon(p.done)}).addTo(leafletMap).bindPopup(`<b>${p.name}</b><br><span style="color:#8C7B8E">${p.done?'✓ Been there':'Wanna go'}</span>`);
+    const m=L.marker(ll,{icon:makePinIcon(p.done)}).addTo(leafletMap).bindPopup(`<b>${p.name}</b><br><span style="color:#8C7B8E">${p.done?'✓ Sudah ke sini':'Mau ke sini'}</span>`);
     leafletMarkers.push(m);
   });
   if(S.places.length>0){const vl=S.places.filter(p=>p.latlng).map(p=>p.latlng);if(vl.length>0)leafletMap.fitBounds(L.latLngBounds(vl),{padding:[40,40],maxZoom:10});}
@@ -594,7 +594,7 @@ function deletePlace(id){S.places=S.places.filter(p=>p.id!==id);saveState();rend
 function renderWishlist(){
   const list=document.getElementById('places-list');
   if(S.places.length===0){list.innerHTML='<div style="text-align:center;padding:24px 0;color:var(--muted);font-size:13px;">Add places you both want to visit together ✦</div>';}
-  else{list.innerHTML=S.places.map(p=>`<div class="place-item"><div class="place-icon ${CAT_CLASS[p.cat]}">${CAT_EMOJI[p.cat]||'📍'}</div><div class="place-info"><div class="place-name" style="${p.done?'text-decoration:line-through;opacity:.6':''}">${p.name}</div><div class="place-meta">${p.cat.charAt(0).toUpperCase()+p.cat.slice(1)} · ${p.done?'visited':'wanna go'}</div></div><div class="place-actions">${p.done?'<span class="done-badge">✓ Done</span>':''}<button class="check-btn ${p.done?'done':''}" onclick="toggleDone(${p.id})"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="${p.done?'#0F6E56':'#8C7B8E'}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="del-btn" onclick="deletePlace(${p.id})">×</button></div></div>`).join('');}
+  else{list.innerHTML=S.places.map(p=>`<div class="place-item"><div class="place-icon ${CAT_CLASS[p.cat]}">${CAT_EMOJI[p.cat]||'📍'}</div><div class="place-info"><div class="place-name" style="${p.done?'text-decoration:line-through;opacity:.6':''}">${p.name}</div><div class="place-meta">${({'city':'Kota','nature':'Alam','beach':'Pantai','culture':'Budaya','food':'Kuliner'}[p.cat]||p.cat)} · ${p.done?'sudah dikunjungi':'mau ke sini'}</div></div><div class="place-actions">${p.done?'<span class="done-badge">✓ Selesai</span>':''}<button class="check-btn ${p.done?'done':''}" onclick="toggleDone(${p.id})"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="${p.done?'#0F6E56':'#8C7B8E'}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="del-btn" onclick="deletePlace(${p.id})">×</button></div></div>`).join('');}
   renderLeafletMarkers();
 }
 
@@ -609,7 +609,7 @@ function addMemory(){const text=document.getElementById('memory-input').value.tr
 function renderUs(){
   document.getElementById('stat-qs').textContent=S.archive.filter(a=>a.myAns).length;document.getElementById('stat-places').textContent=S.places.length;
   const mem=document.getElementById('us-memories');
-  if(S.memories.length===0){mem.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0;">Add your first memory above ✦</div>';}
+  if(S.memories.length===0){mem.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0;">Tambah kenangan pertamamu di atas ✦</div>';}
   else{mem.innerHTML=S.memories.map(m=>`<div class="memory-item"><div class="memory-dot"></div><div><div class="memory-date">${m.date}</div><div class="memory-text">${m.text}</div></div></div>`).join('');}
 }
 
