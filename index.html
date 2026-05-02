@@ -446,9 +446,19 @@ const S={qIndex:0,answered:false,answer:'',meetup:null,places:[],archive:[],memo
 const QUESTIONS=["Hal kecil sehari-hari apa yang selalu bikin kamu senyum?","Kalau kamu cuma boleh makan satu makanan seumur hidup, apa yang kamu pilih?","Hal apa yang kamu diam-diam banggain tapi jarang kamu ceritain?","Ceritain Sunday santaimu yang sempurna.","Lagu apa yang lagi muter terus di kepalamu?","Ketakutan apa yang belum pernah kamu ceritain ke siapapun?","Seperti apa masa depan impianmu, dalam kata-kata paling sederhana?","Kalau kamu bisa kuasai satu skill dalam semalam, apa yang kamu pilih?","Hal terakhir apa yang bikin kamu ketawa keras-keras, sendirian?","Hal apa tentang dirimu yang masih kamu coba pahami?","Apa yang kira-kira dipikirkan dirimu yang umur 10 tahun melihat kamu sekarang?","Tempat mana yang pernah kamu kunjungi dan mengubah cara pandangmu?","Kalau kamu bisa kembali dan menghidupi satu hari lagi, hari mana yang kamu pilih?","Film, buku, atau lagu apa yang paling membentuk dirimu?","Hal apa yang ingin kamu tingkatkan dalam dirimu?"];
 const CAT_EMOJI={city:'🏙',nature:'🌿',beach:'🌊',culture:'🏛',food:'🍜'};
 const CAT_CLASS={city:'city',nature:'nature',beach:'beach',culture:'culture',food:'food'};
-const PLACE_LATLNG={'yogyakarta':[-7.797,110.370],'jogja':[-7.797,110.370],'bromo':[-7.942,112.953],'bali':[-8.409,115.189],'lombok':[-8.650,116.324],'bandung':[-6.914,107.609],'jakarta':[-6.200,106.816],'surabaya':[-7.250,112.750],'malang':[-7.983,112.621],'solo':[-7.574,110.831],'semarang':[-6.993,110.420],'bogor':[-6.597,106.806],'dieng':[-7.202,109.921],'karimunjawa':[-5.867,110.450],'pangandaran':[-7.689,108.651],'labuan bajo':[-8.497,119.889],'raja ampat':[-0.234,130.525],'komodo':[-8.550,119.489],'flores':[-8.674,121.396],'nusa penida':[-8.728,115.544],'gili':[-8.352,116.045],'ubud':[-8.506,115.262],'ijen':[-8.058,114.242],'wakatobi':[-5.490,123.590],'belitung':[-2.770,107.580]};
-
-function getLatLng(name){const key=name.toLowerCase().trim();for(const k in PLACE_LATLNG){if(key===k||key.includes(k)||k.includes(key))return PLACE_LATLNG[k];}return null;}
+async function geocode(name){
+  try{
+    const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1&countrycodes=id`;
+    const r=await fetch(url,{headers:{'Accept-Language':'id','User-Agent':'LDTS-App/1.0'}});
+    const d=await r.json();
+    if(d&&d.length>0)return[parseFloat(d[0].lat),parseFloat(d[0].lon)];
+    // fallback: search globally if not found in Indonesia
+    const r2=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1`,{headers:{'Accept-Language':'id','User-Agent':'LDTS-App/1.0'}});
+    const d2=await r2.json();
+    if(d2&&d2.length>0)return[parseFloat(d2[0].lat),parseFloat(d2[0].lon)];
+  }catch(e){}
+  return null;
+}
 // ── JSONBin Cloud Sync ──
 const JBIN_KEY='$2a$10$aOMy.0xdjfpp1ly5ZZWtCuD65YDOf8msitXmJj2FDeS5XT1AQcN1y';
 const JBIN_BASE='https://api.jsonbin.io/v3/b';
@@ -650,7 +660,7 @@ function renderLeafletMarkers(){
   if(!leafletMap)return;
   leafletMarkers.forEach(m=>m.remove());leafletMarkers=[];
   S.places.forEach(p=>{
-    const ll=p.latlng||getLatLng(p.name);if(!ll)return;if(!p.latlng)p.latlng=ll;
+    const ll=p.latlng;if(!ll)return;
     const m=L.marker(ll,{icon:makePinIcon(p.done)}).addTo(leafletMap).bindPopup(`<b>${p.name}</b><br><span style="color:#8C7B8E">${p.done?'✓ Sudah ke sini':'Mau ke sini'}</span>`);
     leafletMarkers.push(m);
   });
@@ -658,7 +668,21 @@ function renderLeafletMarkers(){
 }
 
 function selectCat(el,cat){document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('selected'));el.classList.add('selected');S.selectedCat=cat;}
-function addPlace(){const name=document.getElementById('place-input').value.trim();if(!name)return;S.places.unshift({id:Date.now(),name,cat:S.selectedCat,done:false,latlng:getLatLng(name)});document.getElementById('place-input').value='';saveState();renderWishlist();renderUs();}
+async function addPlace(){
+  const input=document.getElementById('place-input');
+  const name=input.value.trim();if(!name)return;
+  const addBtn=document.querySelector('.add-btn');
+  addBtn.textContent='Mencari...';addBtn.disabled=true;
+  const latlng=await geocode(name);
+  const place={id:Date.now(),name,cat:S.selectedCat,done:false,latlng};
+  S.places.unshift(place);
+  input.value='';
+  saveState();renderWishlist();renderUs();
+  addBtn.textContent='Tambah';addBtn.disabled=false;
+  // Fly map to new marker
+  if(latlng&&leafletMap){leafletMap.flyTo(latlng,10,{duration:1.2});}
+  else if(!latlng){showSyncStatus('Tempat tidak ditemukan di peta','#E24B4A');setTimeout(()=>showSyncStatus(''),3000);}
+}
 function toggleDone(id){const p=S.places.find(p=>p.id===id);if(p){p.done=!p.done;saveState();renderWishlist();}}
 function deletePlace(id){S.places=S.places.filter(p=>p.id!==id);saveState();renderWishlist();renderUs();}
 
