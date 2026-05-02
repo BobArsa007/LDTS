@@ -5,707 +5,1042 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>LDTS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --pink:#F2C4CE;--pink-mid:#E8A0B0;--pink-deep:#C97B8A;
-  --purple:#9B8EC4;--purple-light:#EAE7F8;--purple-deep:#5C4E8A;
-  --cream:#FDF6F0;--cream-dark:#F5EDE4;--text:#2A1F2D;--muted:#8C7B8E;
-  --border:rgba(42,31,45,0.1);--border-mid:rgba(42,31,45,0.18);--card:#FFFFFF;
+  --rose:#F0B8C4;--rose-mid:#E294A8;--rose-deep:#C4607A;
+  --sage:#8BAF9A;--sage-light:#E8F2ED;--sage-deep:#3D6B56;
+  --warm:#FAF6F1;--warm-dark:#F0E8DF;--warm-card:#FFFFFF;
+  --ink:#1E1520;--ink-mid:#6B5870;--ink-light:#A394A8;
+  --border:rgba(30,21,32,0.08);--border-mid:rgba(30,21,32,0.14);
+  --gold:#C9A84C;
 }
-html,body{height:100%;background:#F0E8E2;margin:0;padding:0;}
+html,body{height:100%;background:#EDE5DD;}
+body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 48px;font-family:'Plus Jakarta Sans',sans-serif;}
 
-/* MOBILE (default) */
-body{display:flex;justify-content:center;align-items:flex-start;padding:16px 0 40px;}
-.app{font-family:'DM Sans',sans-serif;background:var(--cream);width:100%;max-width:430px;min-height:100vh;border-radius:24px;overflow:hidden;border:0.5px solid var(--border-mid);display:flex;flex-direction:column;position:relative;box-shadow:0 4px 32px rgba(42,31,45,0.08);}
-.header{padding:16px 20px 13px;background:var(--card);border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.logo{font-family:'Instrument Serif',serif;font-size:22px;color:var(--text);letter-spacing:-0.5px;}
-.logo em{font-style:italic;color:var(--purple-deep);}
-.streak-pill{font-size:11px;font-weight:500;background:var(--pink);color:#7A3A48;padding:4px 11px;border-radius:20px;}
-.tab-nav{display:flex;background:var(--card);border-top:0.5px solid var(--border);flex-shrink:0;order:99;position:sticky;bottom:0;z-index:20;}
-.tab-btn{flex:1;padding:10px 4px 10px;text-align:center;background:transparent;border:none;font-family:'DM Sans',sans-serif;font-size:10px;color:var(--muted);cursor:pointer;transition:color 0.15s;display:flex;flex-direction:column;align-items:center;gap:4px;}
-.tab-btn.active{color:var(--purple-deep);font-weight:500;}
-.tab-btn svg{width:16px;height:16px;flex-shrink:0;}
+.app{background:var(--warm);width:100%;max-width:420px;min-height:100vh;border-radius:28px;overflow:hidden;border:0.5px solid var(--border-mid);display:flex;flex-direction:column;position:relative;box-shadow:0 8px 48px rgba(30,21,32,0.12);}
+
+/* Decorative top accent */
+.app::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--rose-mid),var(--gold),var(--sage));z-index:100;}
+
+.header{padding:18px 20px 14px;background:var(--warm-card);border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.logo{font-family:'Lora',serif;font-size:21px;color:var(--ink);letter-spacing:-0.3px;}
+.logo em{font-style:italic;color:var(--rose-deep);}
+.header-right{display:flex;align-items:center;gap:8px;}
+.streak-pill{font-size:10px;font-weight:600;background:linear-gradient(135deg,var(--rose),#f7d4db);color:var(--rose-deep);padding:4px 10px;border-radius:20px;letter-spacing:0.02em;}
+
+.tab-nav{display:flex;background:var(--warm-card);border-top:0.5px solid var(--border);flex-shrink:0;order:99;position:sticky;bottom:0;z-index:20;}
+.tab-btn{flex:1;padding:11px 4px 10px;text-align:center;background:transparent;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;color:var(--ink-light);cursor:pointer;transition:color 0.15s;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:500;}
+.tab-btn.active{color:var(--rose-deep);}
+.tab-btn svg{width:17px;height:17px;flex-shrink:0;}
+.tab-btn .tab-dot{width:4px;height:4px;border-radius:50%;background:var(--rose-deep);margin-top:1px;opacity:0;transition:opacity 0.2s;}
+.tab-btn.active .tab-dot{opacity:1;}
+
 .page{display:none;flex:1;overflow-y:auto;}
 .page.active{display:block;}
 .desktop-sidebar{display:none;}
 .content-area{display:contents;}
 
-/* DESKTOP (>=768px) */
 @media(min-width:768px){
-  html,body{height:100%;overflow:hidden;}
-  body{align-items:stretch;padding:0;}
-
-  /* Full-screen app shell */
-  .app{
-    max-width:100%;width:100%;height:100vh;min-height:100vh;max-height:100vh;
-    border-radius:0;flex-direction:row;overflow:hidden;border:none;box-shadow:none;
-  }
-
-  /* Sidebar */
-  .desktop-sidebar{
-    display:flex;flex-direction:column;
-    width:190px;min-width:190px;
-    background:var(--card);border-right:0.5px solid var(--border);
-    padding:28px 0 20px;flex-shrink:0;
-  }
-  .sidebar-logo{font-family:'Instrument Serif',serif;font-size:24px;color:var(--text);letter-spacing:-0.5px;padding:0 22px 28px;}
-  .sidebar-logo em{font-style:italic;color:var(--purple-deep);}
-  .sidebar-nav{display:flex;flex-direction:column;gap:2px;flex:1;padding:0 10px;}
-  .sidebar-btn{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:12px;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--muted);cursor:pointer;transition:all 0.15s;width:100%;text-align:left;}
+  html,body{height:100%;overflow:hidden;padding:0;}
+  body{align-items:stretch;}
+  .app{max-width:100%;width:100%;height:100vh;min-height:100vh;max-height:100vh;border-radius:0;flex-direction:row;overflow:hidden;border:none;box-shadow:none;}
+  .app::before{width:3px;height:100%;top:0;left:0;right:auto;background:linear-gradient(180deg,var(--rose-mid),var(--gold),var(--sage));}
+  .desktop-sidebar{display:flex;flex-direction:column;width:200px;min-width:200px;background:var(--warm-card);border-right:0.5px solid var(--border);padding:32px 0 24px;flex-shrink:0;}
+  .sidebar-logo{font-family:'Lora',serif;font-size:24px;color:var(--ink);letter-spacing:-0.3px;padding:0 22px 32px;}
+  .sidebar-logo em{font-style:italic;color:var(--rose-deep);}
+  .sidebar-nav{display:flex;flex-direction:column;gap:3px;flex:1;padding:0 12px;}
+  .sidebar-btn{display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:12px;border:none;background:transparent;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink-light);cursor:pointer;transition:all 0.15s;width:100%;text-align:left;font-weight:500;}
   .sidebar-btn svg{width:15px;height:15px;flex-shrink:0;}
-  .sidebar-btn.active{background:var(--purple-light);color:var(--purple-deep);font-weight:500;}
-  .sidebar-btn:hover:not(.active){background:var(--cream-dark);color:var(--text);}
-  .sidebar-footer{padding:16px 22px 0;font-size:11px;color:var(--muted);}
-
-  /* Hide mobile chrome */
+  .sidebar-btn.active{background:linear-gradient(135deg,#fdf0f3,#fde8ed);color:var(--rose-deep);}
+  .sidebar-btn:hover:not(.active){background:var(--warm-dark);color:var(--ink);}
+  .sidebar-footer{padding:16px 22px 0;font-size:11px;color:var(--ink-light);line-height:1.6;}
+  .sidebar-footer strong{color:var(--ink);font-weight:600;}
   .header{display:none;}
   .tab-nav{display:none;}
-
-  /* Content area */
   .content-area{display:flex;flex:1;flex-direction:column;overflow:hidden;min-width:0;height:100vh;}
   .page{flex:1;overflow:hidden;display:none;flex-direction:column;height:100%;}
   .page.active{display:flex;}
-
-  /* ── HOME: two-column grid ── */
   #page-home{display:none;}
-  #page-home.active{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    grid-template-rows:200px auto 1fr;
-    overflow:hidden;
-    height:100%;
-  }
-  .home-map-row{grid-column:1/-1;grid-row:1;height:200px;overflow:hidden;position:relative;}
-  #home-map{height:200px !important;width:100%;}
+  #page-home.active{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:190px auto 1fr;overflow:hidden;height:100%;}
+  .home-map-row{grid-column:1/-1;grid-row:1;height:190px;overflow:hidden;position:relative;}
+  #home-map{height:190px !important;width:100%;}
   .weather-strip{grid-column:1/-1;grid-row:2;flex-shrink:0;}
-  .weather-strip .w-cell{padding:10px 20px;}
-  #page-home .home-body{
-    grid-column:1;grid-row:3;
-    overflow-y:auto;padding:16px 14px 16px 20px;
-    border-right:0.5px solid var(--border);
-    min-height:0;
-  }
+  #page-home .home-body{grid-column:1;grid-row:3;overflow-y:auto;padding:20px 16px 20px 24px;border-right:0.5px solid var(--border);min-height:0;}
   .mobile-only{display:none;}
-  #desk-right-col{
-    display:flex;
-    grid-column:2;grid-row:3;
-    overflow-y:auto;padding:16px 20px 16px 14px;
-    flex-direction:column;gap:14px;
-    min-height:0;
-  }
-
-  /* ── WISHLIST: map left, list right ── */
+  #desk-right-col{display:flex;grid-column:2;grid-row:3;overflow-y:auto;padding:20px 24px 20px 16px;flex-direction:column;gap:16px;min-height:0;}
   #page-wishlist{display:none;}
   #page-wishlist.active{display:flex;flex-direction:row;}
   #page-wishlist .wishlist-map-col{flex:1;display:flex;flex-direction:column;position:relative;}
   #page-wishlist #leaflet-map{flex:1;height:100% !important;min-height:0 !important;}
   #page-wishlist .wishlist-body{width:340px;min-width:340px;overflow-y:auto;border-left:0.5px solid var(--border);}
-
-  /* ── ARCHIVE & US: centered max-width scrollable ── */
   #page-archive.active,#page-us.active{display:flex;flex-direction:column;overflow-y:auto;}
-  #page-archive .archive-body,#page-us .us-body{max-width:640px;width:100%;margin:0 auto;padding:24px 20px;}
+  #page-archive .archive-body,#page-us .us-body{max-width:660px;width:100%;margin:0 auto;padding:28px 24px;}
 }
-.map-canvas{width:100%;height:168px;background:#DFF0E8;position:relative;overflow:hidden;}
-.map-bg-layer{position:absolute;inset:0;background:radial-gradient(ellipse at 28% 65%,#C8E8DC 0%,transparent 55%),radial-gradient(ellipse at 72% 38%,#D4E8F5 0%,transparent 55%);}
-.map-svg{position:absolute;top:0;left:0;width:100%;height:100%;}
-.city-pin{position:absolute;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%);}
-.pin-dot{width:11px;height:11px;border-radius:50%;border:2.5px solid white;}
-.pin-label{font-size:9px;font-weight:500;margin-top:3px;padding:2px 7px;border-radius:8px;background:white;border:0.5px solid var(--border);white-space:nowrap;}
-.pin-smg{left:64%;top:36%;}.pin-smg .pin-dot{background:var(--purple-deep);}.pin-smg .pin-label{color:var(--purple-deep);}
-.pin-bgr{left:27%;top:54%;}.pin-bgr .pin-dot{background:var(--pink-deep);}.pin-bgr .pin-label{color:var(--pink-deep);}
-.dist-tag{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:white;border:0.5px solid var(--border);border-radius:12px;padding:4px 11px;font-size:10px;color:var(--muted);white-space:nowrap;}
-.weather-strip{display:flex;background:var(--card);border-bottom:0.5px solid var(--border);}
-.w-cell{flex:1;padding:11px 16px;display:flex;align-items:center;gap:10px;}
+
+/* Weather */
+.weather-strip{display:flex;background:var(--warm-card);border-bottom:0.5px solid var(--border);}
+.w-cell{flex:1;padding:12px 16px;display:flex;align-items:center;gap:11px;}
 .w-cell+.w-cell{border-left:0.5px solid var(--border);}
-.w-icon{font-size:20px;line-height:1;flex-shrink:0;}
-.w-who{font-size:10px;color:var(--muted);}
-.w-temp{font-size:15px;font-weight:500;color:var(--text);}
-.w-sky{font-size:10px;color:var(--muted);}
+.w-icon{font-size:22px;line-height:1;flex-shrink:0;}
+.w-who{font-size:10px;color:var(--ink-light);font-weight:500;}
+.w-temp{font-size:16px;font-weight:600;color:var(--ink);}
+.w-sky{font-size:10px;color:var(--ink-light);}
+
+/* Home map */
 .home-map-row{position:relative;width:100%;height:168px;flex-shrink:0;}
-.mobile-only{}
 #desk-right-col{display:none;}
-.home-body{padding:16px;display:flex;flex-direction:column;gap:14px;}
-.section-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
-.q-card{background:var(--card);border:0.5px solid var(--border);border-radius:16px;overflow:hidden;}
-.q-top{padding:14px 16px 12px;border-bottom:0.5px solid var(--border);}
-.q-day-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.q-text{font-family:'Instrument Serif',serif;font-size:15px;color:var(--text);line-height:1.55;margin-bottom:8px;}
-.q-hint{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;}
-.lock-svg{width:10px;height:12px;flex-shrink:0;}
-.q-body{padding:12px 16px;}
-.q-textarea{width:100%;border:0.5px solid var(--border-mid);border-radius:10px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--cream);resize:none;height:74px;outline:none;line-height:1.6;}
-.q-textarea::placeholder{color:var(--muted);}
-.q-textarea:focus{border-color:var(--purple);}
-.submit-btn{margin-top:10px;width:100%;padding:10px;background:var(--purple-deep);color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:opacity 0.15s;}
-.submit-btn:hover{opacity:0.87;}
-.answered-wrap{padding:12px 16px;display:none;}
-.answered-bubble{font-size:13px;color:var(--text);background:var(--cream);border-radius:10px;padding:10px 12px;line-height:1.6;margin-bottom:8px;}
-.waiting-row{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;}
-.dots span{display:inline-block;width:4px;height:4px;background:var(--muted);border-radius:50%;animation:blink 1.3s infinite;}
-.dots span:nth-child(2){animation-delay:.2s;}.dots span:nth-child(3){animation-delay:.4s;}
-@keyframes blink{0%,80%,100%{opacity:.2;}40%{opacity:1;}}
-.cd-card{background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:14px 16px;}
-.cd-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
-.cd-title{font-family:'Instrument Serif',serif;font-size:14px;color:var(--text);}
-.cd-sub{font-size:11px;color:var(--muted);margin-top:2px;}
-.edit-btn{font-size:11px;color:var(--purple-deep);border:0.5px solid var(--purple);border-radius:8px;padding:3px 9px;background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.home-body{padding:18px 16px;display:flex;flex-direction:column;gap:16px;}
+
+/* Section label */
+.section-label{font-size:10px;color:var(--ink-light);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-bottom:10px;}
+
+/* AI badge */
+.ai-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--sage-deep);background:var(--sage-light);border-radius:10px;padding:3px 9px;font-weight:600;letter-spacing:0.01em;}
+
+/* Question card */
+.q-card{background:var(--warm-card);border:0.5px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 2px 12px rgba(30,21,32,0.05);}
+.q-card-accent{height:2px;background:linear-gradient(90deg,var(--rose-mid),var(--gold));}
+.q-top{padding:16px 18px 14px;}
+.q-day-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.q-day-label{font-size:11px;color:var(--rose-deep);font-weight:600;letter-spacing:0.02em;}
+.q-text{font-family:'Lora',serif;font-size:15px;color:var(--ink);line-height:1.65;margin-bottom:10px;font-style:italic;}
+.q-hint{font-size:11px;color:var(--ink-light);display:flex;align-items:center;gap:5px;font-weight:500;}
+
+/* Loading skeleton */
+.q-skeleton{background:linear-gradient(90deg,var(--warm) 25%,var(--warm-dark) 50%,var(--warm) 75%);background-size:200% 100%;animation:shimmer 1.6s infinite;border-radius:6px;margin-bottom:8px;}
+.q-skeleton.long{width:92%;height:16px;}
+.q-skeleton.med{width:72%;height:16px;margin-top:6px;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+.q-divider{height:0.5px;background:var(--border);margin:0 18px;}
+.q-body{padding:14px 18px;}
+.q-textarea{width:100%;border:0.5px solid var(--border-mid);border-radius:12px;padding:11px 13px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--warm);resize:none;height:78px;outline:none;line-height:1.65;transition:border-color 0.2s;}
+.q-textarea::placeholder{color:var(--ink-light);}
+.q-textarea:focus{border-color:var(--rose-mid);background:#fff;}
+.submit-btn{margin-top:10px;width:100%;padding:11px;background:linear-gradient(135deg,var(--rose-deep),#a84d66);color:white;border:none;border-radius:11px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity 0.15s,transform 0.1s;letter-spacing:0.01em;}
+.submit-btn:hover{opacity:0.9;transform:translateY(-1px);}
+.submit-btn:active{transform:translateY(0);}
+.submit-btn:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
+
+.answered-wrap{padding:14px 18px;display:none;}
+.answered-label{font-size:10px;color:var(--ink-light);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:7px;}
+.answered-bubble{font-size:13px;color:var(--ink);background:linear-gradient(135deg,#fff8fa,#fff3f5);border:0.5px solid rgba(196,96,122,0.18);border-radius:12px;padding:11px 13px;line-height:1.65;margin-bottom:10px;}
+.waiting-row{font-size:11px;color:var(--ink-light);display:flex;align-items:center;gap:6px;font-weight:500;}
+.dots span{display:inline-block;width:4px;height:4px;background:var(--rose-mid);border-radius:50%;animation:blink 1.4s infinite;}
+.dots span:nth-child(2){animation-delay:.22s;}.dots span:nth-child(3){animation-delay:.44s;}
+@keyframes blink{0%,80%,100%{opacity:.18;}40%{opacity:1;}}
+.next-q-btn{margin-top:10px;width:100%;padding:10px;background:transparent;color:var(--rose-deep);border:0.5px solid var(--rose-mid);border-radius:11px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;}
+.next-q-btn:hover{background:linear-gradient(135deg,#fff0f3,#ffe8ed);}
+
+/* Countdown card */
+.cd-card{background:var(--warm-card);border:0.5px solid var(--border);border-radius:18px;padding:16px 18px;box-shadow:0 2px 12px rgba(30,21,32,0.05);}
+.cd-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.cd-title{font-family:'Lora',serif;font-size:15px;color:var(--ink);}
+.cd-sub{font-size:11px;color:var(--ink-light);margin-top:3px;font-weight:500;}
+.edit-btn{font-size:11px;color:var(--rose-deep);border:0.5px solid var(--rose-mid);border-radius:8px;padding:4px 10px;background:transparent;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;transition:all 0.15s;}
+.edit-btn:hover{background:#fff0f3;}
 .cd-nums{display:flex;gap:8px;}
-.cd-box{flex:1;background:var(--cream);border-radius:10px;padding:10px 4px;text-align:center;}
-.cd-num{font-family:'Instrument Serif',serif;font-size:26px;color:var(--text);line-height:1;}
-.cd-lbl{font-size:9px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.05em;}
+.cd-box{flex:1;background:linear-gradient(135deg,var(--warm),var(--warm-dark));border-radius:12px;padding:11px 4px;text-align:center;border:0.5px solid var(--border);}
+.cd-num{font-family:'Lora',serif;font-size:26px;color:var(--ink);line-height:1;}
+.cd-lbl{font-size:9px;color:var(--ink-light);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+
+/* Wishlist */
 .wishlist-page{display:flex;flex-direction:column;}
-.wishlist-page.active{display:flex;}
-#leaflet-map{width:100%;height:260px;min-height:260px;flex-shrink:0;z-index:1;}
-.leaflet-container{font-family:'DM Sans',sans-serif;}
-.leaflet-popup-content-wrapper{border-radius:10px;border:0.5px solid rgba(42,31,45,0.12);box-shadow:0 2px 8px rgba(42,31,45,0.1);}
-.leaflet-popup-content{font-family:'DM Sans',sans-serif;font-size:12px;color:#2A1F2D;margin:8px 12px;}
+#leaflet-map{width:100%;height:250px;min-height:250px;flex-shrink:0;z-index:1;}
+.leaflet-container{font-family:'Plus Jakarta Sans',sans-serif;}
+.leaflet-popup-content-wrapper{border-radius:12px;border:0.5px solid rgba(30,21,32,0.1);box-shadow:0 4px 16px rgba(30,21,32,0.1);}
+.leaflet-popup-content{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:var(--ink);margin:9px 13px;font-weight:500;}
 .leaflet-popup-tip-container{display:none;}
-.wmap-legend{position:absolute;bottom:10px;right:10px;background:white;z-index:9;border:0.5px solid rgba(42,31,45,0.12);border-radius:8px;padding:6px 10px;display:flex;flex-direction:column;gap:4px;pointer-events:none;}
-.legend-row{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--muted);}
+.wmap-legend{position:absolute;bottom:10px;right:10px;background:white;z-index:9;border:0.5px solid rgba(30,21,32,0.1);border-radius:10px;padding:7px 11px;display:flex;flex-direction:column;gap:5px;pointer-events:none;box-shadow:0 2px 8px rgba(30,21,32,0.08);}
+.legend-row{display:flex;align-items:center;gap:6px;font-size:9px;color:var(--ink-light);font-weight:600;}
 .legend-dot{width:8px;height:8px;border-radius:50%;}
-.legend-dot.done{background:#1D9E75;}.legend-dot.wish{background:var(--purple-deep);}
-.wishlist-body{padding:14px 16px;display:flex;flex-direction:column;gap:12px;flex:1;}
-.add-place-card{background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:12px 14px;}
-.add-row{display:flex;gap:8px;margin-bottom:8px;}
-.place-input{flex:1;border:0.5px solid var(--border-mid);border-radius:8px;padding:8px 10px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--cream);outline:none;}
-.place-input:focus{border-color:var(--purple);}
-.add-btn{padding:8px 14px;background:var(--purple-deep);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;}
+.legend-dot.done{background:var(--sage-deep);}.legend-dot.wish{background:var(--rose-deep);}
+.wishlist-body{padding:16px;display:flex;flex-direction:column;gap:12px;flex:1;}
+.add-place-card{background:var(--warm-card);border:0.5px solid var(--border);border-radius:16px;padding:14px 16px;box-shadow:0 1px 6px rgba(30,21,32,0.04);}
+.add-row{display:flex;gap:8px;margin-bottom:10px;}
+.place-input{flex:1;border:0.5px solid var(--border-mid);border-radius:10px;padding:9px 12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--warm);outline:none;transition:border-color 0.2s;font-weight:500;}
+.place-input:focus{border-color:var(--rose-mid);background:#fff;}
+.add-btn{padding:9px 15px;background:linear-gradient(135deg,var(--rose-deep),#a84d66);color:white;border:none;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity 0.15s;}
+.add-btn:hover{opacity:0.88;}
 .category-pills{display:flex;gap:6px;flex-wrap:wrap;}
-.cat-pill{font-size:11px;padding:4px 10px;border-radius:20px;border:0.5px solid var(--border-mid);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
-.cat-pill.selected{background:var(--purple-light);color:var(--purple-deep);border-color:var(--purple);}
+.cat-pill{font-size:11px;padding:5px 11px;border-radius:20px;border:0.5px solid var(--border-mid);background:transparent;color:var(--ink-light);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;font-weight:500;}
+.cat-pill.selected{background:linear-gradient(135deg,#fff0f3,#fde8ed);color:var(--rose-deep);border-color:var(--rose-mid);}
 .places-list{display:flex;flex-direction:column;gap:8px;}
-.place-item{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:12px;}
-.place-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;}
-.place-icon.food{background:#FFF0E0;}.place-icon.nature{background:#E0F5EA;}.place-icon.culture{background:#EAE7F8;}.place-icon.city{background:#E0EEF8;}.place-icon.beach{background:#E0F0FF;}
+.place-item{background:var(--warm-card);border:0.5px solid var(--border);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;transition:box-shadow 0.15s;}
+.place-item:hover{box-shadow:0 2px 10px rgba(30,21,32,0.07);}
+.place-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;}
+.place-icon.food{background:#FFF4E0;}.place-icon.nature{background:#E6F5EC;}.place-icon.culture{background:#EEE9F6;}.place-icon.city{background:#E6EFF8;}.place-icon.beach{background:#E0F3FF;}
 .place-info{flex:1;min-width:0;}
-.place-name{font-size:13px;font-weight:500;color:var(--text);}
-.place-meta{font-size:11px;color:var(--muted);}
+.place-name{font-size:13px;font-weight:600;color:var(--ink);}
+.place-meta{font-size:11px;color:var(--ink-light);font-weight:500;}
 .place-actions{display:flex;gap:6px;align-items:center;}
-.check-btn{width:26px;height:26px;border-radius:50%;border:0.5px solid var(--border-mid);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
-.check-btn:hover{background:#E0F5EA;border-color:#1D9E75;}.check-btn.done{background:#E0F5EA;border-color:#1D9E75;}
-.del-btn{width:26px;height:26px;border-radius:50%;border:0.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;transition:all .15s;}
-.del-btn:hover{background:#FFF0F0;border-color:#E24B4A;color:#E24B4A;}
-.done-badge{font-size:9px;padding:2px 7px;background:#E0F5EA;color:#0F6E56;border-radius:10px;font-weight:500;}
-.archive-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
-.archive-item{background:var(--card);border:0.5px solid var(--border);border-radius:14px;overflow:hidden;}
-.archive-q{padding:12px 14px 10px;border-bottom:0.5px solid var(--border);}
-.archive-day{font-size:10px;color:var(--muted);margin-bottom:4px;}
-.archive-qtext{font-family:'Instrument Serif',serif;font-size:13px;color:var(--text);line-height:1.45;}
-.archive-answers{display:grid;grid-template-columns:1fr 1fr;gap:0;}
-.archive-ans{padding:10px 12px;}
+.check-btn{width:28px;height:28px;border-radius:50%;border:0.5px solid var(--border-mid);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.check-btn:hover{background:var(--sage-light);border-color:var(--sage-deep);}
+.check-btn.done{background:var(--sage-light);border-color:var(--sage-deep);}
+.del-btn{width:28px;height:28px;border-radius:50%;border:0.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink-light);font-size:15px;transition:all .15s;}
+.del-btn:hover{background:#fff3f0;border-color:#e24b4a;color:#e24b4a;}
+.done-badge{font-size:9px;padding:3px 8px;background:var(--sage-light);color:var(--sage-deep);border-radius:10px;font-weight:600;}
+
+/* Archive */
+.archive-body{padding:16px;display:flex;flex-direction:column;gap:12px;}
+.archive-item{background:var(--warm-card);border:0.5px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 1px 6px rgba(30,21,32,0.04);}
+.archive-item-accent{height:2px;background:linear-gradient(90deg,var(--rose-mid),var(--gold));}
+.archive-q{padding:13px 16px 11px;}
+.archive-day{font-size:10px;color:var(--ink-light);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+.archive-qtext{font-family:'Lora',serif;font-size:13px;color:var(--ink);line-height:1.55;font-style:italic;}
+.archive-answers{display:grid;grid-template-columns:1fr 1fr;}
+.archive-ans{padding:11px 14px;}
 .archive-ans+.archive-ans{border-left:0.5px solid var(--border);}
-.archive-who{font-size:9px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em;}
-.archive-atext{font-size:12px;color:var(--text);line-height:1.5;}
-.archive-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;}
-.archive-empty-title{font-family:'Instrument Serif',serif;font-size:18px;color:var(--text);margin-bottom:6px;}
-.us-body{padding:16px;display:flex;flex-direction:column;gap:14px;}
-.us-hero{background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:20px;text-align:center;}
-.us-names{font-family:'Instrument Serif',serif;font-size:20px;color:var(--text);margin-bottom:4px;}
-.us-names em{font-style:italic;color:var(--purple-deep);}
-.us-since{font-size:12px;color:var(--muted);}
-.us-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:16px;}
-.us-stat{background:var(--cream);border-radius:10px;padding:10px 6px;text-align:center;}
-.us-stat-num{font-family:'Instrument Serif',serif;font-size:22px;color:var(--text);}
-.us-stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
+.archive-who{font-size:9px;color:var(--ink-light);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.archive-atext{font-size:12px;color:var(--ink);line-height:1.55;font-weight:500;}
+.archive-empty{text-align:center;padding:48px 20px;color:var(--ink-light);}
+.archive-empty-title{font-family:'Lora',serif;font-size:20px;color:var(--ink);margin-bottom:8px;}
+.archive-empty-sub{font-size:13px;line-height:1.6;font-weight:500;}
+
+/* Us / Profile */
+.us-body{padding:18px 16px;display:flex;flex-direction:column;gap:16px;}
+.us-hero{background:var(--warm-card);border:0.5px solid var(--border);border-radius:20px;padding:24px 20px;text-align:center;position:relative;overflow:hidden;box-shadow:0 2px 16px rgba(30,21,32,0.06);}
+.us-hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at top,#fff8fa 0%,transparent 70%);pointer-events:none;}
+.us-heart{font-size:32px;margin-bottom:8px;display:block;}
+.us-names{font-family:'Lora',serif;font-size:22px;color:var(--ink);margin-bottom:5px;}
+.us-names em{font-style:italic;color:var(--rose-deep);}
+.us-since{font-size:12px;color:var(--ink-light);font-weight:500;}
+.us-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px;}
+.us-stat{background:var(--warm);border-radius:12px;padding:12px 8px;text-align:center;border:0.5px solid var(--border);}
+.us-stat-num{font-family:'Lora',serif;font-size:26px;color:var(--ink);}
+.us-stat-lbl{font-size:9px;color:var(--ink-light);text-transform:uppercase;letter-spacing:.06em;margin-top:3px;font-weight:600;}
 .us-memories{display:flex;flex-direction:column;gap:8px;}
-.memory-item{background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;}
-.memory-dot{width:10px;height:10px;border-radius:50%;background:var(--pink-mid);margin-top:3px;flex-shrink:0;}
-.memory-date{font-size:10px;color:var(--muted);margin-bottom:2px;}
-.memory-text{font-size:13px;color:var(--text);line-height:1.5;}
-.add-memory-card{background:var(--card);border:0.5px dashed var(--border-mid);border-radius:14px;padding:12px 14px;}
+.memory-item{background:var(--warm-card);border:0.5px solid var(--border);border-radius:14px;padding:13px 15px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 1px 4px rgba(30,21,32,0.03);}
+.memory-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--rose-mid),var(--rose-deep));margin-top:4px;flex-shrink:0;}
+.memory-date{font-size:10px;color:var(--ink-light);margin-bottom:3px;font-weight:600;}
+.memory-text{font-size:13px;color:var(--ink);line-height:1.55;font-weight:500;}
+.add-memory-card{background:var(--warm-card);border:0.5px dashed var(--border-mid);border-radius:14px;padding:13px 15px;}
 .add-memory-row{display:flex;gap:8px;}
-.memory-input{flex:1;border:0.5px solid var(--border-mid);border-radius:8px;padding:8px 10px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--cream);outline:none;}
-.memory-input:focus{border-color:var(--purple);}
-.memory-add-btn{padding:8px 14px;background:var(--pink-deep);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;}
-.modal-backdrop{display:none;position:absolute;inset:0;background:rgba(42,31,45,0.38);border-radius:28px;z-index:50;align-items:center;justify-content:center;}
+.memory-input{flex:1;border:0.5px solid var(--border-mid);border-radius:10px;padding:9px 12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--warm);outline:none;font-weight:500;}
+.memory-input:focus{border-color:var(--rose-mid);background:#fff;}
+.memory-add-btn{padding:9px 14px;background:linear-gradient(135deg,var(--rose-deep),#a84d66);color:white;border:none;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity 0.15s;}
+.memory-add-btn:hover{opacity:0.88;}
+
+/* Modal */
+.modal-backdrop{display:none;position:absolute;inset:0;background:rgba(30,21,32,0.42);border-radius:28px;z-index:50;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
 .modal-backdrop.open{display:flex;}
-.modal{background:var(--card);border-radius:18px;padding:20px;width:290px;border:0.5px solid var(--border-mid);}
-.modal-title{font-family:'Instrument Serif',serif;font-size:17px;color:var(--text);margin-bottom:14px;}
-.modal label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px;}
-.modal input[type=text],.modal input[type=date]{width:100%;border:0.5px solid var(--border-mid);border-radius:8px;padding:8px 10px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--cream);outline:none;margin-bottom:12px;}
-.modal input:focus{border-color:var(--purple);}
+.modal{background:var(--warm-card);border-radius:20px;padding:22px;width:300px;border:0.5px solid var(--border-mid);box-shadow:0 8px 40px rgba(30,21,32,0.16);}
+.modal-title{font-family:'Lora',serif;font-size:18px;color:var(--ink);margin-bottom:16px;}
+.modal label{font-size:11px;color:var(--ink-light);display:block;margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;}
+.modal input[type=text],.modal input[type=date]{width:100%;border:0.5px solid var(--border-mid);border-radius:10px;padding:9px 12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--warm);outline:none;margin-bottom:14px;font-weight:500;}
+.modal input:focus{border-color:var(--rose-mid);background:#fff;}
 .modal-btns{display:flex;gap:8px;}
-.modal-cancel{flex:1;padding:9px;border:0.5px solid var(--border-mid);border-radius:8px;background:transparent;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--muted);cursor:pointer;}
-.modal-save{flex:1;padding:9px;border:none;border-radius:8px;background:var(--purple-deep);color:white;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;}
-.page::-webkit-scrollbar{width:4px;}.page::-webkit-scrollbar-track{background:transparent;}.page::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:2px;}
+.modal-cancel{flex:1;padding:10px;border:0.5px solid var(--border-mid);border-radius:10px;background:transparent;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink-light);cursor:pointer;font-weight:600;}
+.modal-save{flex:1;padding:10px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--rose-deep),#a84d66);color:white;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+
+/* Scrollbar */
+.page::-webkit-scrollbar{width:3px;}
+.page::-webkit-scrollbar-track{background:transparent;}
+.page::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:2px;}
+
+/* Sync status */
+#sync-status,#sync-status-m{font-size:10px;font-weight:500;}
 </style>
 </head>
 <body>
 <div class="app" id="app">
-  <!-- Desktop sidebar -->
   <aside class="desktop-sidebar">
     <div class="sidebar-logo">LD<em>TS</em></div>
     <nav class="sidebar-nav">
       <button class="sidebar-btn active" data-tab="home" onclick="switchTab('home')">
-        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Beranda
       </button>
       <button class="sidebar-btn" data-tab="wishlist" onclick="switchTab('wishlist')">
-        <svg viewBox="0 0 16 16" fill="none"><path d="M8 2C5.8 2 4 3.8 4 6c0 3.2 4 8 4 8s4-4.8 4-8c0-2.2-1.8-4-4-4z" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg>
+        <svg viewBox="0 0 16 16" fill="none"><path d="M8 2C5.8 2 4 3.8 4 6c0 3.2 4 8 4 8s4-4.8 4-8c0-2.2-1.8-4-4-4z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
         Wishlist
       </button>
       <button class="sidebar-btn" data-tab="archive" onclick="switchTab('archive')">
-        <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Arsip
       </button>
       <button class="sidebar-btn" data-tab="us" onclick="switchTab('us')">
-        <svg viewBox="0 0 16 16" fill="none"><path d="M8 13s-5-3.2-5-7a3 3 0 0 1 5-2.24A3 3 0 0 1 13 6c0 3.8-5 7-5 7z" stroke="currentColor" stroke-width="1.2"/></svg>
+        <svg viewBox="0 0 16 16" fill="none"><path d="M8 13s-5-3.2-5-7a3 3 0 0 1 5-2.24A3 3 0 0 1 13 6c0 3.8-5 7-5 7z" stroke="currentColor" stroke-width="1.3"/></svg>
         Kita
       </button>
     </nav>
-    <div class="sidebar-footer">Bobby &amp; Yuddit ✦<br><span id="sync-status" style="font-size:10px;"></span></div>
+    <div class="sidebar-footer">
+      <strong>Bobby &amp; Yuddit</strong> ✦<br>
+      <span id="sync-status" style=""></span>
+    </div>
   </aside>
-  <!-- Content area wraps all pages -->
-  <div class="content-area">
-  <div class="header">
-    <div class="logo">LD<em>TS</em></div>
-    <span id="sync-status-m" style="font-size:10px;color:var(--muted);"></span>
-  </div>
-  <nav class="tab-nav">
-    <button class="tab-btn active" data-tab="home" onclick="switchTab('home')">
-      <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      Beranda
-    </button>
-    <button class="tab-btn" data-tab="wishlist" onclick="switchTab('wishlist')">
-      <svg viewBox="0 0 16 16" fill="none"><path d="M8 2C5.8 2 4 3.8 4 6c0 3.2 4 8 4 8s4-4.8 4-8c0-2.2-1.8-4-4-4z" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg>
-      Wishlist
-    </button>
-    <button class="tab-btn" data-tab="archive" onclick="switchTab('archive')">
-      <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      Arsip
-    </button>
-    <button class="tab-btn" data-tab="us" onclick="switchTab('us')">
-      <svg viewBox="0 0 16 16" fill="none"><path d="M8 13s-5-3.2-5-7a3 3 0 0 1 5-2.24A3 3 0 0 1 13 6c0 3.8-5 7-5 7z" stroke="currentColor" stroke-width="1.2"/></svg>
-      Kita
-    </button>
-  </nav>
 
-  <div class="page active" id="page-home">
-    <!-- Row 1: Map (full width) -->
-    <div class="home-map-row">
-      <div id="home-map" style="width:100%;height:168px;z-index:1;"></div>
-      <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:white;border:0.5px solid rgba(42,31,45,0.12);border-radius:12px;padding:4px 11px;font-size:10px;color:#8C7B8E;white-space:nowrap;z-index:9;pointer-events:none;">~450 km jaraknya</div>
-    </div>
-    <!-- Row 2: Weather (full width) -->
-    <div class="weather-strip">
-      <div class="w-cell">
-        <div class="w-icon" id="smg-icon">⛅</div>
-        <div><div class="w-who">Bobby · Semarang</div><div class="w-temp" id="smg-temp">—</div><div class="w-sky" id="smg-sky">Memuat...</div></div>
-      </div>
-      <div class="w-cell">
-        <div class="w-icon" id="bgr-icon">🌧</div>
-        <div><div class="w-who">Yuddit · Bogor</div><div class="w-temp" id="bgr-temp">—</div><div class="w-sky" id="bgr-sky">Memuat...</div></div>
+  <div class="content-area">
+    <div class="header">
+      <div class="logo">LD<em>TS</em></div>
+      <div class="header-right">
+        <span id="sync-status-m"></span>
       </div>
     </div>
-    <!-- Row 3 left: Question -->
-    <div class="home-body">
-      <div class="section-label">Pertanyaan hari ini</div>
-      <div class="q-card">
-        <div class="q-top">
-          <div class="q-day-row">
-            <span style="font-size:11px;color:var(--purple-deep);font-weight:500">jawab dulu untuk lihat</span>
-          </div>
-          <div class="q-text" id="q-text"></div>
-          <div class="q-hint">
-            <svg class="lock-svg" viewBox="0 0 10 12" fill="none"><rect x="1" y="5" width="8" height="7" rx="1.5" stroke="#8C7B8E" stroke-width="1.2"/><path d="M3 5V3.5a2 2 0 0 1 4 0V5" stroke="#8C7B8E" stroke-width="1.2"/></svg>
-            Jawabanmu terkunci sebelum kamu lihat punya dia
+
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="home" onclick="switchTab('home')">
+        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Beranda
+        <div class="tab-dot"></div>
+      </button>
+      <button class="tab-btn" data-tab="wishlist" onclick="switchTab('wishlist')">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M8 2C5.8 2 4 3.8 4 6c0 3.2 4 8 4 8s4-4.8 4-8c0-2.2-1.8-4-4-4z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
+        Wishlist
+        <div class="tab-dot"></div>
+      </button>
+      <button class="tab-btn" data-tab="archive" onclick="switchTab('archive')">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Arsip
+        <div class="tab-dot"></div>
+      </button>
+      <button class="tab-btn" data-tab="us" onclick="switchTab('us')">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M8 13s-5-3.2-5-7a3 3 0 0 1 5-2.24A3 3 0 0 1 13 6c0 3.8-5 7-5 7z" stroke="currentColor" stroke-width="1.3"/></svg>
+        Kita
+        <div class="tab-dot"></div>
+      </button>
+    </nav>
+
+    <!-- HOME PAGE -->
+    <div class="page active" id="page-home">
+      <div class="home-map-row">
+        <div id="home-map" style="width:100%;height:168px;z-index:1;"></div>
+        <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:white;border:0.5px solid rgba(30,21,32,0.1);border-radius:12px;padding:4px 12px;font-size:10px;color:var(--ink-light);white-space:nowrap;z-index:9;pointer-events:none;font-weight:600;box-shadow:0 2px 8px rgba(30,21,32,0.07);">~450 km jaraknya 💌</div>
+      </div>
+
+      <div class="weather-strip">
+        <div class="w-cell">
+          <div class="w-icon" id="smg-icon">⛅</div>
+          <div>
+            <div class="w-who">Bobby · Semarang</div>
+            <div class="w-temp" id="smg-temp">—</div>
+            <div class="w-sky" id="smg-sky">Memuat...</div>
           </div>
         </div>
-        <div class="q-body" id="q-input-area">
-          <textarea class="q-textarea" id="q-textarea" placeholder="Tulis jawabanmu di sini..."></textarea>
-          <button class="submit-btn" onclick="submitAnswer()">Kunci jawabanku</button>
-        </div>
-        <div class="answered-wrap" id="answered-wrap">
-          <div class="answered-bubble" id="answered-bubble"></div>
-          <div class="waiting-row">Menunggu Yuddit <div class="dots"><span></span><span></span><span></span></div></div>
-          <button class="submit-btn" style="margin-top:10px;background:var(--pink-deep);" onclick="nextQuestion()">Pertanyaan berikutnya →</button>
+        <div class="w-cell">
+          <div class="w-icon" id="bgr-icon">🌧</div>
+          <div>
+            <div class="w-who">Yuddit · Bogor</div>
+            <div class="w-temp" id="bgr-temp">—</div>
+            <div class="w-sky" id="bgr-sky">Memuat...</div>
+          </div>
         </div>
       </div>
-      <!-- Countdown (mobile only) -->
-      <div class="mobile-only">
-        <div class="section-label" style="margin-top:4px;">Pertemuan berikutnya</div>
+
+      <div class="home-body">
+        <div>
+          <div class="section-label" style="display:flex;align-items:center;justify-content:space-between;">
+            <span>Pertanyaan hari ini</span>
+            <span class="ai-badge">✦ Gemini AI</span>
+          </div>
+          <div class="q-card">
+            <div class="q-card-accent"></div>
+            <div class="q-top">
+              <div class="q-day-row">
+                <span class="q-day-label" id="q-date-label">—</span>
+              </div>
+              <div id="q-loading">
+                <div class="q-skeleton long"></div>
+                <div class="q-skeleton med"></div>
+              </div>
+              <div class="q-text" id="q-text" style="display:none;"></div>
+              <div class="q-hint" id="q-hint" style="display:none;">
+                <svg width="10" height="12" viewBox="0 0 10 12" fill="none"><rect x="1" y="5" width="8" height="7" rx="1.5" stroke="#A394A8" stroke-width="1.2"/><path d="M3 5V3.5a2 2 0 0 1 4 0V5" stroke="#A394A8" stroke-width="1.2"/></svg>
+                Jawabanmu terkunci sebelum kamu lihat punya dia
+              </div>
+            </div>
+            <div class="q-divider"></div>
+            <div class="q-body" id="q-input-area">
+              <textarea class="q-textarea" id="q-textarea" placeholder="Tulis jawabanmu di sini..." disabled></textarea>
+              <button class="submit-btn" id="submit-btn" onclick="submitAnswer()" disabled>Memuat pertanyaan...</button>
+            </div>
+            <div class="answered-wrap" id="answered-wrap">
+              <div class="answered-label">Jawabanmu</div>
+              <div class="answered-bubble" id="answered-bubble"></div>
+              <div class="waiting-row">Menunggu Yuddit <div class="dots"><span></span><span></span><span></span></div></div>
+              <button class="next-q-btn" onclick="nextQuestion()">Pertanyaan baru →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile: countdown -->
+        <div class="mobile-only">
+          <div class="section-label">Pertemuan berikutnya</div>
+          <div class="cd-card">
+            <div class="cd-header">
+              <div>
+                <div class="cd-title" id="cd-title">Atur pertemuan</div>
+                <div class="cd-sub" id="cd-sub">ketuk edit untuk tambah tanggal →</div>
+              </div>
+              <button class="edit-btn" onclick="openModal()">Edit</button>
+            </div>
+            <div class="cd-nums">
+              <div class="cd-box"><div class="cd-num" id="cd-d">—</div><div class="cd-lbl">hari</div></div>
+              <div class="cd-box"><div class="cd-num" id="cd-h">—</div><div class="cd-lbl">jam</div></div>
+              <div class="cd-box"><div class="cd-num" id="cd-m">—</div><div class="cd-lbl">menit</div></div>
+              <div class="cd-box"><div class="cd-num" id="cd-s">—</div><div class="cd-lbl">detik</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Desktop right column -->
+      <div id="desk-right-col">
+        <div class="section-label">Pertemuan berikutnya</div>
         <div class="cd-card">
           <div class="cd-header">
-            <div><div class="cd-title" id="cd-title">Atur pertemuan berikutnya</div><div class="cd-sub" id="cd-sub">ketuk edit untuk tambah tanggal →</div></div>
+            <div>
+              <div class="cd-title" id="cd-title-d">Atur pertemuan</div>
+              <div class="cd-sub" id="cd-sub-d">ketuk edit untuk tambah tanggal →</div>
+            </div>
             <button class="edit-btn" onclick="openModal()">Edit</button>
           </div>
           <div class="cd-nums">
-            <div class="cd-box"><div class="cd-num" id="cd-d">—</div><div class="cd-lbl">days</div></div>
-            <div class="cd-box"><div class="cd-num" id="cd-h">—</div><div class="cd-lbl">hours</div></div>
-            <div class="cd-box"><div class="cd-num" id="cd-m">—</div><div class="cd-lbl">mins</div></div>
-            <div class="cd-box"><div class="cd-num" id="cd-s">—</div><div class="cd-lbl">secs</div></div>
+            <div class="cd-box"><div class="cd-num" id="cd-d-d">—</div><div class="cd-lbl">hari</div></div>
+            <div class="cd-box"><div class="cd-num" id="cd-h-d">—</div><div class="cd-lbl">jam</div></div>
+            <div class="cd-box"><div class="cd-num" id="cd-m-d">—</div><div class="cd-lbl">menit</div></div>
+            <div class="cd-box"><div class="cd-num" id="cd-s-d">—</div><div class="cd-lbl">detik</div></div>
           </div>
         </div>
-      </div>
-    </div>
-    <!-- Row 3 right: Countdown + heart card (desktop only) -->
-    <div id="desk-right-col">
-      <div class="section-label">Pertemuan berikutnya</div>
-      <div class="cd-card">
-        <div class="cd-header">
-          <div><div class="cd-title" id="cd-title-d">Atur pertemuan berikutnya</div><div class="cd-sub" id="cd-sub-d">ketuk edit untuk tambah tanggal →</div></div>
-          <button class="edit-btn" onclick="openModal()">Edit</button>
-        </div>
-        <div class="cd-nums">
-          <div class="cd-box"><div class="cd-num" id="cd-d-d">—</div><div class="cd-lbl">days</div></div>
-          <div class="cd-box"><div class="cd-num" id="cd-h-d">—</div><div class="cd-lbl">hours</div></div>
-          <div class="cd-box"><div class="cd-num" id="cd-m-d">—</div><div class="cd-lbl">mins</div></div>
-          <div class="cd-box"><div class="cd-num" id="cd-s-d">—</div><div class="cd-lbl">secs</div></div>
+        <div style="background:var(--warm-card);border:0.5px solid var(--border);border-radius:18px;padding:28px 20px;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;text-align:center;box-shadow:0 2px 12px rgba(30,21,32,0.05);">
+          <div style="font-size:36px;">💌</div>
+          <div style="font-family:'Lora',serif;font-size:22px;color:var(--ink);">Bobby &amp; <em style="font-style:italic;color:var(--rose-deep);">Yuddit</em></div>
+          <div style="font-size:12px;color:var(--ink-light);font-weight:500;line-height:1.6;">Jauh di mata, dekat di hati ✦</div>
         </div>
       </div>
-      <div style="background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:24px 20px;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;text-align:center;">
-        <div style="font-size:28px;">🔥</div>
-        <div style="font-family:'Instrument Serif',serif;font-size:22px;color:var(--text);">Bobby &amp; <em style="font-style:italic;color:var(--purple-deep);">Yuddit</em></div>
-        <div style="font-size:12px;color:var(--muted);">Jauh di mata, dekat di hati ✦</div>
-      </div>
-    </div>
-  </div>
+    </div><!-- /page-home -->
 
-  <div class="page wishlist-page" id="page-wishlist">
-    <div class="wishlist-map-col" style="position:relative;">
-      <div id="leaflet-map"></div>
-      <button id="sat-btn" onclick="toggleSatellite()" style="position:absolute;top:10px;right:10px;z-index:9;background:white;border:0.5px solid rgba(42,31,45,0.18);border-radius:8px;padding:5px 10px;font-family:DM Sans,sans-serif;font-size:11px;cursor:pointer;color:#2A1F2D;">🛰 Satelit</button>
-      <div class="wmap-legend">
-        <div class="legend-row"><div class="legend-dot done"></div>Sudah ke sini</div>
-        <div class="legend-row"><div class="legend-dot wish"></div>Mau ke sini</div>
-      </div>
-    </div>
-    <div class="wishlist-body">
-      <div class="add-place-card">
-        <div class="add-row">
-          <input class="place-input" id="place-input" placeholder="Tambah tempat... (mis. Bromo, Jogja)" onkeydown="if(event.key==='Enter')addPlace()"/>
-          <button class="add-btn" onclick="addPlace()">Tambah</button>
-        </div>
-        <div class="category-pills">
-          <button class="cat-pill selected" data-cat="city" onclick="selectCat(this,'city')">🏙 Kota</button>
-          <button class="cat-pill" data-cat="nature" onclick="selectCat(this,'nature')">🌿 Alam</button>
-          <button class="cat-pill" data-cat="beach" onclick="selectCat(this,'beach')">🌊 Pantai</button>
-          <button class="cat-pill" data-cat="culture" onclick="selectCat(this,'culture')">🏛 Budaya</button>
-          <button class="cat-pill" data-cat="food" onclick="selectCat(this,'food')">🍜 Kuliner</button>
+    <!-- WISHLIST PAGE -->
+    <div class="page wishlist-page" id="page-wishlist">
+      <div class="wishlist-map-col" style="position:relative;">
+        <div id="leaflet-map"></div>
+        <button id="sat-btn" onclick="toggleSatellite()" style="position:absolute;top:10px;right:10px;z-index:9;background:white;border:0.5px solid rgba(30,21,32,0.15);border-radius:9px;padding:6px 11px;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;cursor:pointer;color:var(--ink);font-weight:600;box-shadow:0 2px 6px rgba(30,21,32,0.08);">🛰 Satelit</button>
+        <div class="wmap-legend">
+          <div class="legend-row"><div class="legend-dot done"></div>Sudah ke sini</div>
+          <div class="legend-row"><div class="legend-dot wish"></div>Mau ke sini</div>
         </div>
       </div>
-      <div class="places-list" id="places-list"></div>
-    </div>
-  </div>
-
-  <div class="page" id="page-archive">
-    <div class="archive-body" id="archive-body">
-      <div class="archive-empty" id="archive-empty">
-        <div class="archive-empty-title">Belum ada jawaban</div>
-        <div>Jawab pertanyaan hari ini — akan muncul di sini setelah kalian berdua menjawab.</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="page" id="page-us">
-    <div class="us-body">
-      <div class="us-hero">
-        <div class="us-names">Bobby &amp; <em>Yuddit</em></div>
-        <div class="us-since" id="us-since">Mulai hari ini</div>
-        <div class="us-stats">
-
-          <div class="us-stat"><div class="us-stat-num" id="stat-qs">0</div><div class="us-stat-lbl">Questions</div></div>
-          <div class="us-stat"><div class="us-stat-num" id="stat-places">0</div><div class="us-stat-lbl">Places</div></div>
-        </div>
-      </div>
-      <div>
-        <div class="section-label" style="margin-bottom:8px;">Kenangan</div>
-        <div class="add-memory-card" style="margin-bottom:8px;">
-          <div class="add-memory-row">
-            <input class="memory-input" id="memory-input" placeholder="Tambah kenangan atau momen penting..." onkeydown="if(event.key==='Enter')addMemory()"/>
-            <button class="memory-add-btn" onclick="addMemory()">Tambah</button>
+      <div class="wishlist-body">
+        <div class="add-place-card">
+          <div class="add-row">
+            <input class="place-input" id="place-input" placeholder="Tambah tempat... (mis. Bromo, Jogja)" onkeydown="if(event.key==='Enter')addPlace()"/>
+            <button class="add-btn" onclick="addPlace()">Tambah</button>
+          </div>
+          <div class="category-pills">
+            <button class="cat-pill selected" data-cat="city" onclick="selectCat(this,'city')">🏙 Kota</button>
+            <button class="cat-pill" data-cat="nature" onclick="selectCat(this,'nature')">🌿 Alam</button>
+            <button class="cat-pill" data-cat="beach" onclick="selectCat(this,'beach')">🌊 Pantai</button>
+            <button class="cat-pill" data-cat="culture" onclick="selectCat(this,'culture')">🏛 Budaya</button>
+            <button class="cat-pill" data-cat="food" onclick="selectCat(this,'food')">🍜 Kuliner</button>
           </div>
         </div>
-        <div class="us-memories" id="us-memories"></div>
+        <div class="places-list" id="places-list"></div>
       </div>
     </div>
-  </div>
 
-  <div class="modal-backdrop" id="modal" onclick="if(event.target===this)closeModal()">
-    <div class="modal">
-      <div class="modal-title">Rencanakan pertemuan</div>
-      <label>Di mana?</label>
-      <input type="text" id="modal-place" placeholder="mis. Yogyakarta"/>
-      <label>Kapan?</label>
-      <input type="date" id="modal-date"/>
-      <div class="modal-btns">
-        <button class="modal-cancel" onclick="closeModal()">Batal</button>
-        <button class="modal-save" onclick="saveMeetup()">Simpan</button>
+    <!-- ARCHIVE PAGE -->
+    <div class="page" id="page-archive">
+      <div class="archive-body" id="archive-body">
+        <div class="archive-empty" id="archive-empty">
+          <div class="archive-empty-title">Belum ada jawaban</div>
+          <div class="archive-empty-sub">Jawab pertanyaan hari ini — setelah kalian berdua menjawab, akan tersimpan di sini sebagai kenangan. 💌</div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
+
+    <!-- US PAGE -->
+    <div class="page" id="page-us">
+      <div class="us-body">
+        <div class="us-hero">
+          <div class="us-hero-bg"></div>
+          <span class="us-heart">💌</span>
+          <div class="us-names">Bobby &amp; <em>Yuddit</em></div>
+          <div class="us-since" id="us-since">Mulai hari ini</div>
+          <div class="us-stats">
+            <div class="us-stat">
+              <div class="us-stat-num" id="stat-qs">0</div>
+              <div class="us-stat-lbl">Pertanyaan</div>
+            </div>
+            <div class="us-stat">
+              <div class="us-stat-num" id="stat-places">0</div>
+              <div class="us-stat-lbl">Tempat</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-label" style="margin-bottom:10px;">Kenangan</div>
+          <div class="add-memory-card" style="margin-bottom:10px;">
+            <div class="add-memory-row">
+              <input class="memory-input" id="memory-input" placeholder="Catat momen penting..." onkeydown="if(event.key==='Enter')addMemory()"/>
+              <button class="memory-add-btn" onclick="addMemory()">Tambah</button>
+            </div>
+          </div>
+          <div class="us-memories" id="us-memories"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEETUP MODAL -->
+    <div class="modal-backdrop" id="modal" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div class="modal-title">Rencanakan pertemuan</div>
+        <label>Di mana?</label>
+        <input type="text" id="modal-place" placeholder="mis. Yogyakarta"/>
+        <label>Kapan?</label>
+        <input type="date" id="modal-date"/>
+        <div class="modal-btns">
+          <button class="modal-cancel" onclick="closeModal()">Batal</button>
+          <button class="modal-save" onclick="saveMeetup()">Simpan</button>
+        </div>
+      </div>
+    </div>
   </div><!-- /content-area -->
+</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const S={qIndex:0,answered:false,answer:'',meetup:null,places:[],archive:[],memories:[],selectedCat:'city'};
-const QUESTIONS=["Hal kecil sehari-hari apa yang selalu bikin kamu senyum?","Kalau kamu cuma boleh makan satu makanan seumur hidup, apa yang kamu pilih?","Hal apa yang kamu diam-diam banggain tapi jarang kamu ceritain?","Ceritain Sunday santaimu yang sempurna.","Lagu apa yang lagi muter terus di kepalamu?","Ketakutan apa yang belum pernah kamu ceritain ke siapapun?","Seperti apa masa depan impianmu, dalam kata-kata paling sederhana?","Kalau kamu bisa kuasai satu skill dalam semalam, apa yang kamu pilih?","Hal terakhir apa yang bikin kamu ketawa keras-keras, sendirian?","Hal apa tentang dirimu yang masih kamu coba pahami?","Apa yang kira-kira dipikirkan dirimu yang umur 10 tahun melihat kamu sekarang?","Tempat mana yang pernah kamu kunjungi dan mengubah cara pandangmu?","Kalau kamu bisa kembali dan menghidupi satu hari lagi, hari mana yang kamu pilih?","Film, buku, atau lagu apa yang paling membentuk dirimu?","Hal apa yang ingin kamu tingkatkan dalam dirimu?"];
-const CAT_EMOJI={city:'🏙',nature:'🌿',beach:'🌊',culture:'🏛',food:'🍜'};
-const CAT_CLASS={city:'city',nature:'nature',beach:'beach',culture:'culture',food:'food'};
-async function geocode(name){
-  try{
-    const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1&countrycodes=id`;
-    const r=await fetch(url,{headers:{'Accept-Language':'id','User-Agent':'LDTS-App/1.0'}});
-    const d=await r.json();
-    if(d&&d.length>0)return[parseFloat(d[0].lat),parseFloat(d[0].lon)];
-    // fallback: search globally if not found in Indonesia
-    const r2=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1`,{headers:{'Accept-Language':'id','User-Agent':'LDTS-App/1.0'}});
-    const d2=await r2.json();
-    if(d2&&d2.length>0)return[parseFloat(d2[0].lat),parseFloat(d2[0].lon)];
-  }catch(e){}
-  return null;
-}
-// ── JSONBin Cloud Sync ──
-const JBIN_KEY='$2a$10$aOMy.0xdjfpp1ly5ZZWtCuD65YDOf8msitXmJj2FDeS5XT1AQcN1y';
-const JBIN_BASE='https://api.jsonbin.io/v3/b';
-let BIN_ID=localStorage.getItem('ldts_bin_id')||'69f5a28536566621a817060f';
-let syncTimer=null;
+// ── State ──────────────────────────────────────────────
+const S = {
+  answered: false, answer: '', answeredDate: null,
+  meetup: null, places: [], archive: [], memories: [],
+  selectedCat: 'city', todayQuestion: null, todayQuestionDate: null
+};
 
-function showSyncStatus(msg,color='var(--muted)'){
-  ['sync-status','sync-status-m'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el){el.textContent=msg;el.style.color=color;}
-  });
-}
+// ── Talking Stage Fallback Questions ──────────────────
+const FALLBACK_QUESTIONS = [
+  "Kalau kamu bisa menghabiskan satu hari penuh sama orang yang kamu suka tanpa gangguan apapun, kamu mau ngapain?",
+  "Hal apa yang biasanya kamu ceritain ke bestie tapi belum pernah kamu ceritain ke orang yang kamu suka?",
+  "Momen apa yang pertama kali bikin kamu mikirin seseorang lebih dari yang kamu kira?",
+  "Seberapa sering kamu cek HP cuma buat lihat apakah ada pesan dari orang tertentu?",
+  "Tipe kencan pertama seperti apa yang menurutmu paling memorable — santai atau yang sudah direncanain matang?",
+  "Kalau lagi nunggu balasan chat, kira-kira kamu tipe yang sabar atau yang ngetik ulang pesannya berkali-kali?",
+  "Hal kecil apa yang dilakukan seseorang bisa langsung bikin kamu senyum tanpa alasan jelas?",
+  "Seberapa penting 'chemistry' lewat chat sebelum ketemu langsung buat kamu?",
+  "Lagu apa yang akhir-akhir ini sering kamu dengerin, dan kenapa lagu itu yang nyangkut?",
+  "Kalau boleh jujur, pesan chat seperti apa yang paling bikin kamu deg-degan waktu menerimanya?",
+  "Kamu lebih suka ngobrol panjang sampai dini hari atau quality time pendek tapi intense?",
+  "Ada nggak momen di mana kamu ngerasa seseorang 'get you' tanpa harus banyak dijelasin?",
+  "Hal apa yang paling kamu takutin dari proses saling mengenal seseorang secara serius?",
+  "Satu hal yang pasti bikin kamu jatuh lebih dalam ke seseorang itu apa?",
+  "Kalau kamu bisa kirim satu lagu ke orang yang kamu suka malam ini tanpa perlu penjelasan, lagu apa yang kamu pilih?"
+];
 
-async function cloudLoad(){
-  if(!BIN_ID)return false;
-  try{
-    const r=await fetch(`${JBIN_BASE}/${BIN_ID}/latest`,{headers:{'X-Master-Key':JBIN_KEY}});
-    if(!r.ok)return false;
-    const d=await r.json();
-    Object.assign(S,d.record);
-    localStorage.setItem('ldts_v2',JSON.stringify(S));
-    return true;
-  }catch(e){return false;}
+const CAT_EMOJI = {city:'🏙',nature:'🌿',beach:'🌊',culture:'🏛',food:'🍜'};
+const CAT_LABEL = {city:'Kota',nature:'Alam',beach:'Pantai',culture:'Budaya',food:'Kuliner'};
+
+// ── Date key ───────────────────────────────────────────
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-async function cloudSave(){
-  showSyncStatus('Menyimpan...','var(--muted)');
-  try{
-    if(!BIN_ID){
-      // Create bin on first save
-      const r=await fetch(JBIN_BASE,{
-        method:'POST',
-        headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY,'X-Bin-Name':'LDTS-Bobby-Yuddit','X-Private':'true'},
-        body:JSON.stringify(S)
-      });
-      if(!r.ok)throw new Error('create failed');
-      const d=await r.json();
-      BIN_ID=d.metadata.id;
-      localStorage.setItem('ldts_bin_id',BIN_ID);
-    } else {
-      const r=await fetch(`${JBIN_BASE}/${BIN_ID}`,{
-        method:'PUT',
-        headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY},
-        body:JSON.stringify(S)
-      });
-      if(!r.ok)throw new Error('save failed');
+// ── Gemini AI Daily Question ───────────────────────────
+// Flow:
+//   1. Check localStorage cache (instant, avoids any network call)
+//   2. Check JSONBin cloud — if today's question already stored by the other person, use it
+//   3. If neither exists → this device is first → call Gemini → save to JSONBin
+//   4. On any failure → deterministic fallback from static list
+
+async function fetchDailyQuestion() {
+  const key = todayKey();
+  const cacheKey = `ldts_q_${key}`;
+
+  // 1. Local cache hit — fastest path, no network
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) return cached;
+
+  // 2. Check JSONBin cloud — maybe the other person already generated today's question
+  try {
+    const r = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': JBIN_KEY }
+    });
+    if (r.ok) {
+      const d = await r.json();
+      const cloudQ = d.record?.todayQuestion;
+      const cloudDate = d.record?.todayQuestionDate;
+      if (cloudQ && cloudDate === key) {
+        // Other person already generated it — use theirs
+        localStorage.setItem(cacheKey, cloudQ);
+        S.todayQuestion = cloudQ;
+        S.todayQuestionDate = key;
+        return cloudQ;
+      }
     }
-    localStorage.setItem('ldts_v2',JSON.stringify(S));
-    showSyncStatus('Tersinkron ✓','#1D9E75');
-    setTimeout(()=>showSyncStatus(''),3000);
-  }catch(e){
-    localStorage.setItem('ldts_v2',JSON.stringify(S));
-    showSyncStatus('Tersimpan lokal','var(--muted)');
+  } catch(e) { /* network issue — fall through to generate */ }
+
+  // 3. Nobody has generated today's question yet — this device is first
+  //    Call Gemini, then save result to JSONBin so the other person gets the same one
+  const GEMINI_KEY = 'AIzaSyBcFkTh9D19cAMETnExa95pZwsf55tpfzQ';
+
+  const prompt = `Kamu sedang membuat pertanyaan harian untuk aplikasi bernama LDTS milik Bobby (di Semarang) dan Yuddit (di Bogor), Indonesia. Mereka sedang dalam fase "talking stage" — yaitu dua orang yang saling tertarik dan sedang dalam proses saling mengenal lebih dalam, belum resmi pacaran.
+
+Tanggal hari ini: ${key}
+
+Buatlah SATU pertanyaan yang:
+- Relevan dengan fase talking stage — bisa tentang perasaan awal, chemistry, kebiasaan saat suka sama seseorang, atau ekspektasi hubungan
+- Terasa intim tapi tidak terlalu berat — bisa dijawab dengan jujur tanpa canggung
+- Natural dan percakapan sehari-hari dalam Bahasa Indonesia gaul yang hangat (bukan formal)
+- Tidak klise atau terlalu generik
+- Variatif — jangan selalu mulai dengan "Apa" atau "Kalau", coba variasikan struktur kalimat
+- Satu kalimat saja, diakhiri tanda tanya
+
+Contoh nada yang tepat: "Seberapa sering kamu cek HP cuma buat lihat ada pesan dari orang tertentu?" atau "Hal kecil apa yang dilakukan seseorang bisa langsung bikin kamu senyum tanpa alasan jelas?"
+
+Kembalikan HANYA teks pertanyaannya saja. Tanpa tanda kutip, tanpa penjelasan, tanpa angka, tanpa apapun lainnya.`;
+
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: 150, temperature: 1.0 }
+        })
+      }
+    );
+    if (!response.ok) throw new Error('API error ' + response.status);
+    const data = await response.json();
+    const question = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    if (!question) throw new Error('Empty response');
+
+    // Cache locally
+    localStorage.setItem(cacheKey, question);
+
+    // Save to JSONBin so the second person gets the same question
+    S.todayQuestion = question;
+    S.todayQuestionDate = key;
+    saveState(); // this triggers cloudSave which writes to JSONBin
+
+    return question;
+
+  } catch (e) {
+    // 4. Full fallback — deterministic pick based on date
+    console.warn('Gemini fallback:', e);
+    const dayNum = parseInt(key.replace(/-/g, '')) % FALLBACK_QUESTIONS.length;
+    const fallback = FALLBACK_QUESTIONS[dayNum];
+    localStorage.setItem(cacheKey, fallback);
+    // Still save to cloud so second person gets same fallback
+    S.todayQuestion = fallback;
+    S.todayQuestionDate = key;
+    saveState();
+    return fallback;
   }
 }
 
-function loadState(){try{const s=localStorage.getItem('ldts_v2');if(s)Object.assign(S,JSON.parse(s));}catch(e){}}
-function saveState(){
-  clearTimeout(syncTimer);
-  syncTimer=setTimeout(cloudSave,600);
+function showQuestion(text) {
+  document.getElementById('q-loading').style.display = 'none';
+  const qText = document.getElementById('q-text');
+  qText.style.display = 'block';
+  qText.textContent = '\u201C' + text + '\u201D';
+  document.getElementById('q-hint').style.display = 'flex';
+
+  const textarea = document.getElementById('q-textarea');
+  const btn = document.getElementById('submit-btn');
+  textarea.disabled = false;
+  textarea.placeholder = 'Tulis jawabanmu di sini...';
+  btn.disabled = false;
+  btn.textContent = 'Kunci jawaban 🔒';
+
+  const d = new Date();
+  document.getElementById('q-date-label').textContent =
+    d.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'});
 }
 
-async function init(){
-  loadState(); // load local cache first for instant render
-  renderHome();renderWishlist();renderArchive();renderUs();fetchWeather();
-  setTimeout(initHomeMap,200);
-  setTimeout(initLeafletMap,300);
-  // Then sync from cloud
-  showSyncStatus('Memuat dari cloud...','var(--muted)');
-  const ok=await cloudLoad();
-  if(ok){
-    renderHome();renderWishlist();renderArchive();renderUs();
-    showSyncStatus('Tersinkron ✓','#1D9E75');
-    setTimeout(()=>showSyncStatus(''),3000);
-  } else if(!BIN_ID){
-    showSyncStatus('Belum terhubung — data pertama akan membuat bin','var(--muted)');
-    setTimeout(()=>showSyncStatus(''),5000);
-  } else {
-    showSyncStatus('Offline — data lokal','var(--muted)');
-  }
-}
+// ── JSONBin Cloud Sync ─────────────────────────────────
+const JBIN_KEY = '$2a$10$aOMy.0xdjfpp1ly5ZZWtCuD65YDOf8msitXmJj2FDeS5XT1AQcN1y';
+const JBIN_BASE = 'https://api.jsonbin.io/v3/b';
+let BIN_ID = localStorage.getItem('ldts_bin_id') || '69f5a28536566621a817060f';
+let syncTimer = null, cdTimer = null;
 
-function switchTab(tab){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn,.sidebar-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('page-'+tab).classList.add('active');
-  document.querySelectorAll('[data-tab='+tab+']').forEach(b=>b.classList.add('active'));
-  if(tab==='wishlist'){setTimeout(()=>{if(leafletMap)leafletMap.invalidateSize();},120);}
-  if(tab==='home'){setTimeout(()=>{if(homeMap)homeMap.invalidateSize();},120);}
-}
-
-function renderHome(){
-  document.getElementById('q-text').textContent='"'+QUESTIONS[S.qIndex%QUESTIONS.length]+'"';
-  if(S.answered){document.getElementById('q-input-area').style.display='none';document.getElementById('answered-wrap').style.display='block';document.getElementById('answered-bubble').textContent=S.answer;}
-  if(S.meetup){['cd-title','cd-title-d'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=S.meetup.place;});const d=new Date(S.meetup.date);const ds=d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});['cd-sub','cd-sub-d'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=ds;});startCountdown();}
-}
-
-function submitAnswer(){
-  const val=document.getElementById('q-textarea').value.trim();if(!val)return;
-  S.answered=true;S.answer=val;
-  const qi=S.qIndex%QUESTIONS.length;
-  if(!S.archive.find(a=>a.qi===qi))S.archive.unshift({qi,q:QUESTIONS[qi],myAns:val,herAns:null,date:new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short'})});
-  saveState();
-  document.getElementById('q-input-area').style.display='none';
-  document.getElementById('answered-wrap').style.display='block';
-  document.getElementById('answered-bubble').textContent=val;
-  renderArchive();renderUs();
-}
-
-function nextQuestion(){
-  S.qIndex=(S.qIndex||0)+1;S.answered=false;S.answer='';saveState();
-  document.getElementById('q-text').textContent='"'+QUESTIONS[S.qIndex%QUESTIONS.length]+'"';
-  document.getElementById('answered-wrap').style.display='none';
-  document.getElementById('q-input-area').style.display='block';
-  document.getElementById('q-textarea').value='';
-}
-
-
-function startCountdown(){if(cdTimer)clearInterval(cdTimer);cdTimer=setInterval(tickCountdown,1000);tickCountdown();}
-function tickCountdown(){
-  if(!S.meetup)return;
-  const diff=new Date(S.meetup.date)-new Date();
-  const vals=diff<=0?[0,0,0,0]:[Math.floor(diff/86400000),Math.floor((diff%86400000)/3600000),Math.floor((diff%3600000)/60000),Math.floor((diff%60000)/1000)];
-  ['cd-d','cd-h','cd-m','cd-s'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=vals[i];const el2=document.getElementById(id+'-d');if(el2)el2.textContent=vals[i];});
-}
-
-function openModal(){if(S.meetup){document.getElementById('modal-place').value=S.meetup.place;document.getElementById('modal-date').value=S.meetup.date;}document.getElementById('modal').classList.add('open');}
-function closeModal(){document.getElementById('modal').classList.remove('open');}
-function saveMeetup(){const place=document.getElementById('modal-place').value.trim()||'Our meetup';const date=document.getElementById('modal-date').value;if(!date){closeModal();return;}S.meetup={place,date};saveState();
-  ['cd-title','cd-title-d'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=place;});
-  const d=new Date(date);const ds=d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
-  ['cd-sub','cd-sub-d'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=ds;});
-  closeModal();startCountdown();}
-
-const WMO_DESC={0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',48:'Foggy',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',71:'Light snow',73:'Snow',75:'Heavy snow',80:'Rain showers',81:'Rain showers',82:'Heavy showers',95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'};
-const WMO_ICON={0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌦',63:'🌧',65:'🌧',71:'🌨',73:'❄️',75:'❄️',80:'🌦',81:'🌧',82:'🌧',95:'⛈',96:'⛈',99:'⛈'};
-function fetchWeather(){
-  const cities=[{lat:-6.9932,lon:110.4203,tempEl:'smg-temp',skyEl:'smg-sky',iconEl:'smg-icon'},{lat:-6.5971,lon:106.8060,tempEl:'bgr-temp',skyEl:'bgr-sky',iconEl:'bgr-icon'}];
-  cities.forEach(c=>{
-    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,weathercode&timezone=Asia%2FJakarta`)
-      .then(r=>r.json()).then(d=>{
-        const temp=Math.round(d.current.temperature_2m);
-        const code=d.current.weathercode;
-        document.getElementById(c.tempEl).textContent=temp+'°C';
-        document.getElementById(c.skyEl).textContent=WMO_DESC[code]||'Clear';
-        document.getElementById(c.iconEl).textContent=WMO_ICON[code]||'🌤';
-      }).catch(()=>{document.getElementById(c.tempEl).textContent='—';document.getElementById(c.skyEl).textContent='Tidak tersedia';});
+function showSyncStatus(msg, color = 'var(--ink-light)') {
+  ['sync-status','sync-status-m'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = msg; el.style.color = color; }
   });
 }
 
-let homeMap=null;
-function initHomeMap(){
-  if(homeMap)return;
-  homeMap=L.map('home-map',{center:[-7.2,108.6],zoom:7,zoomControl:true,attributionControl:false,dragging:true,touchZoom:true,scrollWheelZoom:true,doubleClickZoom:true,boxZoom:true,keyboard:true});
+async function cloudLoad() {
+  if (!BIN_ID) return false;
+  try {
+    const r = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, { headers: {'X-Master-Key': JBIN_KEY} });
+    if (!r.ok) return false;
+    const d = await r.json();
+    Object.assign(S, d.record);
+    localStorage.setItem('ldts_v2', JSON.stringify(S));
+    return true;
+  } catch(e) { return false; }
+}
+
+async function cloudSave() {
+  showSyncStatus('Menyimpan...', 'var(--ink-light)');
+  try {
+    if (!BIN_ID) {
+      const r = await fetch(JBIN_BASE, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','X-Master-Key':JBIN_KEY,'X-Bin-Name':'LDTS-Bobby-Yuddit','X-Private':'true'},
+        body: JSON.stringify(S)
+      });
+      if (!r.ok) throw new Error('create failed');
+      const d = await r.json();
+      BIN_ID = d.metadata.id;
+      localStorage.setItem('ldts_bin_id', BIN_ID);
+    } else {
+      const r = await fetch(`${JBIN_BASE}/${BIN_ID}`, {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json','X-Master-Key':JBIN_KEY},
+        body: JSON.stringify(S)
+      });
+      if (!r.ok) throw new Error('save failed');
+    }
+    localStorage.setItem('ldts_v2', JSON.stringify(S));
+    showSyncStatus('Tersinkron ✓', '#3D6B56');
+    setTimeout(() => showSyncStatus(''), 3000);
+  } catch(e) {
+    localStorage.setItem('ldts_v2', JSON.stringify(S));
+    showSyncStatus('Tersimpan lokal', 'var(--ink-light)');
+  }
+}
+
+function loadState() { try { const s = localStorage.getItem('ldts_v2'); if (s) Object.assign(S, JSON.parse(s)); } catch(e) {} }
+function saveState() { clearTimeout(syncTimer); syncTimer = setTimeout(cloudSave, 600); }
+
+// ── Init ───────────────────────────────────────────────
+async function init() {
+  loadState();
+  renderWishlist(); renderArchive(); renderUs(); fetchWeather();
+  setTimeout(initHomeMap, 200);
+  setTimeout(initLeafletMap, 300);
+
+  const todayK = todayKey();
+  if (S.answered && S.answeredDate !== todayK) {
+    S.answered = false; S.answer = ''; S.answeredDate = null;
+    saveState();
+  }
+
+  if (S.answered) {
+    document.getElementById('q-input-area').style.display = 'none';
+    document.getElementById('answered-wrap').style.display = 'block';
+    document.getElementById('answered-bubble').textContent = S.answer;
+  }
+
+  if (S.meetup) {
+    updateMeetupUI();
+    startCountdown();
+  }
+
+  showSyncStatus('Memuat...', 'var(--ink-light)');
+  const ok = await cloudLoad();
+  if (ok) {
+    renderWishlist(); renderArchive(); renderUs();
+    showSyncStatus('Tersinkron ✓', '#3D6B56');
+    setTimeout(() => showSyncStatus(''), 3000);
+    if (S.meetup) { updateMeetupUI(); startCountdown(); }
+  } else {
+    showSyncStatus('Offline', 'var(--ink-light)');
+  }
+
+  const question = await fetchDailyQuestion();
+  showQuestion(question);
+
+  if (S.answered && S.answeredDate === todayK) {
+    document.getElementById('q-input-area').style.display = 'none';
+    document.getElementById('answered-wrap').style.display = 'block';
+    document.getElementById('answered-bubble').textContent = S.answer;
+  }
+}
+
+// ── Tab switching ──────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn,.sidebar-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.querySelectorAll('[data-tab=' + tab + ']').forEach(b => b.classList.add('active'));
+  if (tab === 'wishlist') setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 120);
+  if (tab === 'home') setTimeout(() => { if (homeMap) homeMap.invalidateSize(); }, 120);
+}
+
+// ── Answer submission ──────────────────────────────────
+function submitAnswer() {
+  const val = document.getElementById('q-textarea').value.trim();
+  if (!val) return;
+  const todayQ = document.getElementById('q-text').textContent.replace(/^["""]|["""]$/g, '');
+  S.answered = true; S.answer = val; S.answeredDate = todayKey();
+  const existing = S.archive.find(a => a.date === new Date().toLocaleDateString('id-ID', {day:'numeric',month:'short'}));
+  if (!existing) {
+    S.archive.unshift({
+      q: todayQ, myAns: val, herAns: null,
+      date: new Date().toLocaleDateString('id-ID', {day:'numeric', month:'short'})
+    });
+  }
+  saveState();
+  document.getElementById('q-input-area').style.display = 'none';
+  document.getElementById('answered-wrap').style.display = 'block';
+  document.getElementById('answered-bubble').textContent = val;
+  renderArchive(); renderUs();
+}
+
+function nextQuestion() {
+  S.answered = false; S.answer = ''; S.answeredDate = null;
+  localStorage.removeItem(`ldts_q_${todayKey()}`);
+  S.todayQuestion = null; S.todayQuestionDate = null;
+  saveState();
+
+  document.getElementById('q-loading').style.display = 'block';
+  document.getElementById('q-text').style.display = 'none';
+  document.getElementById('q-hint').style.display = 'none';
+  document.getElementById('answered-wrap').style.display = 'none';
+  document.getElementById('q-input-area').style.display = 'block';
+  document.getElementById('q-textarea').value = '';
+  document.getElementById('q-textarea').disabled = true;
+  document.getElementById('submit-btn').disabled = true;
+  document.getElementById('submit-btn').textContent = 'Memuat pertanyaan...';
+
+  fetchDailyQuestion().then(showQuestion);
+}
+
+// ── Countdown ─────────────────────────────────────────
+function updateMeetupUI() {
+  if (!S.meetup) return;
+  ['cd-title','cd-title-d'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = S.meetup.place; });
+  const ds = new Date(S.meetup.date).toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric'});
+  ['cd-sub','cd-sub-d'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ds; });
+}
+function startCountdown() { if (cdTimer) clearInterval(cdTimer); cdTimer = setInterval(tickCountdown, 1000); tickCountdown(); }
+function tickCountdown() {
+  if (!S.meetup) return;
+  const diff = new Date(S.meetup.date) - new Date();
+  const vals = diff <= 0 ? [0,0,0,0] : [
+    Math.floor(diff/86400000),
+    Math.floor((diff%86400000)/3600000),
+    Math.floor((diff%3600000)/60000),
+    Math.floor((diff%60000)/1000)
+  ];
+  ['cd-d','cd-h','cd-m','cd-s'].forEach((id,i) => {
+    const el = document.getElementById(id); if (el) el.textContent = vals[i];
+    const el2 = document.getElementById(id+'-d'); if (el2) el2.textContent = vals[i];
+  });
+}
+
+function openModal() {
+  if (S.meetup) { document.getElementById('modal-place').value = S.meetup.place; document.getElementById('modal-date').value = S.meetup.date; }
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function saveMeetup() {
+  const place = document.getElementById('modal-place').value.trim() || 'Our meetup';
+  const date = document.getElementById('modal-date').value;
+  if (!date) { closeModal(); return; }
+  S.meetup = {place, date};
+  saveState(); updateMeetupUI(); closeModal(); startCountdown();
+}
+
+// ── Weather ────────────────────────────────────────────
+const WMO_DESC = {0:'Cerah',1:'Cerah berawan',2:'Berawan',3:'Mendung',45:'Berkabut',48:'Berkabut',51:'Gerimis ringan',53:'Gerimis',55:'Gerimis lebat',61:'Hujan ringan',63:'Hujan',65:'Hujan lebat',71:'Salju ringan',73:'Salju',75:'Salju lebat',80:'Hujan lokal',81:'Hujan deras',82:'Hujan sangat deras',95:'Hujan badai',96:'Badai petir',99:'Badai petir lebat'};
+const WMO_ICON = {0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌦',63:'🌧',65:'🌧',71:'🌨',73:'❄️',75:'❄️',80:'🌦',81:'🌧',82:'🌧',95:'⛈',96:'⛈',99:'⛈'};
+
+function fetchWeather() {
+  const cities = [
+    {lat:-6.9932,lon:110.4203,tempEl:'smg-temp',skyEl:'smg-sky',iconEl:'smg-icon'},
+    {lat:-6.5971,lon:106.8060,tempEl:'bgr-temp',skyEl:'bgr-sky',iconEl:'bgr-icon'}
+  ];
+  cities.forEach(c => {
+    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,weathercode&timezone=Asia%2FJakarta`)
+      .then(r => r.json()).then(d => {
+        const temp = Math.round(d.current.temperature_2m);
+        const code = d.current.weathercode;
+        document.getElementById(c.tempEl).textContent = temp + '°C';
+        document.getElementById(c.skyEl).textContent = WMO_DESC[code] || 'Cerah';
+        document.getElementById(c.iconEl).textContent = WMO_ICON[code] || '🌤';
+      }).catch(() => {
+        document.getElementById(c.tempEl).textContent = '—';
+        document.getElementById(c.skyEl).textContent = 'Tidak tersedia';
+      });
+  });
+}
+
+// ── Maps ───────────────────────────────────────────────
+let homeMap = null;
+function initHomeMap() {
+  if (homeMap) return;
+  homeMap = L.map('home-map', {center:[-7.2,108.6],zoom:7,zoomControl:true,attributionControl:false,dragging:true,touchZoom:true,scrollWheelZoom:true});
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd'}).addTo(homeMap);
-
-  // Dashed polyline between Bogor and Semarang
-  const smgLL=[-6.993,110.420];
-  const bgrLL=[-6.597,106.806];
-  L.polyline([bgrLL,smgLL],{color:'#E24B4A',weight:2,dashArray:'6 5',opacity:0.9}).addTo(homeMap);
-
-  // Semarang pin (you)
-  const smgIcon=L.divIcon({html:`<div style="display:flex;flex-direction:column;align-items:center"><div style="width:11px;height:11px;border-radius:50%;background:#5C4E8A;border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2)"></div><div style="font-size:9px;font-weight:500;margin-top:3px;padding:2px 7px;border-radius:8px;background:white;border:0.5px solid rgba(42,31,45,0.12);color:#5C4E8A;white-space:nowrap;">Semarang · Bobby</div></div>`,className:'',iconAnchor:[5,5]});
-  L.marker(smgLL,{icon:smgIcon}).addTo(homeMap);
-
-  // Bogor pin (Yuddit)
-  const bgrIcon=L.divIcon({html:`<div style="display:flex;flex-direction:column;align-items:center"><div style="width:11px;height:11px;border-radius:50%;background:#C97B8A;border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2)"></div><div style="font-size:9px;font-weight:500;margin-top:3px;padding:2px 7px;border-radius:8px;background:white;border:0.5px solid rgba(42,31,45,0.12);color:#C97B8A;white-space:nowrap;">Bogor · Yuddit</div></div>`,className:'',iconAnchor:[5,5]});
-  L.marker(bgrLL,{icon:bgrIcon}).addTo(homeMap);
-
+  const smgLL = [-6.993,110.420], bgrLL = [-6.597,106.806];
+  L.polyline([bgrLL,smgLL],{color:'#C4607A',weight:2,dashArray:'6 5',opacity:0.85}).addTo(homeMap);
+  const makeMarker = (ll, label, color) => L.marker(ll, {icon: L.divIcon({
+    html: `<div style="display:flex;flex-direction:column;align-items:center"><div style="width:11px;height:11px;border-radius:50%;background:${color};border:2.5px solid white;box-shadow:0 1px 5px rgba(0,0,0,0.2)"></div><div style="font-size:9px;font-weight:600;margin-top:3px;padding:2px 7px;border-radius:8px;background:white;border:0.5px solid rgba(30,21,32,0.1);color:${color};white-space:nowrap;">${label}</div></div>`,
+    className:'', iconAnchor:[5,5]
+  })}).addTo(homeMap);
+  makeMarker(smgLL, 'Semarang · Bobby', '#5C4E8A');
+  makeMarker(bgrLL, 'Bogor · Yuddit', '#C4607A');
   homeMap.fitBounds([bgrLL,smgLL],{padding:[28,28]});
-  [100,300,600].forEach(t=>setTimeout(()=>homeMap.invalidateSize(),t));
+  [100,300,600].forEach(t => setTimeout(() => homeMap.invalidateSize(), t));
 }
-let leafletMap=null,leafletMarkers=[];
-function makePinIcon(done){const color=done?'#1D9E75':'#5C4E8A';const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="30" viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 18 12 18s12-9 12-18C24 5.4 18.6 0 12 0z" fill="${color}"/><circle cx="12" cy="12" r="5" fill="white"/></svg>`;return L.divIcon({html:svg,className:'',iconSize:[24,30],iconAnchor:[12,30],popupAnchor:[0,-32]});}
 
-let satelliteMode=false;
-let baseLayer=null,satLayer=null;
-function toggleSatellite(){
-  satelliteMode=!satelliteMode;
-  if(satelliteMode){leafletMap.removeLayer(baseLayer);satLayer.addTo(leafletMap);}
-  else{leafletMap.removeLayer(satLayer);baseLayer.addTo(leafletMap);}
-  leafletMap.invalidateSize();
-  document.getElementById('sat-btn').textContent=satelliteMode?'🗺 Peta':'🛰 Satelit';
+let leafletMap = null, leafletMarkers = [];
+function makePinIcon(done) {
+  const color = done ? '#3D6B56' : '#C4607A';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="30" viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 18 12 18s12-9 12-18C24 5.4 18.6 0 12 0z" fill="${color}"/><circle cx="12" cy="12" r="5" fill="white"/></svg>`;
+  return L.divIcon({html:svg,className:'',iconSize:[24,30],iconAnchor:[12,30],popupAnchor:[0,-32]});
 }
-function initLeafletMap(){
-  if(leafletMap)return;
-  leafletMap=L.map('leaflet-map',{center:[-7.5,112],zoom:6,zoomControl:true,attributionControl:false});
-  baseLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd'}).addTo(leafletMap);
-  satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:''});
-  [100,300,600,1000].forEach(t=>setTimeout(()=>leafletMap.invalidateSize(),t));
-  const smgI=L.divIcon({html:`<div style="width:10px;height:10px;border-radius:50%;background:#5C4E8A;border:2px solid white;"></div>`,className:'',iconSize:[10,10],iconAnchor:[5,5]});
-  const bgrI=L.divIcon({html:`<div style="width:10px;height:10px;border-radius:50%;background:#C97B8A;border:2px solid white;"></div>`,className:'',iconSize:[10,10],iconAnchor:[5,5]});
-  L.marker([-6.993,110.420],{icon:smgI}).addTo(leafletMap).bindPopup('Semarang · Bobby');
-  L.marker([-6.597,106.806],{icon:bgrI}).addTo(leafletMap).bindPopup('Bogor · Yuddit');
+
+let satelliteMode = false, baseLayer = null, satLayer = null;
+function toggleSatellite() {
+  satelliteMode = !satelliteMode;
+  if (satelliteMode) { leafletMap.removeLayer(baseLayer); satLayer.addTo(leafletMap); }
+  else { leafletMap.removeLayer(satLayer); baseLayer.addTo(leafletMap); }
+  leafletMap.invalidateSize();
+  document.getElementById('sat-btn').textContent = satelliteMode ? '🗺 Peta' : '🛰 Satelit';
+}
+
+function initLeafletMap() {
+  if (leafletMap) return;
+  leafletMap = L.map('leaflet-map',{center:[-7.5,112],zoom:6,zoomControl:true,attributionControl:false});
+  baseLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd'}).addTo(leafletMap);
+  satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19});
+  [100,300,600,1000].forEach(t => setTimeout(() => leafletMap.invalidateSize(), t));
+  const makeSmallPin = (ll, color, popup) => L.marker(ll, {icon: L.divIcon({
+    html: `<div style="width:10px;height:10px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>`,
+    className:'', iconSize:[10,10], iconAnchor:[5,5]
+  })}).addTo(leafletMap).bindPopup(popup);
+  makeSmallPin([-6.993,110.420], '#5C4E8A', 'Semarang · Bobby');
+  makeSmallPin([-6.597,106.806], '#C4607A', 'Bogor · Yuddit');
   renderLeafletMarkers();
 }
 
-function renderLeafletMarkers(){
-  if(!leafletMap)return;
-  leafletMarkers.forEach(m=>m.remove());leafletMarkers=[];
-  S.places.forEach(p=>{
-    const ll=p.latlng;if(!ll)return;
-    const m=L.marker(ll,{icon:makePinIcon(p.done)}).addTo(leafletMap).bindPopup(`<b>${p.name}</b><br><span style="color:#8C7B8E">${p.done?'✓ Sudah ke sini':'Mau ke sini'}</span>`);
+function renderLeafletMarkers() {
+  if (!leafletMap) return;
+  leafletMarkers.forEach(m => m.remove()); leafletMarkers = [];
+  S.places.forEach(p => {
+    if (!p.latlng) return;
+    const m = L.marker(p.latlng, {icon: makePinIcon(p.done)}).addTo(leafletMap)
+      .bindPopup(`<b>${p.name}</b><br><span style="color:#A394A8">${p.done ? '✓ Sudah ke sini' : 'Mau ke sini'}</span>`);
     leafletMarkers.push(m);
   });
-  if(S.places.length>0){const vl=S.places.filter(p=>p.latlng).map(p=>p.latlng);if(vl.length>0)leafletMap.fitBounds(L.latLngBounds(vl),{padding:[40,40],maxZoom:10});}
+  const valid = S.places.filter(p => p.latlng).map(p => p.latlng);
+  if (valid.length > 0) leafletMap.fitBounds(L.latLngBounds(valid), {padding:[40,40],maxZoom:10});
 }
 
-function selectCat(el,cat){document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('selected'));el.classList.add('selected');S.selectedCat=cat;}
-async function addPlace(){
-  const input=document.getElementById('place-input');
-  const name=input.value.trim();if(!name)return;
-  const addBtn=document.querySelector('.add-btn');
-  addBtn.textContent='Mencari...';addBtn.disabled=true;
-  const latlng=await geocode(name);
-  const place={id:Date.now(),name,cat:S.selectedCat,done:false,latlng};
-  S.places.unshift(place);
-  input.value='';
-  saveState();renderWishlist();renderUs();
-  addBtn.textContent='Tambah';addBtn.disabled=false;
-  // Fly map to new marker
-  if(latlng&&leafletMap){leafletMap.flyTo(latlng,10,{duration:1.2});}
-  else if(!latlng){showSyncStatus('Tempat tidak ditemukan di peta','#E24B4A');setTimeout(()=>showSyncStatus(''),3000);}
+async function geocode(name) {
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1&countrycodes=id`, {headers:{'Accept-Language':'id','User-Agent':'LDTS-App/1.0'}});
+    const d = await r.json();
+    if (d && d.length > 0) return [parseFloat(d[0].lat), parseFloat(d[0].lon)];
+    const r2 = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1`, {headers:{'Accept-Language':'id','User-Agent':'LDTS-App/1.0'}});
+    const d2 = await r2.json();
+    if (d2 && d2.length > 0) return [parseFloat(d2[0].lat), parseFloat(d2[0].lon)];
+  } catch(e) {}
+  return null;
 }
-function toggleDone(id){const p=S.places.find(p=>p.id===id);if(p){p.done=!p.done;saveState();renderWishlist();}}
-function deletePlace(id){S.places=S.places.filter(p=>p.id!==id);saveState();renderWishlist();renderUs();}
 
-function renderWishlist(){
-  const list=document.getElementById('places-list');
-  if(S.places.length===0){list.innerHTML='<div style="text-align:center;padding:24px 0;color:var(--muted);font-size:13px;">Add places you both want to visit together ✦</div>';}
-  else{list.innerHTML=S.places.map(p=>`<div class="place-item"><div class="place-icon ${CAT_CLASS[p.cat]}">${CAT_EMOJI[p.cat]||'📍'}</div><div class="place-info"><div class="place-name" style="${p.done?'text-decoration:line-through;opacity:.6':''}">${p.name}</div><div class="place-meta">${({'city':'Kota','nature':'Alam','beach':'Pantai','culture':'Budaya','food':'Kuliner'}[p.cat]||p.cat)} · ${p.done?'sudah dikunjungi':'mau ke sini'}</div></div><div class="place-actions">${p.done?'<span class="done-badge">✓ Selesai</span>':''}<button class="check-btn ${p.done?'done':''}" onclick="toggleDone(${p.id})"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="${p.done?'#0F6E56':'#8C7B8E'}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="del-btn" onclick="deletePlace(${p.id})">×</button></div></div>`).join('');}
+// ── Wishlist ───────────────────────────────────────────
+function selectCat(el, cat) {
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected'); S.selectedCat = cat;
+}
+
+async function addPlace() {
+  const input = document.getElementById('place-input');
+  const name = input.value.trim(); if (!name) return;
+  const addBtn = document.querySelector('.add-btn');
+  addBtn.textContent = 'Mencari...'; addBtn.disabled = true;
+  const latlng = await geocode(name);
+  S.places.unshift({id: Date.now(), name, cat: S.selectedCat, done: false, latlng});
+  input.value = '';
+  saveState(); renderWishlist(); renderUs();
+  addBtn.textContent = 'Tambah'; addBtn.disabled = false;
+  if (latlng && leafletMap) leafletMap.flyTo(latlng, 10, {duration:1.2});
+  else if (!latlng) { showSyncStatus('Tempat tidak ditemukan di peta', '#C4607A'); setTimeout(() => showSyncStatus(''), 3000); }
+}
+
+function toggleDone(id) { const p = S.places.find(p => p.id === id); if (p) { p.done = !p.done; saveState(); renderWishlist(); } }
+function deletePlace(id) { S.places = S.places.filter(p => p.id !== id); saveState(); renderWishlist(); renderUs(); }
+
+function renderWishlist() {
+  const list = document.getElementById('places-list');
+  if (S.places.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:28px 0;color:var(--ink-light);font-size:13px;font-weight:500;">Tambah tempat yang ingin kalian kunjungi bersama ✦</div>';
+  } else {
+    list.innerHTML = S.places.map(p => `
+      <div class="place-item">
+        <div class="place-icon ${p.cat}">${CAT_EMOJI[p.cat] || '📍'}</div>
+        <div class="place-info">
+          <div class="place-name" style="${p.done ? 'text-decoration:line-through;opacity:.5' : ''}">${p.name}</div>
+          <div class="place-meta">${CAT_LABEL[p.cat] || p.cat} · ${p.done ? 'sudah dikunjungi' : 'mau ke sini'}</div>
+        </div>
+        <div class="place-actions">
+          ${p.done ? '<span class="done-badge">✓ Selesai</span>' : ''}
+          <button class="check-btn ${p.done ? 'done' : ''}" onclick="toggleDone(${p.id})">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="${p.done ? '#3D6B56' : '#A394A8'}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="del-btn" onclick="deletePlace(${p.id})">×</button>
+        </div>
+      </div>`).join('');
+  }
   renderLeafletMarkers();
 }
 
-function renderArchive(){
-  const body=document.getElementById('archive-body');const empty=document.getElementById('archive-empty');const answered=S.archive.filter(a=>a.myAns);
-  if(answered.length===0){if(empty)empty.style.display='block';body.querySelectorAll('.archive-item').forEach(el=>el.remove());return;}
-  if(empty)empty.style.display='none';body.querySelectorAll('.archive-item').forEach(el=>el.remove());
-  answered.forEach(a=>{const el=document.createElement('div');el.className='archive-item';el.innerHTML=`<div class="archive-q"><div class="archive-day">${a.date||''}</div><div class="archive-qtext">"${a.q}"</div></div><div class="archive-answers"><div class="archive-ans"><div class="archive-who">Bobby</div><div class="archive-atext">${a.myAns}</div></div><div class="archive-ans"><div class="archive-who">Yuddit</div><div class="archive-atext" style="color:var(--muted);font-style:italic">${a.herAns||'Waiting for her answer...'}</div></div></div>`;body.appendChild(el);});
+// ── Archive ────────────────────────────────────────────
+function renderArchive() {
+  const body = document.getElementById('archive-body');
+  const empty = document.getElementById('archive-empty');
+  const answered = S.archive.filter(a => a.myAns);
+  if (answered.length === 0) { if (empty) empty.style.display = 'block'; body.querySelectorAll('.archive-item').forEach(el => el.remove()); return; }
+  if (empty) empty.style.display = 'none';
+  body.querySelectorAll('.archive-item').forEach(el => el.remove());
+  answered.forEach(a => {
+    const el = document.createElement('div');
+    el.className = 'archive-item';
+    el.innerHTML = `
+      <div class="archive-item-accent"></div>
+      <div class="archive-q">
+        <div class="archive-day">${a.date || ''}</div>
+        <div class="archive-qtext">\u201C${a.q}\u201D</div>
+      </div>
+      <div class="archive-answers">
+        <div class="archive-ans">
+          <div class="archive-who">Bobby</div>
+          <div class="archive-atext">${a.myAns}</div>
+        </div>
+        <div class="archive-ans">
+          <div class="archive-who">Yuddit</div>
+          <div class="archive-atext" style="${!a.herAns ? 'color:var(--ink-light);font-style:italic' : ''}">${a.herAns || 'Menunggu jawabannya...'}</div>
+        </div>
+      </div>`;
+    body.appendChild(el);
+  });
 }
 
-function addMemory(){const text=document.getElementById('memory-input').value.trim();if(!text)return;S.memories.unshift({text,date:new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})});document.getElementById('memory-input').value='';saveState();renderUs();}
-function renderUs(){
-  document.getElementById('stat-qs').textContent=S.archive.filter(a=>a.myAns).length;document.getElementById('stat-places').textContent=S.places.length;
-  const mem=document.getElementById('us-memories');
-  if(S.memories.length===0){mem.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0;">Tambah kenangan pertamamu di atas ✦</div>';}
-  else{mem.innerHTML=S.memories.map(m=>`<div class="memory-item"><div class="memory-dot"></div><div><div class="memory-date">${m.date}</div><div class="memory-text">${m.text}</div></div></div>`).join('');}
+// ── Us ─────────────────────────────────────────────────
+function addMemory() {
+  const text = document.getElementById('memory-input').value.trim();
+  if (!text) return;
+  S.memories.unshift({text, date: new Date().toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'})});
+  document.getElementById('memory-input').value = '';
+  saveState(); renderUs();
+}
+
+function renderUs() {
+  document.getElementById('stat-qs').textContent = S.archive.filter(a => a.myAns).length;
+  document.getElementById('stat-places').textContent = S.places.length;
+  const mem = document.getElementById('us-memories');
+  if (S.memories.length === 0) {
+    mem.innerHTML = '<div style="font-size:13px;color:var(--ink-light);padding:8px 0;font-weight:500;">Catat momen pertamamu di atas ✦</div>';
+  } else {
+    mem.innerHTML = S.memories.map(m => `
+      <div class="memory-item">
+        <div class="memory-dot"></div>
+        <div>
+          <div class="memory-date">${m.date}</div>
+          <div class="memory-text">${m.text}</div>
+        </div>
+      </div>`).join('');
+  }
 }
 
 init();
