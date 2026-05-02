@@ -120,6 +120,8 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
 .q-text{font-family:'Lora',serif;font-size:15px;color:var(--ink);line-height:1.65;margin-bottom:10px;font-style:italic;}
 .q-hint{font-size:11px;color:var(--ink-light);display:flex;align-items:center;gap:5px;font-weight:500;}
 
+
+
 /* Loading skeleton */
 .q-skeleton{background:linear-gradient(90deg,var(--warm) 25%,var(--warm-dark) 50%,var(--warm) 75%);background-size:200% 100%;animation:shimmer 1.6s infinite;border-radius:6px;margin-bottom:8px;}
 .q-skeleton.long{width:92%;height:16px;}
@@ -554,22 +556,45 @@ function todayKey() {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-// ── Gemini AI Daily Question ───────────────────────────
-// Flow:
-//   1. Check localStorage cache (instant, avoids any network call)
-//   2. Check JSONBin cloud — if today's question already stored by the other person, use it
-//   3. If neither exists → this device is first → call Gemini → save to JSONBin
-//   4. On any failure → deterministic fallback from static list
+// ── Midnight auto-reset ────────────────────────────────
+function scheduleMidnightReset() {
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setHours(24, 0, 0, 0); // next midnight
+  const msUntilMidnight = midnight - now;
+  setTimeout(() => {
+    // Clear today's (now yesterday's) cached question and answered state
+    const prevKey = todayKey();
+    localStorage.removeItem(`ldts_q_${prevKey}`);
+    S.answered = false; S.answer = ''; S.answeredDate = null;
+    S.todayQuestion = null; S.todayQuestionDate = null;
+    saveState();
+    // Reset UI
+    document.getElementById('q-loading').style.display = 'block';
+    document.getElementById('q-text').style.display = 'none';
+    document.getElementById('q-hint').style.display = 'none';
+    document.getElementById('answered-wrap').style.display = 'none';
+    document.getElementById('q-input-area').style.display = 'block';
+    document.getElementById('q-textarea').value = '';
+    document.getElementById('q-textarea').disabled = true;
+    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('submit-btn').textContent = 'Memuat pertanyaan...';
+    // Fetch new question for the new day then reschedule
+    fetchDailyQuestion().then(showQuestion);
+    scheduleMidnightReset();
+  }, msUntilMidnight);
+}
 
+// ── Gemini AI Daily Question ───────────────────────────
 async function fetchDailyQuestion() {
   const key = todayKey();
   const cacheKey = `ldts_q_${key}`;
 
-  // 1. Local cache hit — fastest path, no network
+  // 1. Local cache hit
   const cached = localStorage.getItem(cacheKey);
   if (cached) return cached;
 
-  // 2. Check JSONBin cloud — maybe the other person already generated today's question
+  // 2. Check JSONBin cloud — maybe other person already generated today's question
   try {
     const r = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, {
       headers: { 'X-Master-Key': JBIN_KEY }
@@ -579,32 +604,33 @@ async function fetchDailyQuestion() {
       const cloudQ = d.record?.todayQuestion;
       const cloudDate = d.record?.todayQuestionDate;
       if (cloudQ && cloudDate === key) {
-        // Other person already generated it — use theirs
         localStorage.setItem(cacheKey, cloudQ);
         S.todayQuestion = cloudQ;
         S.todayQuestionDate = key;
         return cloudQ;
       }
     }
-  } catch(e) { /* network issue — fall through to generate */ }
+  } catch(e) { /* fall through */ }
 
-  // 3. Nobody has generated today's question yet — this device is first
-  //    Call Gemini, then save result to JSONBin so the other person gets the same one
+  // 3. Nobody generated yet — call Gemini
   const GEMINI_KEY = 'AIzaSyBcFkTh9D19cAMETnExa95pZwsf55tpfzQ';
 
-  const prompt = `Kamu sedang membuat pertanyaan harian untuk aplikasi bernama LDTS milik Bobby (di Semarang) dan Yuddit (di Bogor), Indonesia. Mereka sedang dalam fase "talking stage" — yaitu dua orang yang saling tertarik dan sedang dalam proses saling mengenal lebih dalam, belum resmi pacaran.
+  const prompt = `Kamu sedang membuat pertanyaan harian untuk aplikasi bernama LDTS milik Bobby (di Semarang) dan Yuddit (di Bogor), Indonesia. Mereka sedang dalam fase "talking stage" — dua orang yang saling tertarik dan sedang dalam proses saling mengenal lebih dalam, belum resmi pacaran.
 
 Tanggal hari ini: ${key}
 
 Buatlah SATU pertanyaan yang:
 - Relevan dengan fase talking stage — bisa tentang perasaan awal, chemistry, kebiasaan saat suka sama seseorang, atau ekspektasi hubungan
-- Terasa intim tapi tidak terlalu berat — bisa dijawab dengan jujur tanpa canggung
-- Natural dan percakapan sehari-hari dalam Bahasa Indonesia gaul yang hangat (bukan formal)
-- Tidak klise atau terlalu generik
-- Variatif — jangan selalu mulai dengan "Apa" atau "Kalau", coba variasikan struktur kalimat
+- Terasa intim dan personal tapi tidak terlalu berat — bisa dijawab dengan jujur tanpa canggung
+- Gunakan kata "Saya" — JANGAN gunakan "Aku" atau "Ku" dalam pertanyaan
+- Bahasa Indonesia gaul yang hangat dan natural, bukan formal dan bukan lebay
+- HINDARI pertanyaan yang klise, cheesy, cringe, atau terlalu romantis berlebihan — jangan tanya soal "bintang di langit", "mimpi bareng", "kamu adalah segalanya", atau ungkapan puitis murahan
+- Pertanyaan yang relatable, sedikit witty, atau ngena secara psikologis jauh lebih baik daripada yang manis-manisan
+- Variatif strukturnya — jangan selalu mulai dengan "Apa" atau "Kalau"
 - Satu kalimat saja, diakhiri tanda tanya
 
-Contoh nada yang tepat: "Seberapa sering kamu cek HP cuma buat lihat ada pesan dari orang tertentu?" atau "Hal kecil apa yang dilakukan seseorang bisa langsung bikin kamu senyum tanpa alasan jelas?"
+Contoh nada TEPAT: "Seberapa sering kamu cek HP cuma buat lihat ada pesan dari orang tertentu?" atau "Hal kecil apa yang dilakukan seseorang bisa langsung bikin kamu senyum tanpa alasan jelas?"
+Contoh nada yang HARUS DIHINDARI: "Bintang mana yang menurutmu paling indah?" atau "Kalau kamu jadi hujan, mau turun di mana?" atau "Saya ingin selalu ada untukmu, kamu gimana?"
 
 Kembalikan HANYA teks pertanyaannya saja. Tanpa tanda kutip, tanpa penjelasan, tanpa angka, tanpa apapun lainnya.`;
 
@@ -616,7 +642,7 @@ Kembalikan HANYA teks pertanyaannya saja. Tanpa tanda kutip, tanpa penjelasan, t
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 150, temperature: 1.0 }
+          generationConfig: { maxOutputTokens: 150, temperature: 1.1 }
         })
       }
     );
@@ -625,23 +651,16 @@ Kembalikan HANYA teks pertanyaannya saja. Tanpa tanda kutip, tanpa penjelasan, t
     const question = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
     if (!question) throw new Error('Empty response');
 
-    // Cache locally
     localStorage.setItem(cacheKey, question);
-
-    // Save to JSONBin so the second person gets the same question
     S.todayQuestion = question;
     S.todayQuestionDate = key;
-    saveState(); // this triggers cloudSave which writes to JSONBin
-
+    saveState();
     return question;
 
   } catch (e) {
-    // 4. Full fallback — deterministic pick based on date
     console.warn('Gemini fallback:', e);
-    const dayNum = parseInt(key.replace(/-/g, '')) % FALLBACK_QUESTIONS.length;
-    const fallback = FALLBACK_QUESTIONS[dayNum];
+    const fallback = FALLBACK_QUESTIONS[parseInt(key.replace(/-/g, '')) % FALLBACK_QUESTIONS.length];
     localStorage.setItem(cacheKey, fallback);
-    // Still save to cloud so second person gets same fallback
     S.todayQuestion = fallback;
     S.todayQuestionDate = key;
     saveState();
@@ -667,6 +686,8 @@ function showQuestion(text) {
   document.getElementById('q-date-label').textContent =
     d.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'});
 }
+
+
 
 // ── JSONBin Cloud Sync ─────────────────────────────────
 const JBIN_KEY = '$2a$10$aOMy.0xdjfpp1ly5ZZWtCuD65YDOf8msitXmJj2FDeS5XT1AQcN1y';
@@ -769,6 +790,8 @@ async function init() {
     document.getElementById('answered-wrap').style.display = 'block';
     document.getElementById('answered-bubble').textContent = S.answer;
   }
+
+  scheduleMidnightReset();
 }
 
 // ── Tab switching ──────────────────────────────────────
