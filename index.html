@@ -588,7 +588,7 @@ async function refreshQuestion() {
   localStorage.removeItem(`ldts_q_${todayKey()}`);
   S.todayQuestion = null; S.todayQuestionDate = null;
 
-  const question = await fetchDailyQuestion();
+  const question = await fetchDailyQuestion(true);
   showQuestion(question);
 }
 
@@ -622,33 +622,37 @@ function scheduleMidnightReset() {
 }
 
 // ── Gemini AI Daily Question ───────────────────────────
-async function fetchDailyQuestion() {
+async function fetchDailyQuestion(forceNew = false) {
   const key = todayKey();
   const cacheKey = `ldts_q_${key}`;
 
-  // 1. Local cache hit
-  const cached = localStorage.getItem(cacheKey);
-  if (cached) return cached;
+  // 1. Local cache hit (skip if forceNew)
+  if (!forceNew) {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) return cached;
+  }
 
-  // 2. Check JSONBin cloud — maybe other person already generated today's question
-  try {
-    const r = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, {
-      headers: { 'X-Master-Key': JBIN_KEY }
-    });
-    if (r.ok) {
-      const d = await r.json();
-      const cloudQ = d.record?.todayQuestion;
-      const cloudDate = d.record?.todayQuestionDate;
-      if (cloudQ && cloudDate === key) {
-        localStorage.setItem(cacheKey, cloudQ);
-        S.todayQuestion = cloudQ;
-        S.todayQuestionDate = key;
-        return cloudQ;
+  // 2. Check JSONBin cloud (skip if forceNew — we want fresh from Gemini)
+  if (!forceNew) {
+    try {
+      const r = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, {
+        headers: { 'X-Master-Key': JBIN_KEY }
+      });
+      if (r.ok) {
+        const d = await r.json();
+        const cloudQ = d.record?.todayQuestion;
+        const cloudDate = d.record?.todayQuestionDate;
+        if (cloudQ && cloudDate === key) {
+          localStorage.setItem(cacheKey, cloudQ);
+          S.todayQuestion = cloudQ;
+          S.todayQuestionDate = key;
+          return cloudQ;
+        }
       }
-    }
-  } catch(e) { /* fall through */ }
+    } catch(e) { /* fall through */ }
+  }
 
-  // 3. Nobody generated yet — call Gemini
+  // 3. Call Gemini directly (forceNew = true means skip cache/cloud, go straight to Gemini)
   const GEMINI_KEY = 'AIzaSyBcFkTh9D19cAMETnExa95pZwsf55tpfzQ';
 
   const prompt = `Kamu sedang membuat pertanyaan harian untuk aplikasi bernama LDTS milik Bobby (di Semarang) dan Yuddit (di Bogor), Indonesia. Mereka sedang dalam fase "talking stage" — dua orang yang saling tertarik dan sedang dalam proses saling mengenal lebih dalam, belum resmi pacaran.
@@ -682,7 +686,11 @@ Kembalikan HANYA teks pertanyaannya saja. Tanpa tanda kutip, tanpa penjelasan, t
         })
       }
     );
-    if (!response.ok) throw new Error('API error ' + response.status);
+    if (!response.ok) {
+      const errBody = await response.text();
+      console.warn('Gemini error', response.status, errBody);
+      throw new Error('API error ' + response.status);
+    }
     const data = await response.json();
     const question = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
     if (!question) throw new Error('Empty response');
@@ -690,12 +698,15 @@ Kembalikan HANYA teks pertanyaannya saja. Tanpa tanda kutip, tanpa penjelasan, t
     localStorage.setItem(cacheKey, question);
     S.todayQuestion = question;
     S.todayQuestionDate = key;
-    saveState();
+    saveState(); // this pushes to JSONBin so Yuddit gets the same question
     return question;
 
   } catch (e) {
     console.warn('Gemini fallback:', e);
-    const fallback = FALLBACK_QUESTIONS[parseInt(key.replace(/-/g, '')) % FALLBACK_QUESTIONS.length];
+    const idx = forceNew
+      ? Math.floor(Math.random() * FALLBACK_QUESTIONS.length)
+      : parseInt(key.replace(/-/g, '')) % FALLBACK_QUESTIONS.length;
+    const fallback = FALLBACK_QUESTIONS[idx];
     localStorage.setItem(cacheKey, fallback);
     S.todayQuestion = fallback;
     S.todayQuestionDate = key;
@@ -786,6 +797,30 @@ async function cloudSave() {
 function loadState() { try { const s = localStorage.getItem('ldts_v2'); if (s) Object.assign(S, JSON.parse(s)); } catch(e) {} }
 function saveState() { clearTimeout(syncTimer); syncTimer = setTimeout(cloudSave, 600); }
 
+// ── Periodic question sync (keep both devices in sync) ─
+// Runs every 30s — if the other person refreshed, this picks it up
+function startQuestionSyncCheck() {
+  setInterval(async () => {
+    if (S.answered) return; // already answered — no point syncing question
+    const key = todayKey();
+    try {
+      const r = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, {
+        headers: { 'X-Master-Key': JBIN_KEY }
+      });
+      if (!r.ok) return;
+      const d = await r.json();
+      const cloudQ = d.record?.todayQuestion;
+      const cloudDate = d.record?.todayQuestionDate;
+      if (cloudQ && cloudDate === key && cloudQ !== S.todayQuestion) {
+        // Other person refreshed — update to their new question
+        S.todayQuestion = cloudQ;
+        localStorage.setItem(`ldts_q_${key}`, cloudQ);
+        showQuestion(cloudQ);
+      }
+    } catch(e) { /* silent fail */ }
+  }, 30000);
+}
+
 // ── Init ───────────────────────────────────────────────
 async function init() {
   loadState();
@@ -833,6 +868,7 @@ async function init() {
   }
 
   scheduleMidnightReset();
+  startQuestionSyncCheck();
 }
 
 // ── Tab switching ──────────────────────────────────────
