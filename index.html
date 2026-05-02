@@ -122,6 +122,14 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
 
 
 
+/* Refresh button */
+.q-refresh-btn{background:transparent;border:none;cursor:pointer;color:var(--ink-light);padding:3px;border-radius:6px;display:flex;align-items:center;transition:color 0.15s;}
+.q-refresh-btn:hover{color:var(--rose-deep);}
+.q-refresh-btn svg{transition:transform 0.3s;}
+.q-refresh-btn.spinning svg{animation:spin 0.7s linear infinite;}
+.q-refresh-btn:disabled{opacity:0.3;cursor:not-allowed;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
 /* Loading skeleton */
 .q-skeleton{background:linear-gradient(90deg,var(--warm) 25%,var(--warm-dark) 50%,var(--warm) 75%);background-size:200% 100%;animation:shimmer 1.6s infinite;border-radius:6px;margin-bottom:8px;}
 .q-skeleton.long{width:92%;height:16px;}
@@ -359,6 +367,12 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
             <div class="q-top">
               <div class="q-day-row">
                 <span class="q-day-label" id="q-date-label">—</span>
+                <button class="q-refresh-btn" id="q-refresh-btn" onclick="refreshQuestion()" title="Ganti pertanyaan" disabled>
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M12.5 2.5A6 6 0 1 0 13 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M13 2.5V5.5H10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
               </div>
               <div id="q-loading">
                 <div class="q-skeleton long"></div>
@@ -556,6 +570,28 @@ function todayKey() {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
+// ── Refresh question (only before answering) ──────────
+async function refreshQuestion() {
+  if (S.answered) return;
+  const refreshBtn = document.getElementById('q-refresh-btn');
+  refreshBtn.disabled = true;
+  refreshBtn.classList.add('spinning');
+
+  document.getElementById('q-loading').style.display = 'block';
+  document.getElementById('q-text').style.display = 'none';
+  document.getElementById('q-hint').style.display = 'none';
+  document.getElementById('q-textarea').value = '';
+  document.getElementById('q-textarea').disabled = true;
+  document.getElementById('submit-btn').disabled = true;
+  document.getElementById('submit-btn').textContent = 'Memuat pertanyaan...';
+
+  localStorage.removeItem(`ldts_q_${todayKey()}`);
+  S.todayQuestion = null; S.todayQuestionDate = null;
+
+  const question = await fetchDailyQuestion();
+  showQuestion(question);
+}
+
 // ── Midnight auto-reset ────────────────────────────────
 function scheduleMidnightReset() {
   const now = new Date();
@@ -682,6 +718,9 @@ function showQuestion(text) {
   btn.disabled = false;
   btn.textContent = 'Kunci jawaban 🔒';
 
+  const refreshBtn = document.getElementById('q-refresh-btn');
+  if (refreshBtn) { refreshBtn.disabled = false; refreshBtn.classList.remove('spinning'); }
+
   const d = new Date();
   document.getElementById('q-date-label').textContent =
     d.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'});
@@ -764,6 +803,7 @@ async function init() {
     document.getElementById('q-input-area').style.display = 'none';
     document.getElementById('answered-wrap').style.display = 'block';
     document.getElementById('answered-bubble').textContent = S.answer;
+    const rb = document.getElementById('q-refresh-btn'); if (rb) rb.style.display = 'none';
   }
 
   if (S.meetup) {
@@ -789,6 +829,7 @@ async function init() {
     document.getElementById('q-input-area').style.display = 'none';
     document.getElementById('answered-wrap').style.display = 'block';
     document.getElementById('answered-bubble').textContent = S.answer;
+    const rb = document.getElementById('q-refresh-btn'); if (rb) rb.style.display = 'none';
   }
 
   scheduleMidnightReset();
@@ -821,6 +862,7 @@ function submitAnswer() {
   document.getElementById('q-input-area').style.display = 'none';
   document.getElementById('answered-wrap').style.display = 'block';
   document.getElementById('answered-bubble').textContent = val;
+  const rb = document.getElementById('q-refresh-btn'); if (rb) rb.style.display = 'none';
   renderArchive(); renderUs();
 }
 
@@ -839,6 +881,8 @@ function nextQuestion() {
   document.getElementById('q-textarea').disabled = true;
   document.getElementById('submit-btn').disabled = true;
   document.getElementById('submit-btn').textContent = 'Memuat pertanyaan...';
+  const rb = document.getElementById('q-refresh-btn');
+  if (rb) { rb.style.display = 'flex'; rb.disabled = true; }
 
   fetchDailyQuestion().then(showQuestion);
 }
