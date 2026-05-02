@@ -97,6 +97,17 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
 /* Section label */
 .section-label{font-size:10px;color:var(--ink-light);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-bottom:10px;}
 
+/* Logo */
+.logo-lockup{display:flex;flex-direction:column;gap:1px;}
+.sidebar-logo-lockup{padding:0 22px 28px;display:flex;flex-direction:column;gap:2px;}
+.logo-mark{display:flex;align-items:baseline;gap:1px;line-height:1;}
+.logo-ld{font-family:'Lora',serif;font-size:22px;font-weight:500;color:var(--ink);letter-spacing:-0.5px;}
+.logo-ts{font-family:'Lora',serif;font-size:22px;font-weight:400;font-style:italic;color:var(--rose-deep);letter-spacing:-0.5px;}
+.logo-tagline{font-family:'Plus Jakarta Sans',sans-serif;font-size:8.5px;font-weight:500;color:var(--ink-light);letter-spacing:0.12em;text-transform:uppercase;}
+.sidebar-logo-lockup .logo-ld{font-size:26px;}
+.sidebar-logo-lockup .logo-ts{font-size:26px;}
+.sidebar-logo-lockup .logo-tagline{font-size:9px;}
+
 /* AI badge */
 .ai-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--sage-deep);background:var(--sage-light);border-radius:10px;padding:3px 9px;font-weight:600;letter-spacing:0.01em;}
 
@@ -248,7 +259,10 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
 <body>
 <div class="app" id="app">
   <aside class="desktop-sidebar">
-    <div class="sidebar-logo">LD<em>TS</em></div>
+    <div class="sidebar-logo-lockup">
+      <div class="logo-mark"><span class="logo-ld">LD</span><span class="logo-ts">TS</span></div>
+      <div class="logo-tagline">long distance, talking stage</div>
+    </div>
     <nav class="sidebar-nav">
       <button class="sidebar-btn active" data-tab="home" onclick="switchTab('home')">
         <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
@@ -275,7 +289,12 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
 
   <div class="content-area">
     <div class="header">
-      <div class="logo">LD<em>TS</em></div>
+      <div class="logo-lockup">
+        <div class="logo-mark">
+          <span class="logo-ld">LD</span><span class="logo-ts">TS</span>
+        </div>
+        <div class="logo-tagline">long distance, talking stage</div>
+      </div>
       <div class="header-right">
         <span id="sync-status-m"></span>
       </div>
@@ -332,10 +351,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
 
       <div class="home-body">
         <div>
-          <div class="section-label" style="display:flex;align-items:center;justify-content:space-between;">
-            <span>Pertanyaan hari ini</span>
-            <span class="ai-badge">✦ Gemini AI</span>
-          </div>
+          <div class="section-label">Pertanyaan hari ini</div>
           <div class="q-card">
             <div class="q-card-accent"></div>
             <div class="q-top">
