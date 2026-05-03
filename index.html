@@ -19,44 +19,54 @@
 }
 html,body{height:100%;background:#EDE5DD;}
 body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 48px;font-family:'Plus Jakarta Sans',sans-serif;}
-
 .app{background:var(--warm);width:100%;max-width:420px;min-height:100vh;border-radius:28px;overflow:hidden;border:0.5px solid var(--border-mid);display:flex;flex-direction:column;position:relative;box-shadow:0 8px 48px rgba(30,21,32,0.12);}
-
-/* Decorative top accent */
 .app::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--rose-mid),var(--gold),var(--sage));z-index:100;}
 
-.header{padding:18px 20px 14px;background:var(--warm-card);border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.logo{font-family:'Lora',serif;font-size:21px;color:var(--ink);letter-spacing:-0.3px;}
-.logo em{font-style:italic;color:var(--rose-deep);}
-.header-right{display:flex;align-items:center;gap:8px;}
-.streak-pill{font-size:10px;font-weight:600;background:linear-gradient(135deg,var(--rose),#f7d4db);color:var(--rose-deep);padding:4px 10px;border-radius:20px;letter-spacing:0.02em;}
+/* ── Identity screen ── */
+.identity-screen{position:absolute;inset:0;background:var(--warm);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 28px;gap:0;border-radius:28px;}
+.identity-screen.hidden{display:none;}
+.id-logo{font-family:'Lora',serif;font-size:32px;color:var(--ink);margin-bottom:6px;}
+.id-logo em{font-style:italic;color:var(--rose-deep);}
+.id-tagline{font-size:10px;font-weight:600;color:var(--ink-light);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:36px;}
+.id-prompt{font-family:'Lora',serif;font-size:18px;color:var(--ink);margin-bottom:24px;text-align:center;line-height:1.5;}
+.id-btns{display:flex;flex-direction:column;gap:12px;width:100%;}
+.id-btn{padding:16px;border-radius:16px;border:0.5px solid var(--border-mid);background:var(--warm-card);font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;transition:all 0.18s;display:flex;align-items:center;gap:14px;}
+.id-btn:hover{border-color:var(--rose-mid);background:linear-gradient(135deg,#fff8fa,#fff3f5);}
+.id-btn .id-avatar{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.id-btn.bobby .id-avatar{background:#EEE9F6;}
+.id-btn.yuddit .id-avatar{background:linear-gradient(135deg,#fff0f3,#fde8ed);}
+.id-btn-text{display:flex;flex-direction:column;gap:2px;text-align:left;}
+.id-btn-name{font-size:15px;font-weight:600;color:var(--ink);}
+.id-btn-city{font-size:11px;color:var(--ink-light);font-weight:500;}
 
+/* ── Header & nav ── */
+.header{padding:18px 20px 14px;background:var(--warm-card);border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.header-right{display:flex;align-items:center;gap:8px;}
 .tab-nav{display:flex;background:var(--warm-card);border-top:0.5px solid var(--border);flex-shrink:0;order:99;position:sticky;bottom:0;z-index:20;}
 .tab-btn{flex:1;padding:11px 4px 10px;text-align:center;background:transparent;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;color:var(--ink-light);cursor:pointer;transition:color 0.15s;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:500;}
 .tab-btn.active{color:var(--rose-deep);}
 .tab-btn svg{width:17px;height:17px;flex-shrink:0;}
 .tab-btn .tab-dot{width:4px;height:4px;border-radius:50%;background:var(--rose-deep);margin-top:1px;opacity:0;transition:opacity 0.2s;}
 .tab-btn.active .tab-dot{opacity:1;}
-
 .page{display:none;flex:1;overflow-y:auto;}
 .page.active{display:block;}
 .desktop-sidebar{display:none;}
 .content-area{display:contents;}
 
+/* ── Desktop layout ── */
 @media(min-width:768px){
   html,body{height:100%;overflow:hidden;padding:0;}
   body{align-items:stretch;}
   .app{max-width:100%;width:100%;height:100vh;min-height:100vh;max-height:100vh;border-radius:0;flex-direction:row;overflow:hidden;border:none;box-shadow:none;}
   .app::before{width:3px;height:100%;top:0;left:0;right:auto;background:linear-gradient(180deg,var(--rose-mid),var(--gold),var(--sage));}
+  .identity-screen{border-radius:0;}
   .desktop-sidebar{display:flex;flex-direction:column;width:200px;min-width:200px;background:var(--warm-card);border-right:0.5px solid var(--border);padding:32px 0 24px;flex-shrink:0;}
-  .sidebar-logo{font-family:'Lora',serif;font-size:24px;color:var(--ink);letter-spacing:-0.3px;padding:0 22px 32px;}
-  .sidebar-logo em{font-style:italic;color:var(--rose-deep);}
   .sidebar-nav{display:flex;flex-direction:column;gap:3px;flex:1;padding:0 12px;}
   .sidebar-btn{display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:12px;border:none;background:transparent;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink-light);cursor:pointer;transition:all 0.15s;width:100%;text-align:left;font-weight:500;}
   .sidebar-btn svg{width:15px;height:15px;flex-shrink:0;}
   .sidebar-btn.active{background:linear-gradient(135deg,#fdf0f3,#fde8ed);color:var(--rose-deep);}
   .sidebar-btn:hover:not(.active){background:var(--warm-dark);color:var(--ink);}
-  .sidebar-footer{padding:16px 22px 0;font-size:11px;color:var(--ink-light);line-height:1.6;}
+  .sidebar-footer{padding:16px 22px 0;font-size:11px;color:var(--ink-light);line-height:1.8;}
   .sidebar-footer strong{color:var(--ink);font-weight:600;}
   .header{display:none;}
   .tab-nav{display:none;}
@@ -80,7 +90,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
   #page-archive .archive-body,#page-us .us-body{max-width:660px;width:100%;margin:0 auto;padding:28px 24px;}
 }
 
-/* Weather */
+/* ── Weather ── */
 .weather-strip{display:flex;background:var(--warm-card);border-bottom:0.5px solid var(--border);}
 .w-cell{flex:1;padding:12px 16px;display:flex;align-items:center;gap:11px;}
 .w-cell+.w-cell{border-left:0.5px solid var(--border);}
@@ -89,29 +99,23 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
 .w-temp{font-size:16px;font-weight:600;color:var(--ink);}
 .w-sky{font-size:10px;color:var(--ink-light);}
 
-/* Home map */
+/* ── Home ── */
 .home-map-row{position:relative;width:100%;height:168px;flex-shrink:0;}
 #desk-right-col{display:none;}
 .home-body{padding:18px 16px;display:flex;flex-direction:column;gap:16px;}
-
-/* Section label */
 .section-label{font-size:10px;color:var(--ink-light);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-bottom:10px;}
 
-/* Logo */
+/* ── Logo ── */
 .logo-lockup{display:flex;flex-direction:column;gap:1px;}
 .sidebar-logo-lockup{padding:0 22px 28px;display:flex;flex-direction:column;gap:2px;}
 .logo-mark{display:flex;align-items:baseline;gap:1px;line-height:1;}
 .logo-ld{font-family:'Lora',serif;font-size:22px;font-weight:500;color:var(--ink);letter-spacing:-0.5px;}
 .logo-ts{font-family:'Lora',serif;font-size:22px;font-weight:400;font-style:italic;color:var(--rose-deep);letter-spacing:-0.5px;}
 .logo-tagline{font-family:'Plus Jakarta Sans',sans-serif;font-size:8.5px;font-weight:500;color:var(--ink-light);letter-spacing:0.12em;text-transform:uppercase;}
-.sidebar-logo-lockup .logo-ld{font-size:26px;}
-.sidebar-logo-lockup .logo-ts{font-size:26px;}
+.sidebar-logo-lockup .logo-ld,.sidebar-logo-lockup .logo-ts{font-size:26px;}
 .sidebar-logo-lockup .logo-tagline{font-size:9px;}
 
-/* AI badge */
-.ai-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--sage-deep);background:var(--sage-light);border-radius:10px;padding:3px 9px;font-weight:600;letter-spacing:0.01em;}
-
-/* Question card */
+/* ── Question card ── */
 .q-card{background:var(--warm-card);border:0.5px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 2px 12px rgba(30,21,32,0.05);}
 .q-card-accent{height:2px;background:linear-gradient(90deg,var(--rose-mid),var(--gold));}
 .q-top{padding:16px 18px 14px;}
@@ -119,23 +123,16 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
 .q-day-label{font-size:11px;color:var(--rose-deep);font-weight:600;letter-spacing:0.02em;}
 .q-text{font-family:'Lora',serif;font-size:15px;color:var(--ink);line-height:1.65;margin-bottom:10px;font-style:italic;}
 .q-hint{font-size:11px;color:var(--ink-light);display:flex;align-items:center;gap:5px;font-weight:500;}
-
-
-
-/* Refresh button */
 .q-refresh-btn{background:transparent;border:none;cursor:pointer;color:var(--ink-light);padding:3px;border-radius:6px;display:flex;align-items:center;transition:color 0.15s;}
 .q-refresh-btn:hover{color:var(--rose-deep);}
 .q-refresh-btn svg{transition:transform 0.3s;}
 .q-refresh-btn.spinning svg{animation:spin 0.7s linear infinite;}
 .q-refresh-btn:disabled{opacity:0.3;cursor:not-allowed;}
 @keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
-
-/* Loading skeleton */
 .q-skeleton{background:linear-gradient(90deg,var(--warm) 25%,var(--warm-dark) 50%,var(--warm) 75%);background-size:200% 100%;animation:shimmer 1.6s infinite;border-radius:6px;margin-bottom:8px;}
 .q-skeleton.long{width:92%;height:16px;}
 .q-skeleton.med{width:72%;height:16px;margin-top:6px;}
 @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
-
 .q-divider{height:0.5px;background:var(--border);margin:0 18px;}
 .q-body{padding:14px 18px;}
 .q-textarea{width:100%;border:0.5px solid var(--border-mid);border-radius:12px;padding:11px 13px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--warm);resize:none;height:78px;outline:none;line-height:1.65;transition:border-color 0.2s;}
@@ -145,18 +142,16 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
 .submit-btn:hover{opacity:0.9;transform:translateY(-1px);}
 .submit-btn:active{transform:translateY(0);}
 .submit-btn:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
-
 .answered-wrap{padding:14px 18px;display:none;}
 .answered-label{font-size:10px;color:var(--ink-light);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:7px;}
 .answered-bubble{font-size:13px;color:var(--ink);background:linear-gradient(135deg,#fff8fa,#fff3f5);border:0.5px solid rgba(196,96,122,0.18);border-radius:12px;padding:11px 13px;line-height:1.65;margin-bottom:10px;}
 .waiting-row{font-size:11px;color:var(--ink-light);display:flex;align-items:center;gap:6px;font-weight:500;}
+.partner-answered-note{font-size:12px;color:var(--sage-deep);font-weight:600;background:var(--sage-light);border-radius:10px;padding:9px 13px;margin-top:8px;}
 .dots span{display:inline-block;width:4px;height:4px;background:var(--rose-mid);border-radius:50%;animation:blink 1.4s infinite;}
 .dots span:nth-child(2){animation-delay:.22s;}.dots span:nth-child(3){animation-delay:.44s;}
 @keyframes blink{0%,80%,100%{opacity:.18;}40%{opacity:1;}}
-.next-q-btn{margin-top:10px;width:100%;padding:10px;background:transparent;color:var(--rose-deep);border:0.5px solid var(--rose-mid);border-radius:11px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;}
-.next-q-btn:hover{background:linear-gradient(135deg,#fff0f3,#ffe8ed);}
 
-/* Countdown card */
+/* ── Countdown ── */
 .cd-card{background:var(--warm-card);border:0.5px solid var(--border);border-radius:18px;padding:16px 18px;box-shadow:0 2px 12px rgba(30,21,32,0.05);}
 .cd-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
 .cd-title{font-family:'Lora',serif;font-size:15px;color:var(--ink);}
@@ -168,7 +163,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
 .cd-num{font-family:'Lora',serif;font-size:26px;color:var(--ink);line-height:1;}
 .cd-lbl{font-size:9px;color:var(--ink-light);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
 
-/* Wishlist */
+/* ── Wishlist ── */
 .wishlist-page{display:flex;flex-direction:column;}
 #leaflet-map{width:100%;height:250px;min-height:250px;flex-shrink:0;z-index:1;}
 .leaflet-container{font-family:'Plus Jakarta Sans',sans-serif;}
@@ -205,7 +200,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
 .del-btn:hover{background:#fff3f0;border-color:#e24b4a;color:#e24b4a;}
 .done-badge{font-size:9px;padding:3px 8px;background:var(--sage-light);color:var(--sage-deep);border-radius:10px;font-weight:600;}
 
-/* Archive */
+/* ── Archive ── */
 .archive-body{padding:16px;display:flex;flex-direction:column;gap:12px;}
 .archive-item{background:var(--warm-card);border:0.5px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 1px 6px rgba(30,21,32,0.04);}
 .archive-item-accent{height:2px;background:linear-gradient(90deg,var(--rose-mid),var(--gold));}
@@ -221,7 +216,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
 .archive-empty-title{font-family:'Lora',serif;font-size:20px;color:var(--ink);margin-bottom:8px;}
 .archive-empty-sub{font-size:13px;line-height:1.6;font-weight:500;}
 
-/* Us / Profile */
+/* ── Us ── */
 .us-body{padding:18px 16px;display:flex;flex-direction:column;gap:16px;}
 .us-hero{background:var(--warm-card);border:0.5px solid var(--border);border-radius:20px;padding:24px 20px;text-align:center;position:relative;overflow:hidden;box-shadow:0 2px 16px rgba(30,21,32,0.06);}
 .us-hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at top,#fff8fa 0%,transparent 70%);pointer-events:none;}
@@ -229,7 +224,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
 .us-names{font-family:'Lora',serif;font-size:22px;color:var(--ink);margin-bottom:5px;}
 .us-names em{font-style:italic;color:var(--rose-deep);}
 .us-since{font-size:12px;color:var(--ink-light);font-weight:500;}
-.us-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px;}
+.us-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:18px;}
 .us-stat{background:var(--warm);border-radius:12px;padding:12px 8px;text-align:center;border:0.5px solid var(--border);}
 .us-stat-num{font-family:'Lora',serif;font-size:26px;color:var(--ink);}
 .us-stat-lbl{font-size:9px;color:var(--ink-light);text-transform:uppercase;letter-spacing:.06em;margin-top:3px;font-weight:600;}
@@ -245,7 +240,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
 .memory-add-btn{padding:9px 14px;background:linear-gradient(135deg,var(--rose-deep),#a84d66);color:white;border:none;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity 0.15s;}
 .memory-add-btn:hover{opacity:0.88;}
 
-/* Modal */
+/* ── Modals ── */
 .modal-backdrop{display:none;position:absolute;inset:0;background:rgba(30,21,32,0.42);border-radius:28px;z-index:50;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
 .modal-backdrop.open{display:flex;}
 .modal{background:var(--warm-card);border-radius:20px;padding:22px;width:300px;border:0.5px solid var(--border-mid);box-shadow:0 8px 40px rgba(30,21,32,0.16);}
@@ -257,17 +252,44 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
 .modal-cancel{flex:1;padding:10px;border:0.5px solid var(--border-mid);border-radius:10px;background:transparent;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink-light);cursor:pointer;font-weight:600;}
 .modal-save{flex:1;padding:10px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--rose-deep),#a84d66);color:white;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
 
-/* Scrollbar */
+/* ── Misc ── */
 .page::-webkit-scrollbar{width:3px;}
 .page::-webkit-scrollbar-track{background:transparent;}
 .page::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:2px;}
-
-/* Sync status */
 #sync-status,#sync-status-m{font-size:10px;font-weight:500;}
 </style>
 </head>
 <body>
 <div class="app" id="app">
+
+  <!-- ═══════════════════════════════════════════════════════
+       IDENTITY SCREEN — shown once on first launch per device
+       ═══════════════════════════════════════════════════════ -->
+  <div class="identity-screen" id="identity-screen">
+    <div class="id-logo">LD<em>TS</em></div>
+    <div class="id-tagline">long distance, talking stage</div>
+    <div class="id-prompt">Hei — kamu siapa?</div>
+    <div class="id-btns">
+      <button class="id-btn bobby" onclick="setIdentity('bobby')">
+        <div class="id-avatar">🎧</div>
+        <div class="id-btn-text">
+          <div class="id-btn-name">Bobby</div>
+          <div class="id-btn-city">Semarang</div>
+        </div>
+      </button>
+      <button class="id-btn yuddit" onclick="setIdentity('yuddit')">
+        <div class="id-avatar">🌸</div>
+        <div class="id-btn-text">
+          <div class="id-btn-name">Yuddit</div>
+          <div class="id-btn-city">Bogor</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       DESKTOP SIDEBAR
+       ═══════════════════════════════════════ -->
   <aside class="desktop-sidebar">
     <div class="sidebar-logo-lockup">
       <div class="logo-mark"><span class="logo-ld">LD</span><span class="logo-ts">TS</span></div>
@@ -293,47 +315,43 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
     </nav>
     <div class="sidebar-footer">
       <strong>Bobby &amp; Yuddit</strong> ✦<br>
-      <span id="sync-status" style=""></span>
+      Masuk sebagai: <strong id="sidebar-who">—</strong><br>
+      <span id="sync-status"></span>
     </div>
   </aside>
 
+  <!-- ═══════════════════════════════════════
+       MAIN CONTENT
+       ═══════════════════════════════════════ -->
   <div class="content-area">
     <div class="header">
       <div class="logo-lockup">
-        <div class="logo-mark">
-          <span class="logo-ld">LD</span><span class="logo-ts">TS</span>
-        </div>
+        <div class="logo-mark"><span class="logo-ld">LD</span><span class="logo-ts">TS</span></div>
         <div class="logo-tagline">long distance, talking stage</div>
       </div>
-      <div class="header-right">
-        <span id="sync-status-m"></span>
-      </div>
+      <div class="header-right"><span id="sync-status-m"></span></div>
     </div>
 
     <nav class="tab-nav">
       <button class="tab-btn active" data-tab="home" onclick="switchTab('home')">
         <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        Beranda
-        <div class="tab-dot"></div>
+        Beranda<div class="tab-dot"></div>
       </button>
       <button class="tab-btn" data-tab="wishlist" onclick="switchTab('wishlist')">
         <svg viewBox="0 0 16 16" fill="none"><path d="M8 2C5.8 2 4 3.8 4 6c0 3.2 4 8 4 8s4-4.8 4-8c0-2.2-1.8-4-4-4z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
-        Wishlist
-        <div class="tab-dot"></div>
+        Wishlist<div class="tab-dot"></div>
       </button>
       <button class="tab-btn" data-tab="archive" onclick="switchTab('archive')">
         <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        Arsip
-        <div class="tab-dot"></div>
+        Arsip<div class="tab-dot"></div>
       </button>
       <button class="tab-btn" data-tab="us" onclick="switchTab('us')">
         <svg viewBox="0 0 16 16" fill="none"><path d="M8 13s-5-3.2-5-7a3 3 0 0 1 5-2.24A3 3 0 0 1 13 6c0 3.8-5 7-5 7z" stroke="currentColor" stroke-width="1.3"/></svg>
-        Kita
-        <div class="tab-dot"></div>
+        Kita<div class="tab-dot"></div>
       </button>
     </nav>
 
-    <!-- HOME PAGE -->
+    <!-- ── HOME PAGE ── -->
     <div class="page active" id="page-home">
       <div class="home-map-row">
         <div id="home-map" style="width:100%;height:168px;z-index:1;"></div>
@@ -374,10 +392,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
                   </svg>
                 </button>
               </div>
-              <div id="q-loading">
-                <div class="q-skeleton long"></div>
-                <div class="q-skeleton med"></div>
-              </div>
+              <div id="q-loading"><div class="q-skeleton long"></div><div class="q-skeleton med"></div></div>
               <div class="q-text" id="q-text" style="display:none;"></div>
               <div class="q-hint" id="q-hint" style="display:none;">
                 <svg width="10" height="12" viewBox="0 0 10 12" fill="none"><rect x="1" y="5" width="8" height="7" rx="1.5" stroke="#A394A8" stroke-width="1.2"/><path d="M3 5V3.5a2 2 0 0 1 4 0V5" stroke="#A394A8" stroke-width="1.2"/></svg>
@@ -392,22 +407,17 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
             <div class="answered-wrap" id="answered-wrap">
               <div class="answered-label">Jawabanmu</div>
               <div class="answered-bubble" id="answered-bubble"></div>
-              <div class="waiting-row">Menunggu Yuddit <div class="dots"><span></span><span></span><span></span></div></div>
-              <button class="next-q-btn" onclick="nextQuestion()">Pertanyaan baru →</button>
+              <div id="partner-status"></div>
             </div>
           </div>
         </div>
 
-        <!-- Mobile: countdown -->
         <div class="mobile-only">
           <div class="section-label">Pertemuan berikutnya</div>
           <div class="cd-card">
             <div class="cd-header">
-              <div>
-                <div class="cd-title" id="cd-title">Atur pertemuan</div>
-                <div class="cd-sub" id="cd-sub">ketuk edit untuk tambah tanggal →</div>
-              </div>
-              <button class="edit-btn" onclick="openModal()">Edit</button>
+              <div><div class="cd-title" id="cd-title">Atur pertemuan</div><div class="cd-sub" id="cd-sub">ketuk edit untuk tambah tanggal →</div></div>
+              <button class="edit-btn" onclick="openMeetupModal()">Edit</button>
             </div>
             <div class="cd-nums">
               <div class="cd-box"><div class="cd-num" id="cd-d">—</div><div class="cd-lbl">hari</div></div>
@@ -419,16 +429,12 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
         </div>
       </div>
 
-      <!-- Desktop right column -->
       <div id="desk-right-col">
         <div class="section-label">Pertemuan berikutnya</div>
         <div class="cd-card">
           <div class="cd-header">
-            <div>
-              <div class="cd-title" id="cd-title-d">Atur pertemuan</div>
-              <div class="cd-sub" id="cd-sub-d">ketuk edit untuk tambah tanggal →</div>
-            </div>
-            <button class="edit-btn" onclick="openModal()">Edit</button>
+            <div><div class="cd-title" id="cd-title-d">Atur pertemuan</div><div class="cd-sub" id="cd-sub-d">ketuk edit untuk tambah tanggal →</div></div>
+            <button class="edit-btn" onclick="openMeetupModal()">Edit</button>
           </div>
           <div class="cd-nums">
             <div class="cd-box"><div class="cd-num" id="cd-d-d">—</div><div class="cd-lbl">hari</div></div>
@@ -443,9 +449,9 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
           <div style="font-size:12px;color:var(--ink-light);font-weight:500;line-height:1.6;">Jauh di mata, dekat di hati ✦</div>
         </div>
       </div>
-    </div><!-- /page-home -->
+    </div>
 
-    <!-- WISHLIST PAGE -->
+    <!-- ── WISHLIST PAGE ── -->
     <div class="page wishlist-page" id="page-wishlist">
       <div class="wishlist-map-col" style="position:relative;">
         <div id="leaflet-map"></div>
@@ -473,7 +479,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
       </div>
     </div>
 
-    <!-- ARCHIVE PAGE -->
+    <!-- ── ARCHIVE PAGE ── -->
     <div class="page" id="page-archive">
       <div class="archive-body" id="archive-body">
         <div class="archive-empty" id="archive-empty">
@@ -483,7 +489,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
       </div>
     </div>
 
-    <!-- US PAGE -->
+    <!-- ── US PAGE ── -->
     <div class="page" id="page-us">
       <div class="us-body">
         <div class="us-hero">
@@ -492,17 +498,11 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
           <div class="us-names">Bobby &amp; <em>Yuddit</em></div>
           <div class="us-since" id="us-since">Mulai hari ini</div>
           <div class="us-stats">
-            <div class="us-stat">
-              <div class="us-stat-num" id="stat-qs">0</div>
-              <div class="us-stat-lbl">Pertanyaan</div>
-            </div>
-            <div class="us-stat">
-              <div class="us-stat-num" id="stat-places">0</div>
-              <div class="us-stat-lbl">Tempat</div>
-            </div>
+            <div class="us-stat"><div class="us-stat-num" id="stat-days">0</div><div class="us-stat-lbl">Hari</div></div>
+            <div class="us-stat"><div class="us-stat-num" id="stat-qs">0</div><div class="us-stat-lbl">Pertanyaan</div></div>
+            <div class="us-stat"><div class="us-stat-num" id="stat-places">0</div><div class="us-stat-lbl">Tempat</div></div>
           </div>
         </div>
-
         <div>
           <div class="section-label" style="margin-bottom:10px;">Kenangan</div>
           <div class="add-memory-card" style="margin-bottom:10px;">
@@ -516,234 +516,117 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
       </div>
     </div>
 
-    <!-- MEETUP MODAL -->
-    <div class="modal-backdrop" id="modal" onclick="if(event.target===this)closeModal()">
+    <!-- ── MEETUP MODAL ── -->
+    <div class="modal-backdrop" id="meetup-modal" onclick="if(event.target===this)closeMeetupModal()">
       <div class="modal">
         <div class="modal-title">Rencanakan pertemuan</div>
         <label>Di mana?</label>
         <input type="text" id="modal-place" placeholder="mis. Yogyakarta"/>
         <label>Kapan?</label>
         <input type="date" id="modal-date"/>
+        <label>Jadian sejak? <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opsional)</span></label>
+        <input type="date" id="modal-since"/>
         <div class="modal-btns">
-          <button class="modal-cancel" onclick="closeModal()">Batal</button>
+          <button class="modal-cancel" onclick="closeMeetupModal()">Batal</button>
           <button class="modal-save" onclick="saveMeetup()">Simpan</button>
         </div>
       </div>
     </div>
-  </div><!-- /content-area -->
+  </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ── State ──────────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════════════════
+// CONFIG
+// ═════════════════════════════════════════════════════════════════════════════
+const GEMINI_KEY = 'AIzaSyBcFkTh9D19cAMETnExa95pZwsf55tpfzQ';
+const JBIN_KEY   = '$2a$10$aOMy.0xdjfpp1ly5ZZWtCuD65YDOf8msitXmJj2FDeS5XT1AQcN1y';
+const JBIN_BASE  = 'https://api.jsonbin.io/v3/b';
+let   BIN_ID     = localStorage.getItem('ldts_bin_id') || '69f5a28536566621a817060f';
+
+// ═════════════════════════════════════════════════════════════════════════════
+// IDENTITY  — stored only in localStorage (device-local, never synced)
+// 'bobby' | 'yuddit' | null (not yet chosen)
+// ═════════════════════════════════════════════════════════════════════════════
+let WHO = localStorage.getItem('ldts_who'); // 'bobby' | 'yuddit' | null
+
+function partner() { return WHO === 'bobby' ? 'yuddit' : 'bobby'; }
+function partnerName() { return WHO === 'bobby' ? 'Yuddit' : 'Bobby'; }
+function myName()    { return WHO === 'bobby' ? 'Bobby'  : 'Yuddit'; }
+
+function setIdentity(who) {
+  WHO = who;
+  localStorage.setItem('ldts_who', who);
+  document.getElementById('identity-screen').classList.add('hidden');
+  applyIdentityUI();
+  init();
+}
+
+function applyIdentityUI() {
+  if (!WHO) return;
+  const el = document.getElementById('sidebar-who');
+  if (el) el.textContent = myName();
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// SHARED STATE  — synced via JSONBin between both devices
+// Archive entries use bobbyAns / yudditAns (not myAns/herAns)
+// Answered state is per-person: bobbyAnswered, yudditAnswered, etc.
+// ═════════════════════════════════════════════════════════════════════════════
 const S = {
-  answered: false, answer: '', answeredDate: null,
-  meetup: null, places: [], archive: [], memories: [],
-  selectedCat: 'city', todayQuestion: null, todayQuestionDate: null
+  // Per-person answered state (stored in shared cloud so partner can see)
+  bobbyAnswered:    false,
+  bobbyAnswer:      '',
+  bobbyAnsweredDate: null,
+  yudditAnswered:    false,
+  yudditAnswer:     '',
+  yudditAnsweredDate: null,
+
+  // Shared data
+  meetup:           null,
+  sinceDate:        null,   // the "jadian since" date string (YYYY-MM-DD)
+  places:           [],
+  archive:          [],     // [{dateKey, date, q, bobbyAns, yudditAns}]
+  memories:         [],
+  selectedCat:      'city',
+
+  // Daily question (shared — generated once, read by both)
+  todayQuestion:     null,
+  todayQuestionDate: null
 };
 
-// ── Talking Stage Fallback Questions ──────────────────
+// ═════════════════════════════════════════════════════════════════════════════
+// FALLBACK QUESTIONS
+// ═════════════════════════════════════════════════════════════════════════════
 const FALLBACK_QUESTIONS = [
-  "Kalau kamu bisa menghabiskan satu hari penuh sama orang yang kamu suka tanpa gangguan apapun, kamu mau ngapain?",
+  "Kalau bisa menghabiskan satu hari penuh sama orang yang kamu suka tanpa gangguan apapun, kamu mau ngapain?",
   "Hal apa yang biasanya kamu ceritain ke bestie tapi belum pernah kamu ceritain ke orang yang kamu suka?",
   "Momen apa yang pertama kali bikin kamu mikirin seseorang lebih dari yang kamu kira?",
   "Seberapa sering kamu cek HP cuma buat lihat apakah ada pesan dari orang tertentu?",
   "Tipe kencan pertama seperti apa yang menurutmu paling memorable — santai atau yang sudah direncanain matang?",
-  "Kalau lagi nunggu balasan chat, kira-kira kamu tipe yang sabar atau yang ngetik ulang pesannya berkali-kali?",
+  "Kalau lagi nunggu balasan chat, kamu tipe yang sabar atau yang ngetik ulang pesannya berkali-kali?",
   "Hal kecil apa yang dilakukan seseorang bisa langsung bikin kamu senyum tanpa alasan jelas?",
-  "Seberapa penting 'chemistry' lewat chat sebelum ketemu langsung buat kamu?",
+  "Seberapa penting chemistry lewat chat sebelum ketemu langsung buat kamu?",
   "Lagu apa yang akhir-akhir ini sering kamu dengerin, dan kenapa lagu itu yang nyangkut?",
-  "Kalau boleh jujur, pesan chat seperti apa yang paling bikin kamu deg-degan waktu menerimanya?",
+  "Pesan chat seperti apa yang paling bikin kamu deg-degan waktu menerimanya?",
   "Kamu lebih suka ngobrol panjang sampai dini hari atau quality time pendek tapi intense?",
-  "Ada nggak momen di mana kamu ngerasa seseorang 'get you' tanpa harus banyak dijelasin?",
+  "Ada nggak momen di mana kamu ngerasa seseorang benar-benar ngerti kamu tanpa harus banyak dijelasin?",
   "Hal apa yang paling kamu takutin dari proses saling mengenal seseorang secara serius?",
   "Satu hal yang pasti bikin kamu jatuh lebih dalam ke seseorang itu apa?",
-  "Kalau kamu bisa kirim satu lagu ke orang yang kamu suka malam ini tanpa perlu penjelasan, lagu apa yang kamu pilih?"
+  "Kalau bisa kirim satu lagu ke orang yang kamu suka malam ini tanpa perlu penjelasan, lagu apa yang kamu pilih?"
 ];
 
 const CAT_EMOJI = {city:'🏙',nature:'🌿',beach:'🌊',culture:'🏛',food:'🍜'};
 const CAT_LABEL = {city:'Kota',nature:'Alam',beach:'Pantai',culture:'Budaya',food:'Kuliner'};
 
-// ── Date key ───────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════════════════
+// HELPERS
+// ═════════════════════════════════════════════════════════════════════════════
 function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
-
-// ── Refresh question (only before answering) ──────────
-async function refreshQuestion() {
-  if (S.answered) return;
-  const refreshBtn = document.getElementById('q-refresh-btn');
-  refreshBtn.disabled = true;
-  refreshBtn.classList.add('spinning');
-
-  document.getElementById('q-loading').style.display = 'block';
-  document.getElementById('q-text').style.display = 'none';
-  document.getElementById('q-hint').style.display = 'none';
-  document.getElementById('q-textarea').value = '';
-  document.getElementById('q-textarea').disabled = true;
-  document.getElementById('submit-btn').disabled = true;
-  document.getElementById('submit-btn').textContent = 'Memuat pertanyaan...';
-
-  localStorage.removeItem(`ldts_q_${todayKey()}`);
-  S.todayQuestion = null; S.todayQuestionDate = null;
-
-  const question = await fetchDailyQuestion(true);
-  showQuestion(question);
-}
-
-// ── Midnight auto-reset ────────────────────────────────
-function scheduleMidnightReset() {
-  const now = new Date();
-  const midnight = new Date(now);
-  midnight.setHours(24, 0, 0, 0); // next midnight
-  const msUntilMidnight = midnight - now;
-  setTimeout(() => {
-    // Clear today's (now yesterday's) cached question and answered state
-    const prevKey = todayKey();
-    localStorage.removeItem(`ldts_q_${prevKey}`);
-    S.answered = false; S.answer = ''; S.answeredDate = null;
-    S.todayQuestion = null; S.todayQuestionDate = null;
-    saveState();
-    // Reset UI
-    document.getElementById('q-loading').style.display = 'block';
-    document.getElementById('q-text').style.display = 'none';
-    document.getElementById('q-hint').style.display = 'none';
-    document.getElementById('answered-wrap').style.display = 'none';
-    document.getElementById('q-input-area').style.display = 'block';
-    document.getElementById('q-textarea').value = '';
-    document.getElementById('q-textarea').disabled = true;
-    document.getElementById('submit-btn').disabled = true;
-    document.getElementById('submit-btn').textContent = 'Memuat pertanyaan...';
-    // Fetch new question for the new day then reschedule
-    fetchDailyQuestion().then(showQuestion);
-    scheduleMidnightReset();
-  }, msUntilMidnight);
-}
-
-// ── Gemini AI Daily Question ───────────────────────────
-async function fetchDailyQuestion(forceNew = false) {
-  const key = todayKey();
-  const cacheKey = `ldts_q_${key}`;
-
-  // 1. Local cache hit (skip if forceNew)
-  if (!forceNew) {
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) return cached;
-  }
-
-  // 2. Check JSONBin cloud (skip if forceNew — we want fresh from Gemini)
-  if (!forceNew) {
-    try {
-      const r = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, {
-        headers: { 'X-Master-Key': JBIN_KEY }
-      });
-      if (r.ok) {
-        const d = await r.json();
-        const cloudQ = d.record?.todayQuestion;
-        const cloudDate = d.record?.todayQuestionDate;
-        if (cloudQ && cloudDate === key) {
-          localStorage.setItem(cacheKey, cloudQ);
-          S.todayQuestion = cloudQ;
-          S.todayQuestionDate = key;
-          return cloudQ;
-        }
-      }
-    } catch(e) { /* fall through */ }
-  }
-
-  // 3. Call Gemini directly (forceNew = true means skip cache/cloud, go straight to Gemini)
-  const GEMINI_KEY = 'AIzaSyBcFkTh9D19cAMETnExa95pZwsf55tpfzQ';
-
-  const prompt = `Kamu sedang membuat pertanyaan harian untuk aplikasi bernama LDTS milik Bobby (di Semarang) dan Yuddit (di Bogor), Indonesia. Mereka sedang dalam fase "talking stage" — dua orang yang saling tertarik dan sedang dalam proses saling mengenal lebih dalam, belum resmi pacaran.
-
-Tanggal hari ini: ${key}
-
-Buatlah SATU pertanyaan yang:
-- Relevan dengan fase talking stage — bisa tentang perasaan awal, chemistry, kebiasaan saat suka sama seseorang, atau ekspektasi hubungan
-- Terasa intim dan personal tapi tidak terlalu berat — bisa dijawab dengan jujur tanpa canggung
-- Gunakan kata "Saya" — JANGAN gunakan "Aku" atau "Ku" dalam pertanyaan
-- Bahasa Indonesia gaul yang hangat dan natural, bukan formal dan bukan lebay
-- HINDARI pertanyaan yang klise, cheesy, cringe, atau terlalu romantis berlebihan — jangan tanya soal "bintang di langit", "mimpi bareng", "kamu adalah segalanya", atau ungkapan puitis murahan
-- Pertanyaan yang relatable, sedikit witty, atau ngena secara psikologis jauh lebih baik daripada yang manis-manisan
-- Variatif strukturnya — jangan selalu mulai dengan "Apa" atau "Kalau"
-- Satu kalimat saja, diakhiri tanda tanya
-
-Contoh nada TEPAT: "Seberapa sering kamu cek HP cuma buat lihat ada pesan dari orang tertentu?" atau "Hal kecil apa yang dilakukan seseorang bisa langsung bikin kamu senyum tanpa alasan jelas?"
-Contoh nada yang HARUS DIHINDARI: "Bintang mana yang menurutmu paling indah?" atau "Kalau kamu jadi hujan, mau turun di mana?" atau "Saya ingin selalu ada untukmu, kamu gimana?"
-
-Kembalikan HANYA teks pertanyaannya saja. Tanpa tanda kutip, tanpa penjelasan, tanpa angka, tanpa apapun lainnya.`;
-
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 150, temperature: 1.1 }
-        })
-      }
-    );
-    if (!response.ok) {
-      const errBody = await response.text();
-      console.warn('Gemini error', response.status, errBody);
-      throw new Error('API error ' + response.status);
-    }
-    const data = await response.json();
-    const question = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-    if (!question) throw new Error('Empty response');
-
-    localStorage.setItem(cacheKey, question);
-    S.todayQuestion = question;
-    S.todayQuestionDate = key;
-    saveState(); // this pushes to JSONBin so Yuddit gets the same question
-    return question;
-
-  } catch (e) {
-    console.warn('Gemini fallback:', e);
-    const idx = forceNew
-      ? Math.floor(Math.random() * FALLBACK_QUESTIONS.length)
-      : parseInt(key.replace(/-/g, '')) % FALLBACK_QUESTIONS.length;
-    const fallback = FALLBACK_QUESTIONS[idx];
-    localStorage.setItem(cacheKey, fallback);
-    S.todayQuestion = fallback;
-    S.todayQuestionDate = key;
-    saveState();
-    return fallback;
-  }
-}
-
-function showQuestion(text) {
-  document.getElementById('q-loading').style.display = 'none';
-  const qText = document.getElementById('q-text');
-  qText.style.display = 'block';
-  qText.textContent = '\u201C' + text + '\u201D';
-  document.getElementById('q-hint').style.display = 'flex';
-
-  const textarea = document.getElementById('q-textarea');
-  const btn = document.getElementById('submit-btn');
-  textarea.disabled = false;
-  textarea.placeholder = 'Tulis jawabanmu di sini...';
-  btn.disabled = false;
-  btn.textContent = 'Kunci jawaban 🔒';
-
-  const refreshBtn = document.getElementById('q-refresh-btn');
-  if (refreshBtn) { refreshBtn.disabled = false; refreshBtn.classList.remove('spinning'); }
-
-  const d = new Date();
-  document.getElementById('q-date-label').textContent =
-    d.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'});
-}
-
-
-
-// ── JSONBin Cloud Sync ─────────────────────────────────
-const JBIN_KEY = '$2a$10$aOMy.0xdjfpp1ly5ZZWtCuD65YDOf8msitXmJj2FDeS5XT1AQcN1y';
-const JBIN_BASE = 'https://api.jsonbin.io/v3/b';
-let BIN_ID = localStorage.getItem('ldts_bin_id') || '69f5a28536566621a817060f';
-let syncTimer = null, cdTimer = null;
 
 function showSyncStatus(msg, color = 'var(--ink-light)') {
   ['sync-status','sync-status-m'].forEach(id => {
@@ -752,6 +635,20 @@ function showSyncStatus(msg, color = 'var(--ink-light)') {
   });
 }
 
+function myAnswered()       { return WHO === 'bobby' ? S.bobbyAnswered    : S.yudditAnswered; }
+function myAnswer()         { return WHO === 'bobby' ? S.bobbyAnswer      : S.yudditAnswer; }
+function myAnsweredDate()   { return WHO === 'bobby' ? S.bobbyAnsweredDate : S.yudditAnsweredDate; }
+function partnerAnswered()  { return WHO === 'bobby' ? S.yudditAnswered   : S.bobbyAnswered; }
+function partnerAnswer()    { return WHO === 'bobby' ? S.yudditAnswer     : S.bobbyAnswer; }
+
+function setMyAnswered(val, answer, date) {
+  if (WHO === 'bobby') { S.bobbyAnswered = val; S.bobbyAnswer = answer; S.bobbyAnsweredDate = date; }
+  else                 { S.yudditAnswered = val; S.yudditAnswer = answer; S.yudditAnsweredDate = date; }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// CLOUD  (JSONBin)
+// ═════════════════════════════════════════════════════════════════════════════
 async function cloudLoad() {
   if (!BIN_ID) return false;
   try {
@@ -759,15 +656,17 @@ async function cloudLoad() {
     if (!r.ok) return false;
     const d = await r.json();
     Object.assign(S, d.record);
-    localStorage.setItem('ldts_v2', JSON.stringify(S));
+    localStorage.setItem('ldts_v3', JSON.stringify(S));
     return true;
   } catch(e) { return false; }
 }
 
+let syncTimer = null;
 async function cloudSave() {
   showSyncStatus('Menyimpan...', 'var(--ink-light)');
   try {
     if (!BIN_ID) {
+      // First save — create the bin
       const r = await fetch(JBIN_BASE, {
         method: 'POST',
         headers: {'Content-Type':'application/json','X-Master-Key':JBIN_KEY,'X-Bin-Name':'LDTS-Bobby-Yuddit','X-Private':'true'},
@@ -778,76 +677,344 @@ async function cloudSave() {
       BIN_ID = d.metadata.id;
       localStorage.setItem('ldts_bin_id', BIN_ID);
     } else {
+      // ── Merge-before-write ─────────────────────────────────────────────────
+      // Fetch latest cloud record, merge our changes on top, then PUT.
+      // This prevents the race condition where two devices save simultaneously
+      // and the second write silently overwrites the first person's answer.
+      let base = S;
+      try {
+        const cr = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, {
+          headers: {'X-Master-Key': JBIN_KEY}
+        });
+        if (cr.ok) {
+          const cloud = (await cr.json()).record || {};
+          // Start with cloud as the base, overlay local on top
+          const merged = { ...cloud, ...S };
+
+          // Answered state: keep whichever side is true
+          if (cloud.bobbyAnswered && !S.bobbyAnswered) {
+            merged.bobbyAnswered    = cloud.bobbyAnswered;
+            merged.bobbyAnswer      = cloud.bobbyAnswer;
+            merged.bobbyAnsweredDate = cloud.bobbyAnsweredDate;
+          }
+          if (cloud.yudditAnswered && !S.yudditAnswered) {
+            merged.yudditAnswered    = cloud.yudditAnswered;
+            merged.yudditAnswer      = cloud.yudditAnswer;
+            merged.yudditAnsweredDate = cloud.yudditAnsweredDate;
+          }
+
+          // Archive: merge by dateKey, preserving both answers
+          const aMap = {};
+          (cloud.archive || []).forEach(a => { aMap[a.dateKey || a.date] = { ...a }; });
+          (S.archive || []).forEach(a => {
+            const k = a.dateKey || a.date;
+            if (aMap[k]) {
+              aMap[k] = {
+                ...aMap[k], ...a,
+                bobbyAns:  a.bobbyAns  || aMap[k].bobbyAns  || null,
+                yudditAns: a.yudditAns || aMap[k].yudditAns || null,
+              };
+            } else {
+              aMap[k] = { ...a };
+            }
+          });
+          merged.archive = Object.values(aMap)
+            .sort((a, b) => (b.dateKey || b.date) > (a.dateKey || a.date) ? 1 : -1);
+
+          // todayQuestion: keep cloud's if local has none for today
+          const todayK = todayKey();
+          if (cloud.todayQuestion && cloud.todayQuestionDate === todayK && !S.todayQuestion) {
+            merged.todayQuestion     = cloud.todayQuestion;
+            merged.todayQuestionDate = cloud.todayQuestionDate;
+          }
+
+          base = merged;
+          Object.assign(S, merged); // keep in-memory state in sync
+        }
+      } catch(mergeErr) { /* merge fetch failed — write local S as-is */ }
+
       const r = await fetch(`${JBIN_BASE}/${BIN_ID}`, {
         method: 'PUT',
         headers: {'Content-Type':'application/json','X-Master-Key':JBIN_KEY},
-        body: JSON.stringify(S)
+        body: JSON.stringify(base)
       });
       if (!r.ok) throw new Error('save failed');
     }
-    localStorage.setItem('ldts_v2', JSON.stringify(S));
+    localStorage.setItem('ldts_v3', JSON.stringify(S));
     showSyncStatus('Tersinkron ✓', '#3D6B56');
     setTimeout(() => showSyncStatus(''), 3000);
   } catch(e) {
-    localStorage.setItem('ldts_v2', JSON.stringify(S));
+    localStorage.setItem('ldts_v3', JSON.stringify(S));
     showSyncStatus('Tersimpan lokal', 'var(--ink-light)');
   }
 }
 
-function loadState() { try { const s = localStorage.getItem('ldts_v2'); if (s) Object.assign(S, JSON.parse(s)); } catch(e) {} }
+function loadState() {
+  try {
+    // Migrate old v2 data if present
+    const old = localStorage.getItem('ldts_v2');
+    const cur = localStorage.getItem('ldts_v3');
+    if (cur) { Object.assign(S, JSON.parse(cur)); return; }
+    if (old) {
+      const o = JSON.parse(old);
+      // Map old myAns → bobbyAns in archive entries
+      if (o.archive) o.archive.forEach(a => {
+        if (!a.bobbyAns && a.myAns)   a.bobbyAns  = a.myAns;
+        if (!a.yudditAns && a.herAns) a.yudditAns = a.herAns;
+        delete a.myAns; delete a.herAns;
+      });
+      // Map old answered state
+      if (o.answered) { S.bobbyAnswered = true; S.bobbyAnswer = o.answer || ''; S.bobbyAnsweredDate = o.answeredDate; }
+      Object.assign(S, o);
+    }
+  } catch(e) {}
+}
 function saveState() { clearTimeout(syncTimer); syncTimer = setTimeout(cloudSave, 600); }
 
-// ── Periodic question sync (keep both devices in sync) ─
-// Runs every 30s — if the other person refreshed, this picks it up
-function startQuestionSyncCheck() {
-  setInterval(async () => {
-    if (S.answered) return; // already answered — no point syncing question
-    const key = todayKey();
-    try {
-      const r = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, {
-        headers: { 'X-Master-Key': JBIN_KEY }
-      });
-      if (!r.ok) return;
-      const d = await r.json();
-      const cloudQ = d.record?.todayQuestion;
-      const cloudDate = d.record?.todayQuestionDate;
-      if (cloudQ && cloudDate === key && cloudQ !== S.todayQuestion) {
-        // Other person refreshed — update to their new question
-        S.todayQuestion = cloudQ;
-        localStorage.setItem(`ldts_q_${key}`, cloudQ);
-        showQuestion(cloudQ);
-      }
-    } catch(e) { /* silent fail */ }
-  }, 30000);
+// ═════════════════════════════════════════════════════════════════════════════
+// GEMINI PROMPT
+// ═════════════════════════════════════════════════════════════════════════════
+function buildPrompt(dateKey) {
+  return `Kamu membuat pertanyaan harian untuk aplikasi LDTS milik Bobby (Semarang) dan Yuddit (Bogor). Mereka sedang dalam fase talking stage — saling tertarik, belum resmi pacaran, sedang dalam proses saling mengenal lebih dalam.
+
+Tanggal hari ini: ${dateKey}
+
+Buat SATU pertanyaan dengan aturan ketat berikut:
+
+WAJIB DIPENUHI:
+- Topik relevan dengan fase talking stage: perasaan awal, kebiasaan saat suka seseorang, ekspektasi hubungan, atau self-awareness soal jatuh cinta
+- Bahasa Indonesia yang natural dan hangat — bukan formal kaku, bukan lebay
+- Jika ada kata ganti orang pertama dalam pertanyaan, WAJIB gunakan "Saya" — contoh: "Saya biasanya...", "hal yang Saya perhatiin"
+- Satu kalimat, diakhiri tanda tanya
+- Relatable, sedikit witty, atau menyentuh secara psikologis
+
+DILARANG KERAS:
+- Kata "aku", "ku" dalam bentuk apapun: "aku rasa", "menurutku", "hatiku", "bagiku"
+- Ungkapan puitis atau romantis berlebihan: "bintang di langit", "detak jantung", "kamu adalah segalanya", "jatuh ke pelukanmu", "mimpi indah bersamamu"
+- Pertanyaan yang terdengar seperti lirik lagu galau atau caption foto sunset
+- Nada cringe, mellow berlebihan, atau sok dalam
+- Pertanyaan ya/tidak yang tidak memancing cerita
+- Selalu diawali "Kalau" atau "Apa"
+
+CONTOH NADA TEPAT (jangan salin, jadikan referensi nada):
+"Seberapa sering kamu cek HP cuma buat lihat apakah ada pesan dari orang tertentu?"
+"Hal kecil apa yang dilakukan seseorang bisa langsung bikin kamu senyum tanpa alasan jelas?"
+"Saat Saya mulai suka sama seseorang, hal pertama yang biasanya Saya perhatiin dari mereka itu apa?"
+
+CONTOH NADA SALAH:
+"Bintang mana yang kamu pilih untuk menemani malammu?" ← puitis murahan
+"Aku ingin selalu ada untukmu, kamu bagaimana?" ← lebay + pakai "aku"
+
+Kembalikan HANYA teks pertanyaannya saja. Tanpa tanda kutip, tanpa penjelasan, tanpa angka.`;
 }
 
-// ── Init ───────────────────────────────────────────────
+async function callGemini(dateKey) {
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+    { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ contents:[{parts:[{text:buildPrompt(dateKey)}]}], generationConfig:{maxOutputTokens:150,temperature:1.0} }) }
+  );
+  if (!res.ok) throw new Error('Gemini HTTP ' + res.status);
+  const data = await res.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+  if (!text) throw new Error('Empty response');
+  return text;
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// DAILY QUESTION  — cloud-first, single-generator
+// ═════════════════════════════════════════════════════════════════════════════
+async function fetchDailyQuestion(forceNew = false) {
+  const key      = todayKey();
+  const cacheKey = `ldts_q_${key}`;
+
+  // 1. Local cache
+  if (!forceNew) {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) return cached;
+  }
+
+  // 2. Cloud — use it if today's question is already there
+  if (!forceNew && BIN_ID) {
+    try {
+      const r  = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, { headers: {'X-Master-Key': JBIN_KEY} });
+      if (r.ok) {
+        const d  = await r.json();
+        const cQ = d.record?.todayQuestion;
+        const cD = d.record?.todayQuestionDate;
+        if (cQ && cD === key) {
+          localStorage.setItem(cacheKey, cQ);
+          S.todayQuestion = cQ; S.todayQuestionDate = key;
+          return cQ;
+        }
+      }
+    } catch(e) { /* fall through */ }
+  }
+
+  // 3. Generate via Gemini (this device becomes leader for today)
+  try {
+    const question = await callGemini(key);
+    localStorage.setItem(cacheKey, question);
+    S.todayQuestion = question; S.todayQuestionDate = key;
+    saveState();
+    return question;
+  } catch(e) { console.warn('Gemini failed:', e); }
+
+  // 4. Static fallback
+  const idx      = forceNew
+    ? Math.floor(Math.random() * FALLBACK_QUESTIONS.length)
+    : parseInt(key.replace(/-/g,'')) % FALLBACK_QUESTIONS.length;
+  const fallback = FALLBACK_QUESTIONS[idx];
+  localStorage.setItem(cacheKey, fallback);
+  S.todayQuestion = fallback; S.todayQuestionDate = key;
+  saveState();
+  return fallback;
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// QUESTION UI
+// ═════════════════════════════════════════════════════════════════════════════
+function showQuestion(text) {
+  document.getElementById('q-loading').style.display = 'none';
+  const qText = document.getElementById('q-text');
+  qText.style.display  = 'block';
+  qText.textContent    = '\u201C' + text + '\u201D';
+  document.getElementById('q-hint').style.display = 'flex';
+
+  const d = new Date();
+  document.getElementById('q-date-label').textContent =
+    d.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'});
+
+  const todayK = todayKey();
+  const iAnswered   = myAnswered()      && myAnsweredDate()      === todayK;
+  const theyAnswered = partnerAnswered() && (WHO === 'bobby' ? S.yudditAnsweredDate : S.bobbyAnsweredDate) === todayK;
+
+  // Refresh button: only visible if nobody has answered yet
+  const rb = document.getElementById('q-refresh-btn');
+  if (iAnswered || theyAnswered) {
+    rb.style.display = 'none';
+  } else {
+    rb.style.display = 'flex';
+    rb.disabled = false;
+    rb.classList.remove('spinning');
+  }
+
+  if (iAnswered) {
+    // Show answered state
+    document.getElementById('q-input-area').style.display  = 'none';
+    document.getElementById('answered-wrap').style.display = 'block';
+    document.getElementById('answered-bubble').textContent = myAnswer();
+    renderPartnerStatus(theyAnswered);
+  } else {
+    // Show input
+    document.getElementById('q-input-area').style.display  = 'block';
+    document.getElementById('answered-wrap').style.display = 'none';
+    const ta  = document.getElementById('q-textarea');
+    const btn = document.getElementById('submit-btn');
+    ta.disabled     = false;
+    ta.placeholder  = 'Tulis jawabanmu di sini...';
+    btn.disabled    = false;
+    btn.textContent = 'Kunci jawaban 🔒';
+  }
+}
+
+function renderPartnerStatus(theyAnswered) {
+  const el = document.getElementById('partner-status');
+  if (!el) return;
+  if (theyAnswered) {
+    el.innerHTML = `<div class="partner-answered-note">✓ ${partnerName()} sudah menjawab — lihat di Arsip!</div>`;
+  } else {
+    el.innerHTML = `<div class="waiting-row">Menunggu ${partnerName()} <div class="dots"><span></span><span></span><span></span></div></div>`;
+  }
+}
+
+async function refreshQuestion() {
+  const todayK = todayKey();
+  // Block refresh if either person has already answered
+  if ((myAnswered() && myAnsweredDate() === todayK) ||
+      (partnerAnswered() && (WHO==='bobby'?S.yudditAnsweredDate:S.bobbyAnsweredDate) === todayK)) return;
+
+  const rb = document.getElementById('q-refresh-btn');
+  rb.disabled = true; rb.classList.add('spinning');
+
+  document.getElementById('q-loading').style.display    = 'block';
+  document.getElementById('q-text').style.display       = 'none';
+  document.getElementById('q-hint').style.display       = 'none';
+  document.getElementById('q-textarea').value           = '';
+  document.getElementById('q-textarea').disabled        = true;
+  document.getElementById('submit-btn').disabled        = true;
+  document.getElementById('submit-btn').textContent     = 'Memuat pertanyaan...';
+
+  localStorage.removeItem(`ldts_q_${todayK}`);
+  S.todayQuestion = null; S.todayQuestionDate = null;
+
+  const question = await fetchDailyQuestion(true);
+  showQuestion(question);
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// CROSS-DEVICE SYNC  (every 30 s — picks up partner's answer + question changes)
+// ═════════════════════════════════════════════════════════════════════════════
+function startSyncCheck() {
+  setInterval(async () => {
+    if (!BIN_ID) return;
+    const key = todayKey();
+    try {
+      const r  = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, { headers: {'X-Master-Key': JBIN_KEY} });
+      if (!r.ok) return;
+      const d  = await r.json();
+      const rec = d.record;
+
+      let changed = false;
+
+      // Check if partner answered since we last loaded
+      const partnerKey     = partner();
+      const partnerAnsField = partnerKey + 'Answer';
+      const partnerDoneField = partnerKey + 'Answered';
+      const partnerDateField = partnerKey + 'AnsweredDate';
+      if (rec[partnerDoneField] && rec[partnerDateField] === key && !S[partnerDoneField]) {
+        S[partnerDoneField]  = rec[partnerDoneField];
+        S[partnerAnsField]   = rec[partnerAnsField];
+        S[partnerDateField]  = rec[partnerDateField];
+        // Also update today's archive entry so it shows the partner's answer immediately
+        const entry = S.archive.find(a => a.dateKey === key);
+        if (entry) entry[partnerKey + 'Ans'] = rec[partnerAnsField]; // 'bobbyAns' or 'yudditAns'
+        changed = true;
+      }
+
+      // Check if question changed (other device refreshed)
+      const cQ = rec?.todayQuestion;
+      const cD = rec?.todayQuestionDate;
+      if (cQ && cD === key && cQ !== S.todayQuestion) {
+        S.todayQuestion = cQ; S.todayQuestionDate = key;
+        localStorage.setItem(`ldts_q_${key}`, cQ);
+        changed = true;
+      }
+
+      if (changed) {
+        localStorage.setItem('ldts_v3', JSON.stringify(S));
+        if (S.todayQuestion) showQuestion(S.todayQuestion);
+        renderArchive(); renderUs();
+      }
+    } catch(e) { /* silent */ }
+  }, 30_000);
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// INIT
+// ═════════════════════════════════════════════════════════════════════════════
 async function init() {
   loadState();
   renderWishlist(); renderArchive(); renderUs(); fetchWeather();
-  setTimeout(initHomeMap, 200);
+  setTimeout(initHomeMap,    200);
   setTimeout(initLeafletMap, 300);
 
   const todayK = todayKey();
-  if (S.answered && S.answeredDate !== todayK) {
-    S.answered = false; S.answer = ''; S.answeredDate = null;
-    saveState();
-  }
 
-  if (S.answered) {
-    document.getElementById('q-input-area').style.display = 'none';
-    document.getElementById('answered-wrap').style.display = 'block';
-    document.getElementById('answered-bubble').textContent = S.answer;
-    const rb = document.getElementById('q-refresh-btn'); if (rb) rb.style.display = 'none';
-  }
-
-  if (S.meetup) {
-    updateMeetupUI();
-    startCountdown();
-  }
+  if (S.meetup) { updateMeetupUI(); startCountdown(); }
 
   showSyncStatus('Memuat...', 'var(--ink-light)');
-  const ok = await cloudLoad();
+  const ok = await cloudLoad(); // always load cloud first — it has the authoritative state
   if (ok) {
     renderWishlist(); renderArchive(); renderUs();
     showSyncStatus('Tersinkron ✓', '#3D6B56');
@@ -857,312 +1024,280 @@ async function init() {
     showSyncStatus('Offline', 'var(--ink-light)');
   }
 
+  // Date rollover — run AFTER cloudLoad so we don't wipe today's valid cloud state.
+  // Clears any answered state or cached question that belongs to a previous day.
+  const questionStale = S.todayQuestionDate && S.todayQuestionDate !== todayK;
+  if (questionStale) {
+    localStorage.removeItem(`ldts_q_${S.todayQuestionDate}`);
+    S.todayQuestion = null; S.todayQuestionDate = null;
+  }
+  let rolloverDirty = questionStale;
+  if (S.bobbyAnsweredDate  && S.bobbyAnsweredDate  !== todayK) {
+    S.bobbyAnswered  = false; S.bobbyAnswer  = ''; S.bobbyAnsweredDate  = null; rolloverDirty = true;
+  }
+  if (S.yudditAnsweredDate && S.yudditAnsweredDate !== todayK) {
+    S.yudditAnswered = false; S.yudditAnswer = ''; S.yudditAnsweredDate = null; rolloverDirty = true;
+  }
+  if (rolloverDirty) saveState();
+
+  // Show loading skeleton while question fetches
+  document.getElementById('q-loading').style.display    = 'block';
+  document.getElementById('q-text').style.display       = 'none';
+  document.getElementById('q-hint').style.display       = 'none';
+  document.getElementById('q-input-area').style.display = 'block';
+  document.getElementById('answered-wrap').style.display = 'none';
+  document.getElementById('q-textarea').disabled        = true;
+  document.getElementById('submit-btn').disabled        = true;
+  document.getElementById('submit-btn').textContent     = 'Memuat pertanyaan...';
+
   const question = await fetchDailyQuestion();
   showQuestion(question);
 
-  if (S.answered && S.answeredDate === todayK) {
-    document.getElementById('q-input-area').style.display = 'none';
-    document.getElementById('answered-wrap').style.display = 'block';
-    document.getElementById('answered-bubble').textContent = S.answer;
-    const rb = document.getElementById('q-refresh-btn'); if (rb) rb.style.display = 'none';
-  }
-
-  scheduleMidnightReset();
-  startQuestionSyncCheck();
+  startSyncCheck();
 }
 
-// ── Tab switching ──────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═════════════════════════════════════════════════════════════════════════════
 function switchTab(tab) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn,.sidebar-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('page-' + tab).classList.add('active');
   document.querySelectorAll('[data-tab=' + tab + ']').forEach(b => b.classList.add('active'));
   if (tab === 'wishlist') setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 120);
-  if (tab === 'home') setTimeout(() => { if (homeMap) homeMap.invalidateSize(); }, 120);
+  if (tab === 'home')     setTimeout(() => { if (homeMap)    homeMap.invalidateSize();    }, 120);
 }
 
-// ── Answer submission ──────────────────────────────────
+// ═════════════════════════════════════════════════════════════════════════════
+// ANSWER SUBMISSION
+// ═════════════════════════════════════════════════════════════════════════════
 function submitAnswer() {
   const val = document.getElementById('q-textarea').value.trim();
-  if (!val) return;
+  if (!val || !WHO) return;
+
+  const todayK = todayKey();
   const todayQ = document.getElementById('q-text').textContent.replace(/^["""]|["""]$/g, '');
-  S.answered = true; S.answer = val; S.answeredDate = todayKey();
-  const existing = S.archive.find(a => a.date === new Date().toLocaleDateString('id-ID', {day:'numeric',month:'short'}));
-  if (!existing) {
-    S.archive.unshift({
-      q: todayQ, myAns: val, herAns: null,
-      date: new Date().toLocaleDateString('id-ID', {day:'numeric', month:'short'})
-    });
+
+  // Record this person's answer
+  setMyAnswered(true, val, todayK);
+
+  // Find or create archive entry for today (keyed by dateKey string)
+  let entry = S.archive.find(a => a.dateKey === todayK);
+  if (!entry) {
+    entry = {
+      dateKey: todayK,
+      date: new Date().toLocaleDateString('id-ID', {day:'numeric', month:'short'}),
+      q: todayQ,
+      bobbyAns:  null,
+      yudditAns: null
+    };
+    S.archive.unshift(entry);
   }
+  // Write into the correct field
+  if (WHO === 'bobby') entry.bobbyAns  = val;
+  else                 entry.yudditAns = val;
+
   saveState();
-  document.getElementById('q-input-area').style.display = 'none';
-  document.getElementById('answered-wrap').style.display = 'block';
-  document.getElementById('answered-bubble').textContent = val;
-  const rb = document.getElementById('q-refresh-btn'); if (rb) rb.style.display = 'none';
+  showQuestion(todayQ); // re-render card with answered state
   renderArchive(); renderUs();
 }
 
-function nextQuestion() {
-  S.answered = false; S.answer = ''; S.answeredDate = null;
-  localStorage.removeItem(`ldts_q_${todayKey()}`);
-  S.todayQuestion = null; S.todayQuestionDate = null;
-  saveState();
-
-  document.getElementById('q-loading').style.display = 'block';
-  document.getElementById('q-text').style.display = 'none';
-  document.getElementById('q-hint').style.display = 'none';
-  document.getElementById('answered-wrap').style.display = 'none';
-  document.getElementById('q-input-area').style.display = 'block';
-  document.getElementById('q-textarea').value = '';
-  document.getElementById('q-textarea').disabled = true;
-  document.getElementById('submit-btn').disabled = true;
-  document.getElementById('submit-btn').textContent = 'Memuat pertanyaan...';
-  const rb = document.getElementById('q-refresh-btn');
-  if (rb) { rb.style.display = 'flex'; rb.disabled = true; }
-
-  fetchDailyQuestion().then(showQuestion);
-}
-
-// ── Countdown ─────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════════════════
+// COUNTDOWN
+// ═════════════════════════════════════════════════════════════════════════════
 function updateMeetupUI() {
   if (!S.meetup) return;
   ['cd-title','cd-title-d'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = S.meetup.place; });
-  const ds = new Date(S.meetup.date).toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric'});
+  const [my,mm,md] = S.meetup.date.split('-').map(Number);
+  const meetLocal = new Date(my, mm-1, md);
+  const ds = meetLocal.toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric'});
   ['cd-sub','cd-sub-d'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ds; });
 }
+let cdTimer = null;
 function startCountdown() { if (cdTimer) clearInterval(cdTimer); cdTimer = setInterval(tickCountdown, 1000); tickCountdown(); }
 function tickCountdown() {
   if (!S.meetup) return;
-  const diff = new Date(S.meetup.date) - new Date();
-  const vals = diff <= 0 ? [0,0,0,0] : [
-    Math.floor(diff/86400000),
-    Math.floor((diff%86400000)/3600000),
-    Math.floor((diff%3600000)/60000),
-    Math.floor((diff%60000)/1000)
+  const [ty,tm,td] = S.meetup.date.split('-').map(Number);
+  const diff = new Date(ty, tm-1, td) - new Date();
+  const v    = diff <= 0 ? [0,0,0,0] : [
+    Math.floor(diff / 86400000),
+    Math.floor((diff % 86400000) / 3600000),
+    Math.floor((diff % 3600000)  / 60000),
+    Math.floor((diff % 60000)    / 1000)
   ];
   ['cd-d','cd-h','cd-m','cd-s'].forEach((id,i) => {
-    const el = document.getElementById(id); if (el) el.textContent = vals[i];
-    const el2 = document.getElementById(id+'-d'); if (el2) el2.textContent = vals[i];
+    const a = document.getElementById(id);      if (a) a.textContent = v[i];
+    const b = document.getElementById(id+'-d'); if (b) b.textContent = v[i];
   });
 }
-
-function openModal() {
-  if (S.meetup) { document.getElementById('modal-place').value = S.meetup.place; document.getElementById('modal-date').value = S.meetup.date; }
-  document.getElementById('modal').classList.add('open');
+function openMeetupModal() {
+  if (S.meetup)    document.getElementById('modal-place').value = S.meetup.place;
+  if (S.meetup)    document.getElementById('modal-date').value  = S.meetup.date;
+  if (S.sinceDate) document.getElementById('modal-since').value = S.sinceDate;
+  document.getElementById('meetup-modal').classList.add('open');
 }
-function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function closeMeetupModal() { document.getElementById('meetup-modal').classList.remove('open'); }
 function saveMeetup() {
-  const place = document.getElementById('modal-place').value.trim() || 'Our meetup';
-  const date = document.getElementById('modal-date').value;
-  if (!date) { closeModal(); return; }
-  S.meetup = {place, date};
-  saveState(); updateMeetupUI(); closeModal(); startCountdown();
+  const place = document.getElementById('modal-place').value.trim() || 'Pertemuan kita';
+  const date  = document.getElementById('modal-date').value;
+  const since = document.getElementById('modal-since').value;
+  if (date)  S.meetup    = {place, date};
+  if (since) S.sinceDate = since;
+  saveState();
+  if (S.meetup) { updateMeetupUI(); startCountdown(); }
+  renderUs();
+  closeMeetupModal();
 }
 
-// ── Weather ────────────────────────────────────────────
-const WMO_DESC = {0:'Cerah',1:'Cerah berawan',2:'Berawan',3:'Mendung',45:'Berkabut',48:'Berkabut',51:'Gerimis ringan',53:'Gerimis',55:'Gerimis lebat',61:'Hujan ringan',63:'Hujan',65:'Hujan lebat',71:'Salju ringan',73:'Salju',75:'Salju lebat',80:'Hujan lokal',81:'Hujan deras',82:'Hujan sangat deras',95:'Hujan badai',96:'Badai petir',99:'Badai petir lebat'};
-const WMO_ICON = {0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌦',63:'🌧',65:'🌧',71:'🌨',73:'❄️',75:'❄️',80:'🌦',81:'🌧',82:'🌧',95:'⛈',96:'⛈',99:'⛈'};
-
+// ═════════════════════════════════════════════════════════════════════════════
+// WEATHER
+// ═════════════════════════════════════════════════════════════════════════════
+const WMO_DESC={0:'Cerah',1:'Cerah berawan',2:'Berawan',3:'Mendung',45:'Berkabut',48:'Berkabut',51:'Gerimis ringan',53:'Gerimis',55:'Gerimis lebat',61:'Hujan ringan',63:'Hujan',65:'Hujan lebat',71:'Salju ringan',73:'Salju',75:'Salju lebat',80:'Hujan lokal',81:'Hujan deras',82:'Hujan sangat deras',95:'Hujan badai',96:'Badai petir',99:'Badai petir lebat'};
+const WMO_ICON={0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌦',63:'🌧',65:'🌧',71:'🌨',73:'❄️',75:'❄️',80:'🌦',81:'🌧',82:'🌧',95:'⛈',96:'⛈',99:'⛈'};
 function fetchWeather() {
-  const cities = [
-    {lat:-6.9932,lon:110.4203,tempEl:'smg-temp',skyEl:'smg-sky',iconEl:'smg-icon'},
-    {lat:-6.5971,lon:106.8060,tempEl:'bgr-temp',skyEl:'bgr-sky',iconEl:'bgr-icon'}
-  ];
-  cities.forEach(c => {
+  [{lat:-6.9932,lon:110.4203,t:'smg-temp',s:'smg-sky',i:'smg-icon'},{lat:-6.5971,lon:106.8060,t:'bgr-temp',s:'bgr-sky',i:'bgr-icon'}].forEach(c => {
     fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,weathercode&timezone=Asia%2FJakarta`)
-      .then(r => r.json()).then(d => {
-        const temp = Math.round(d.current.temperature_2m);
-        const code = d.current.weathercode;
-        document.getElementById(c.tempEl).textContent = temp + '°C';
-        document.getElementById(c.skyEl).textContent = WMO_DESC[code] || 'Cerah';
-        document.getElementById(c.iconEl).textContent = WMO_ICON[code] || '🌤';
-      }).catch(() => {
-        document.getElementById(c.tempEl).textContent = '—';
-        document.getElementById(c.skyEl).textContent = 'Tidak tersedia';
-      });
+      .then(r=>r.json()).then(d=>{
+        document.getElementById(c.t).textContent=Math.round(d.current.temperature_2m)+'°C';
+        document.getElementById(c.s).textContent=WMO_DESC[d.current.weathercode]||'Cerah';
+        document.getElementById(c.i).textContent=WMO_ICON[d.current.weathercode]||'🌤';
+      }).catch(()=>{document.getElementById(c.t).textContent='—';document.getElementById(c.s).textContent='Tidak tersedia';});
   });
 }
 
-// ── Maps ───────────────────────────────────────────────
-let homeMap = null;
-function initHomeMap() {
-  if (homeMap) return;
-  homeMap = L.map('home-map', {center:[-7.2,108.6],zoom:7,zoomControl:true,attributionControl:false,dragging:true,touchZoom:true,scrollWheelZoom:true});
+// ═════════════════════════════════════════════════════════════════════════════
+// MAPS
+// ═════════════════════════════════════════════════════════════════════════════
+let homeMap=null;
+function initHomeMap(){
+  if(homeMap)return;
+  homeMap=L.map('home-map',{center:[-7.2,108.6],zoom:7,zoomControl:true,attributionControl:false,dragging:true,touchZoom:true,scrollWheelZoom:true});
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd'}).addTo(homeMap);
-  const smgLL = [-6.993,110.420], bgrLL = [-6.597,106.806];
+  const smgLL=[-6.993,110.420],bgrLL=[-6.597,106.806];
   L.polyline([bgrLL,smgLL],{color:'#C4607A',weight:2,dashArray:'6 5',opacity:0.85}).addTo(homeMap);
-  const makeMarker = (ll, label, color) => L.marker(ll, {icon: L.divIcon({
-    html: `<div style="display:flex;flex-direction:column;align-items:center"><div style="width:11px;height:11px;border-radius:50%;background:${color};border:2.5px solid white;box-shadow:0 1px 5px rgba(0,0,0,0.2)"></div><div style="font-size:9px;font-weight:600;margin-top:3px;padding:2px 7px;border-radius:8px;background:white;border:0.5px solid rgba(30,21,32,0.1);color:${color};white-space:nowrap;">${label}</div></div>`,
-    className:'', iconAnchor:[5,5]
-  })}).addTo(homeMap);
-  makeMarker(smgLL, 'Semarang · Bobby', '#5C4E8A');
-  makeMarker(bgrLL, 'Bogor · Yuddit', '#C4607A');
+  const mk=(ll,lbl,col)=>L.marker(ll,{icon:L.divIcon({html:`<div style="display:flex;flex-direction:column;align-items:center"><div style="width:11px;height:11px;border-radius:50%;background:${col};border:2.5px solid white;box-shadow:0 1px 5px rgba(0,0,0,0.2)"></div><div style="font-size:9px;font-weight:600;margin-top:3px;padding:2px 7px;border-radius:8px;background:white;border:0.5px solid rgba(30,21,32,0.1);color:${col};white-space:nowrap;">${lbl}</div></div>`,className:'',iconAnchor:[5,5]})}).addTo(homeMap);
+  mk(smgLL,'Semarang · Bobby','#5C4E8A');mk(bgrLL,'Bogor · Yuddit','#C4607A');
   homeMap.fitBounds([bgrLL,smgLL],{padding:[28,28]});
-  [100,300,600].forEach(t => setTimeout(() => homeMap.invalidateSize(), t));
+  [100,300,600].forEach(t=>setTimeout(()=>homeMap.invalidateSize(),t));
 }
 
-let leafletMap = null, leafletMarkers = [];
-function makePinIcon(done) {
-  const color = done ? '#3D6B56' : '#C4607A';
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="30" viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 18 12 18s12-9 12-18C24 5.4 18.6 0 12 0z" fill="${color}"/><circle cx="12" cy="12" r="5" fill="white"/></svg>`;
-  return L.divIcon({html:svg,className:'',iconSize:[24,30],iconAnchor:[12,30],popupAnchor:[0,-32]});
+let leafletMap=null,leafletMarkers=[],satelliteMode=false,baseLayer=null,satLayer=null;
+function makePinIcon(done){const c=done?'#3D6B56':'#C4607A';return L.divIcon({html:`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="30" viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 18 12 18s12-9 12-18C24 5.4 18.6 0 12 0z" fill="${c}"/><circle cx="12" cy="12" r="5" fill="white"/></svg>`,className:'',iconSize:[24,30],iconAnchor:[12,30],popupAnchor:[0,-32]});}
+function toggleSatellite(){satelliteMode=!satelliteMode;if(satelliteMode){leafletMap.removeLayer(baseLayer);satLayer.addTo(leafletMap);}else{leafletMap.removeLayer(satLayer);baseLayer.addTo(leafletMap);}leafletMap.invalidateSize();document.getElementById('sat-btn').textContent=satelliteMode?'🗺 Peta':'🛰 Satelit';}
+function initLeafletMap(){
+  if(leafletMap)return;
+  leafletMap=L.map('leaflet-map',{center:[-7.5,112],zoom:6,zoomControl:true,attributionControl:false});
+  baseLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd'}).addTo(leafletMap);
+  satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19});
+  [100,300,600,1000].forEach(t=>setTimeout(()=>leafletMap.invalidateSize(),t));
+  const sp=(ll,col,pop)=>L.marker(ll,{icon:L.divIcon({html:`<div style="width:10px;height:10px;border-radius:50%;background:${col};border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>`,className:'',iconSize:[10,10],iconAnchor:[5,5]})}).addTo(leafletMap).bindPopup(pop);
+  sp([-6.993,110.420],'#5C4E8A','Semarang · Bobby');sp([-6.597,106.806],'#C4607A','Bogor · Yuddit');
+  renderLeafletMarkers();
+}
+function renderLeafletMarkers(){
+  if(!leafletMap)return;
+  leafletMarkers.forEach(m=>m.remove());leafletMarkers=[];
+  S.places.forEach(p=>{if(!p.latlng)return;const m=L.marker(p.latlng,{icon:makePinIcon(p.done)}).addTo(leafletMap).bindPopup(`<b>${p.name}</b><br><span style="color:#A394A8">${p.done?'✓ Sudah ke sini':'Mau ke sini'}</span>`);leafletMarkers.push(m);});
+  const v=S.places.filter(p=>p.latlng).map(p=>p.latlng);
+  if(v.length>0)leafletMap.fitBounds(L.latLngBounds(v),{padding:[40,40],maxZoom:10});
+}
+async function geocode(name){
+  try{const r=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1&countrycodes=id`,{headers:{'Accept-Language':'id','User-Agent':'LDTS-App/1.0'}});const d=await r.json();if(d&&d.length>0)return[parseFloat(d[0].lat),parseFloat(d[0].lon)];const r2=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1`,{headers:{'Accept-Language':'id','User-Agent':'LDTS-App/1.0'}});const d2=await r2.json();if(d2&&d2.length>0)return[parseFloat(d2[0].lat),parseFloat(d2[0].lon)];}catch(e){}return null;
 }
 
-let satelliteMode = false, baseLayer = null, satLayer = null;
-function toggleSatellite() {
-  satelliteMode = !satelliteMode;
-  if (satelliteMode) { leafletMap.removeLayer(baseLayer); satLayer.addTo(leafletMap); }
-  else { leafletMap.removeLayer(satLayer); baseLayer.addTo(leafletMap); }
-  leafletMap.invalidateSize();
-  document.getElementById('sat-btn').textContent = satelliteMode ? '🗺 Peta' : '🛰 Satelit';
+// ═════════════════════════════════════════════════════════════════════════════
+// WISHLIST
+// ═════════════════════════════════════════════════════════════════════════════
+function selectCat(el,cat){document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('selected'));el.classList.add('selected');S.selectedCat=cat;}
+async function addPlace(){
+  const input=document.getElementById('place-input'),name=input.value.trim();if(!name)return;
+  const ab=document.querySelector('.add-btn');ab.textContent='Mencari...';ab.disabled=true;
+  const ll=await geocode(name);
+  S.places.unshift({id:Date.now(),name,cat:S.selectedCat,done:false,latlng:ll});
+  input.value='';saveState();renderWishlist();renderUs();
+  ab.textContent='Tambah';ab.disabled=false;
+  if(ll&&leafletMap)leafletMap.flyTo(ll,10,{duration:1.2});
+  else if(!ll){showSyncStatus('Tempat tidak ditemukan di peta','#C4607A');setTimeout(()=>showSyncStatus(''),3000);}
 }
-
-function initLeafletMap() {
-  if (leafletMap) return;
-  leafletMap = L.map('leaflet-map',{center:[-7.5,112],zoom:6,zoomControl:true,attributionControl:false});
-  baseLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd'}).addTo(leafletMap);
-  satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19});
-  [100,300,600,1000].forEach(t => setTimeout(() => leafletMap.invalidateSize(), t));
-  const makeSmallPin = (ll, color, popup) => L.marker(ll, {icon: L.divIcon({
-    html: `<div style="width:10px;height:10px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>`,
-    className:'', iconSize:[10,10], iconAnchor:[5,5]
-  })}).addTo(leafletMap).bindPopup(popup);
-  makeSmallPin([-6.993,110.420], '#5C4E8A', 'Semarang · Bobby');
-  makeSmallPin([-6.597,106.806], '#C4607A', 'Bogor · Yuddit');
+function toggleDone(id){const p=S.places.find(p=>p.id===id);if(p){p.done=!p.done;saveState();renderWishlist();}}
+function deletePlace(id){S.places=S.places.filter(p=>p.id!==id);saveState();renderWishlist();renderUs();}
+function renderWishlist(){
+  const list=document.getElementById('places-list');
+  if(S.places.length===0){list.innerHTML='<div style="text-align:center;padding:28px 0;color:var(--ink-light);font-size:13px;font-weight:500;">Tambah tempat yang ingin kalian kunjungi bersama ✦</div>';return;}
+  list.innerHTML=S.places.map(p=>`<div class="place-item"><div class="place-icon ${p.cat}">${CAT_EMOJI[p.cat]||'📍'}</div><div class="place-info"><div class="place-name" style="${p.done?'text-decoration:line-through;opacity:.5':''}">${p.name}</div><div class="place-meta">${CAT_LABEL[p.cat]||p.cat} · ${p.done?'sudah dikunjungi':'mau ke sini'}</div></div><div class="place-actions">${p.done?'<span class="done-badge">✓ Selesai</span>':''}<button class="check-btn ${p.done?'done':''}" onclick="toggleDone(${p.id})"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="${p.done?'#3D6B56':'#A394A8'}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="del-btn" onclick="deletePlace(${p.id})">×</button></div></div>`).join('');
   renderLeafletMarkers();
 }
 
-function renderLeafletMarkers() {
-  if (!leafletMap) return;
-  leafletMarkers.forEach(m => m.remove()); leafletMarkers = [];
-  S.places.forEach(p => {
-    if (!p.latlng) return;
-    const m = L.marker(p.latlng, {icon: makePinIcon(p.done)}).addTo(leafletMap)
-      .bindPopup(`<b>${p.name}</b><br><span style="color:#A394A8">${p.done ? '✓ Sudah ke sini' : 'Mau ke sini'}</span>`);
-    leafletMarkers.push(m);
-  });
-  const valid = S.places.filter(p => p.latlng).map(p => p.latlng);
-  if (valid.length > 0) leafletMap.fitBounds(L.latLngBounds(valid), {padding:[40,40],maxZoom:10});
-}
-
-async function geocode(name) {
-  try {
-    const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1&countrycodes=id`, {headers:{'Accept-Language':'id','User-Agent':'LDTS-App/1.0'}});
-    const d = await r.json();
-    if (d && d.length > 0) return [parseFloat(d[0].lat), parseFloat(d[0].lon)];
-    const r2 = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1`, {headers:{'Accept-Language':'id','User-Agent':'LDTS-App/1.0'}});
-    const d2 = await r2.json();
-    if (d2 && d2.length > 0) return [parseFloat(d2[0].lat), parseFloat(d2[0].lon)];
-  } catch(e) {}
-  return null;
-}
-
-// ── Wishlist ───────────────────────────────────────────
-function selectCat(el, cat) {
-  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('selected'));
-  el.classList.add('selected'); S.selectedCat = cat;
-}
-
-async function addPlace() {
-  const input = document.getElementById('place-input');
-  const name = input.value.trim(); if (!name) return;
-  const addBtn = document.querySelector('.add-btn');
-  addBtn.textContent = 'Mencari...'; addBtn.disabled = true;
-  const latlng = await geocode(name);
-  S.places.unshift({id: Date.now(), name, cat: S.selectedCat, done: false, latlng});
-  input.value = '';
-  saveState(); renderWishlist(); renderUs();
-  addBtn.textContent = 'Tambah'; addBtn.disabled = false;
-  if (latlng && leafletMap) leafletMap.flyTo(latlng, 10, {duration:1.2});
-  else if (!latlng) { showSyncStatus('Tempat tidak ditemukan di peta', '#C4607A'); setTimeout(() => showSyncStatus(''), 3000); }
-}
-
-function toggleDone(id) { const p = S.places.find(p => p.id === id); if (p) { p.done = !p.done; saveState(); renderWishlist(); } }
-function deletePlace(id) { S.places = S.places.filter(p => p.id !== id); saveState(); renderWishlist(); renderUs(); }
-
-function renderWishlist() {
-  const list = document.getElementById('places-list');
-  if (S.places.length === 0) {
-    list.innerHTML = '<div style="text-align:center;padding:28px 0;color:var(--ink-light);font-size:13px;font-weight:500;">Tambah tempat yang ingin kalian kunjungi bersama ✦</div>';
-  } else {
-    list.innerHTML = S.places.map(p => `
-      <div class="place-item">
-        <div class="place-icon ${p.cat}">${CAT_EMOJI[p.cat] || '📍'}</div>
-        <div class="place-info">
-          <div class="place-name" style="${p.done ? 'text-decoration:line-through;opacity:.5' : ''}">${p.name}</div>
-          <div class="place-meta">${CAT_LABEL[p.cat] || p.cat} · ${p.done ? 'sudah dikunjungi' : 'mau ke sini'}</div>
-        </div>
-        <div class="place-actions">
-          ${p.done ? '<span class="done-badge">✓ Selesai</span>' : ''}
-          <button class="check-btn ${p.done ? 'done' : ''}" onclick="toggleDone(${p.id})">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="${p.done ? '#3D6B56' : '#A394A8'}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <button class="del-btn" onclick="deletePlace(${p.id})">×</button>
-        </div>
-      </div>`).join('');
+// ═════════════════════════════════════════════════════════════════════════════
+// ARCHIVE  — always Bobby left, Yuddit right, regardless of who is viewing
+// ═════════════════════════════════════════════════════════════════════════════
+function renderArchive(){
+  const body=document.getElementById('archive-body'),empty=document.getElementById('archive-empty');
+  const entries=S.archive.filter(a=>a.bobbyAns||a.yudditAns);
+  if(entries.length===0){
+    if(empty)empty.style.display='block';
+    body.querySelectorAll('.archive-item').forEach(el=>el.remove());
+    return;
   }
-  renderLeafletMarkers();
-}
-
-// ── Archive ────────────────────────────────────────────
-function renderArchive() {
-  const body = document.getElementById('archive-body');
-  const empty = document.getElementById('archive-empty');
-  const answered = S.archive.filter(a => a.myAns);
-  if (answered.length === 0) { if (empty) empty.style.display = 'block'; body.querySelectorAll('.archive-item').forEach(el => el.remove()); return; }
-  if (empty) empty.style.display = 'none';
-  body.querySelectorAll('.archive-item').forEach(el => el.remove());
-  answered.forEach(a => {
-    const el = document.createElement('div');
-    el.className = 'archive-item';
-    el.innerHTML = `
-      <div class="archive-item-accent"></div>
-      <div class="archive-q">
-        <div class="archive-day">${a.date || ''}</div>
-        <div class="archive-qtext">\u201C${a.q}\u201D</div>
-      </div>
-      <div class="archive-answers">
-        <div class="archive-ans">
-          <div class="archive-who">Bobby</div>
-          <div class="archive-atext">${a.myAns}</div>
-        </div>
-        <div class="archive-ans">
-          <div class="archive-who">Yuddit</div>
-          <div class="archive-atext" style="${!a.herAns ? 'color:var(--ink-light);font-style:italic' : ''}">${a.herAns || 'Menunggu jawabannya...'}</div>
-        </div>
-      </div>`;
+  if(empty)empty.style.display='none';
+  body.querySelectorAll('.archive-item').forEach(el=>el.remove());
+  entries.forEach(a=>{
+    const el=document.createElement('div');el.className='archive-item';
+    const bobbyTxt  = a.bobbyAns  || '<em style="color:var(--ink-light)">Menunggu jawabannya...</em>';
+    const yudditTxt = a.yudditAns || '<em style="color:var(--ink-light)">Menunggu jawabannya...</em>';
+    el.innerHTML=`<div class="archive-item-accent"></div><div class="archive-q"><div class="archive-day">${a.date||''}</div><div class="archive-qtext">\u201C${a.q}\u201D</div></div><div class="archive-answers"><div class="archive-ans"><div class="archive-who">Bobby</div><div class="archive-atext">${bobbyTxt}</div></div><div class="archive-ans"><div class="archive-who">Yuddit</div><div class="archive-atext">${yudditTxt}</div></div></div>`;
     body.appendChild(el);
   });
 }
 
-// ── Us ─────────────────────────────────────────────────
-function addMemory() {
-  const text = document.getElementById('memory-input').value.trim();
-  if (!text) return;
-  S.memories.unshift({text, date: new Date().toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'})});
-  document.getElementById('memory-input').value = '';
-  saveState(); renderUs();
+// ═════════════════════════════════════════════════════════════════════════════
+// US PAGE
+// ═════════════════════════════════════════════════════════════════════════════
+function addMemory(){
+  const t=document.getElementById('memory-input').value.trim();if(!t)return;
+  S.memories.unshift({text:t,date:new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})});
+  document.getElementById('memory-input').value='';saveState();renderUs();
 }
 
-function renderUs() {
-  document.getElementById('stat-qs').textContent = S.archive.filter(a => a.myAns).length;
-  document.getElementById('stat-places').textContent = S.places.length;
-  const mem = document.getElementById('us-memories');
-  if (S.memories.length === 0) {
-    mem.innerHTML = '<div style="font-size:13px;color:var(--ink-light);padding:8px 0;font-weight:500;">Catat momen pertamamu di atas ✦</div>';
+function renderUs(){
+  // Hari bersama — calculated from sinceDate
+  const sincEl=document.getElementById('us-since');
+  const daysEl=document.getElementById('stat-days');
+  if(S.sinceDate){
+    // Parse YYYY-MM-DD as LOCAL midnight (not UTC) to avoid the +7hr timezone offset
+    // causing the counter to show -1 day until 7am on the start date itself.
+    const [sy,sm,sd] = S.sinceDate.split('-').map(Number);
+    const sinceLocal = new Date(sy, sm-1, sd); // local midnight
+    const todayLocal = new Date(); todayLocal.setHours(0,0,0,0);
+    const diff = Math.floor((todayLocal - sinceLocal) / 86400000);
+    if(sincEl) sincEl.textContent='Sejak '+sinceLocal.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+    if(daysEl) daysEl.textContent=Math.max(0,diff);
   } else {
-    mem.innerHTML = S.memories.map(m => `
-      <div class="memory-item">
-        <div class="memory-dot"></div>
-        <div>
-          <div class="memory-date">${m.date}</div>
-          <div class="memory-text">${m.text}</div>
-        </div>
-      </div>`).join('');
+    if(sincEl) sincEl.textContent='Atur tanggal di pertemuan → Edit';
+    if(daysEl) daysEl.textContent='—';
   }
+
+  document.getElementById('stat-qs').textContent     = S.archive.filter(a=>a.bobbyAns||a.yudditAns).length;
+  document.getElementById('stat-places').textContent  = S.places.length;
+
+  const mem=document.getElementById('us-memories');
+  if(S.memories.length===0){
+    mem.innerHTML='<div style="font-size:13px;color:var(--ink-light);padding:8px 0;font-weight:500;">Catat momen pertamamu di atas ✦</div>';
+    return;
+  }
+  mem.innerHTML=S.memories.map(m=>`<div class="memory-item"><div class="memory-dot"></div><div><div class="memory-date">${m.date}</div><div class="memory-text">${m.text}</div></div></div>`).join('');
 }
 
-init();
+// ═════════════════════════════════════════════════════════════════════════════
+// BOOTSTRAP
+// ═════════════════════════════════════════════════════════════════════════════
+if (WHO) {
+  // Already identified — hide the identity screen and start
+  document.getElementById('identity-screen').classList.add('hidden');
+  applyIdentityUI();
+  init();
+}
+// If WHO is null, identity screen remains visible; setIdentity() calls init()
 </script>
 </body>
 </html>
