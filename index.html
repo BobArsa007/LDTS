@@ -123,12 +123,22 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
 .q-day-label{font-size:11px;color:var(--rose-deep);font-weight:600;letter-spacing:0.02em;}
 .q-text{font-family:'Lora',serif;font-size:15px;color:var(--ink);line-height:1.65;margin-bottom:10px;font-style:italic;}
 .q-hint{font-size:11px;color:var(--ink-light);display:flex;align-items:center;gap:5px;font-weight:500;}
-.q-refresh-btn{background:transparent;border:none;cursor:pointer;color:var(--ink-light);padding:3px;border-radius:6px;display:flex;align-items:center;transition:color 0.15s;}
-.q-refresh-btn:hover{color:var(--rose-deep);}
-.q-refresh-btn svg{transition:transform 0.3s;}
-.q-refresh-btn.spinning svg{animation:spin 0.7s linear infinite;}
-.q-refresh-btn:disabled{opacity:0.3;cursor:not-allowed;}
-@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.q-edit-btn{background:transparent;border:0.5px solid var(--rose-mid);color:var(--rose-deep);padding:3px 10px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s;display:none;}
+.q-edit-btn:hover{background:#fff0f3;}
+.q-edit-btn.visible{display:inline-flex;align-items:center;gap:4px;}
+.q-empty{font-family:'Lora',serif;font-size:14px;color:var(--ink-light);font-style:italic;line-height:1.6;}
+
+/* ── Bobby's question editor (only shown to Bobby) ── */
+.q-editor-wrap{display:none;padding:14px 18px;background:linear-gradient(135deg,#fdf8ff,#f8f0fb);border-top:0.5px solid var(--border);}
+.q-editor-wrap.open{display:block;}
+.q-editor-label{font-size:10px;font-weight:600;color:var(--ink-light);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
+.q-editor-textarea{width:100%;border:0.5px solid var(--border-mid);border-radius:12px;padding:11px 13px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--warm);resize:none;height:80px;outline:none;line-height:1.65;transition:border-color 0.2s;}
+.q-editor-textarea:focus{border-color:#A07AB8;background:#fff;}
+.q-editor-actions{display:flex;gap:8px;margin-top:10px;}
+.q-editor-cancel{flex:1;padding:9px;border:0.5px solid var(--border-mid);border-radius:10px;background:transparent;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:var(--ink-light);cursor:pointer;font-weight:600;}
+.q-editor-save{flex:2;padding:9px;background:linear-gradient(135deg,#7B5EA7,#5C4480);color:white;border:none;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:opacity 0.15s;}
+.q-editor-save:hover{opacity:0.88;}
+
 .q-skeleton{background:linear-gradient(90deg,var(--warm) 25%,var(--warm-dark) 50%,var(--warm) 75%);background-size:200% 100%;animation:shimmer 1.6s infinite;border-radius:6px;margin-bottom:8px;}
 .q-skeleton.long{width:92%;height:16px;}
 .q-skeleton.med{width:72%;height:16px;margin-top:6px;}
@@ -262,9 +272,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
 <body>
 <div class="app" id="app">
 
-  <!-- ═══════════════════════════════════════════════════════
-       IDENTITY SCREEN — shown once on first launch per device
-       ═══════════════════════════════════════════════════════ -->
+  <!-- IDENTITY SCREEN -->
   <div class="identity-screen" id="identity-screen">
     <div class="id-logo">LD<em>TS</em></div>
     <div class="id-tagline">long distance, talking stage</div>
@@ -287,9 +295,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════
-       DESKTOP SIDEBAR
-       ═══════════════════════════════════════ -->
+  <!-- DESKTOP SIDEBAR -->
   <aside class="desktop-sidebar">
     <div class="sidebar-logo-lockup">
       <div class="logo-mark"><span class="logo-ld">LD</span><span class="logo-ts">TS</span></div>
@@ -320,9 +326,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
     </div>
   </aside>
 
-  <!-- ═══════════════════════════════════════
-       MAIN CONTENT
-       ═══════════════════════════════════════ -->
+  <!-- MAIN CONTENT -->
   <div class="content-area">
     <div class="header">
       <div class="logo-lockup">
@@ -351,7 +355,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
       </button>
     </nav>
 
-    <!-- ── HOME PAGE ── -->
+    <!-- HOME PAGE -->
     <div class="page active" id="page-home">
       <div class="home-map-row">
         <div id="home-map" style="width:100%;height:168px;z-index:1;"></div>
@@ -385,24 +389,35 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
             <div class="q-top">
               <div class="q-day-row">
                 <span class="q-day-label" id="q-date-label">—</span>
-                <button class="q-refresh-btn" id="q-refresh-btn" onclick="refreshQuestion()" title="Ganti pertanyaan" disabled>
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path d="M12.5 2.5A6 6 0 1 0 13 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M13 2.5V5.5H10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
+                <!-- Edit button: only visible to Bobby when nobody has answered yet -->
+                <button class="q-edit-btn" id="q-edit-btn" onclick="toggleQuestionEditor()">
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2L3 11H1v-2L8.5 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  Atur pertanyaan
                 </button>
               </div>
               <div id="q-loading"><div class="q-skeleton long"></div><div class="q-skeleton med"></div></div>
               <div class="q-text" id="q-text" style="display:none;"></div>
+              <div class="q-empty" id="q-empty" style="display:none;">Belum ada pertanyaan untuk hari ini.<br>Bobby bisa mengaturnya di atas. 💌</div>
               <div class="q-hint" id="q-hint" style="display:none;">
                 <svg width="10" height="12" viewBox="0 0 10 12" fill="none"><rect x="1" y="5" width="8" height="7" rx="1.5" stroke="#A394A8" stroke-width="1.2"/><path d="M3 5V3.5a2 2 0 0 1 4 0V5" stroke="#A394A8" stroke-width="1.2"/></svg>
                 Jawabanmu terkunci sebelum kamu lihat punya dia
               </div>
             </div>
-            <div class="q-divider"></div>
+
+            <!-- Bobby-only question editor -->
+            <div class="q-editor-wrap" id="q-editor-wrap">
+              <div class="q-editor-label">✏️ Tulis pertanyaan untuk hari ini</div>
+              <textarea class="q-editor-textarea" id="q-editor-textarea" placeholder="Tulis pertanyaannya di sini..."></textarea>
+              <div class="q-editor-actions">
+                <button class="q-editor-cancel" onclick="closeQuestionEditor()">Batal</button>
+                <button class="q-editor-save" onclick="saveQuestion()">Simpan &amp; Kirim 💌</button>
+              </div>
+            </div>
+
+            <div class="q-divider" id="q-divider"></div>
             <div class="q-body" id="q-input-area">
               <textarea class="q-textarea" id="q-textarea" placeholder="Tulis jawabanmu di sini..." disabled></textarea>
-              <button class="submit-btn" id="submit-btn" onclick="submitAnswer()" disabled>Memuat pertanyaan...</button>
+              <button class="submit-btn" id="submit-btn" onclick="submitAnswer()" disabled>Menunggu pertanyaan...</button>
             </div>
             <div class="answered-wrap" id="answered-wrap">
               <div class="answered-label">Jawabanmu</div>
@@ -451,7 +466,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
       </div>
     </div>
 
-    <!-- ── WISHLIST PAGE ── -->
+    <!-- WISHLIST PAGE -->
     <div class="page wishlist-page" id="page-wishlist">
       <div class="wishlist-map-col" style="position:relative;">
         <div id="leaflet-map"></div>
@@ -479,7 +494,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
       </div>
     </div>
 
-    <!-- ── ARCHIVE PAGE ── -->
+    <!-- ARCHIVE PAGE -->
     <div class="page" id="page-archive">
       <div class="archive-body" id="archive-body">
         <div class="archive-empty" id="archive-empty">
@@ -489,7 +504,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
       </div>
     </div>
 
-    <!-- ── US PAGE ── -->
+    <!-- US PAGE -->
     <div class="page" id="page-us">
       <div class="us-body">
         <div class="us-hero">
@@ -516,7 +531,7 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
       </div>
     </div>
 
-    <!-- ── MEETUP MODAL ── -->
+    <!-- MEETUP MODAL -->
     <div class="modal-backdrop" id="meetup-modal" onclick="if(event.target===this)closeMeetupModal()">
       <div class="modal">
         <div class="modal-title">Rencanakan pertemuan</div>
@@ -537,23 +552,21 @@ body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 4
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // CONFIG
-// ═════════════════════════════════════════════════════════════════════════════
-const GEMINI_KEY = 'AIzaSyBcFkTh9D19cAMETnExa95pZwsf55tpfzQ';
-const JBIN_KEY   = '$2a$10$aOMy.0xdjfpp1ly5ZZWtCuD65YDOf8msitXmJj2FDeS5XT1AQcN1y';
-const JBIN_BASE  = 'https://api.jsonbin.io/v3/b';
-let   BIN_ID     = localStorage.getItem('ldts_bin_id') || '69f5a28536566621a817060f';
+// ═══════════════════════════════════════════════════════
+const JBIN_KEY  = '$2a$10$aOMy.0xdjfpp1ly5ZZWtCuD65YDOf8msitXmJj2FDeS5XT1AQcN1y';
+const JBIN_BASE = 'https://api.jsonbin.io/v3/b';
+let   BIN_ID    = localStorage.getItem('ldts_bin_id') || '69f5a28536566621a817060f';
 
-// ═════════════════════════════════════════════════════════════════════════════
-// IDENTITY  — stored only in localStorage (device-local, never synced)
-// 'bobby' | 'yuddit' | null (not yet chosen)
-// ═════════════════════════════════════════════════════════════════════════════
-let WHO = localStorage.getItem('ldts_who'); // 'bobby' | 'yuddit' | null
+// ═══════════════════════════════════════════════════════
+// IDENTITY
+// ═══════════════════════════════════════════════════════
+let WHO = localStorage.getItem('ldts_who');
 
-function partner() { return WHO === 'bobby' ? 'yuddit' : 'bobby'; }
+function partner()     { return WHO === 'bobby' ? 'yuddit' : 'bobby'; }
 function partnerName() { return WHO === 'bobby' ? 'Yuddit' : 'Bobby'; }
-function myName()    { return WHO === 'bobby' ? 'Bobby'  : 'Yuddit'; }
+function myName()      { return WHO === 'bobby' ? 'Bobby'  : 'Yuddit'; }
 
 function setIdentity(who) {
   WHO = who;
@@ -569,86 +582,49 @@ function applyIdentityUI() {
   if (el) el.textContent = myName();
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// SHARED STATE  — synced via JSONBin between both devices
-// Archive entries use bobbyAns / yudditAns (not myAns/herAns)
-// Answered state is per-person: bobbyAnswered, yudditAnswered, etc.
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// SHARED STATE
+// ═══════════════════════════════════════════════════════
 const S = {
-  // Per-person answered state (stored in shared cloud so partner can see)
-  bobbyAnswered:    false,
-  bobbyAnswer:      '',
-  bobbyAnsweredDate: null,
-  yudditAnswered:    false,
-  yudditAnswer:     '',
-  yudditAnsweredDate: null,
-
-  // Shared data
-  meetup:           null,
-  sinceDate:        null,   // the "jadian since" date string (YYYY-MM-DD)
-  places:           [],
-  archive:          [],     // [{dateKey, date, q, bobbyAns, yudditAns}]
-  memories:         [],
-  selectedCat:      'city',
-
-  // Daily question (shared — generated once, read by both)
-  todayQuestion:     null,
-  todayQuestionDate: null
+  bobbyAnswered: false, bobbyAnswer: '', bobbyAnsweredDate: null,
+  yudditAnswered: false, yudditAnswer: '', yudditAnsweredDate: null,
+  meetup: null, sinceDate: null,
+  places: [], archive: [], memories: [],
+  selectedCat: 'city',
+  todayQuestion: null, todayQuestionDate: null
 };
 
-// ═════════════════════════════════════════════════════════════════════════════
-// FALLBACK QUESTIONS
-// ═════════════════════════════════════════════════════════════════════════════
-const FALLBACK_QUESTIONS = [
-  "Kalau bisa menghabiskan satu hari penuh sama orang yang kamu suka tanpa gangguan apapun, kamu mau ngapain?",
-  "Hal apa yang biasanya kamu ceritain ke bestie tapi belum pernah kamu ceritain ke orang yang kamu suka?",
-  "Momen apa yang pertama kali bikin kamu mikirin seseorang lebih dari yang kamu kira?",
-  "Seberapa sering kamu cek HP cuma buat lihat apakah ada pesan dari orang tertentu?",
-  "Tipe kencan pertama seperti apa yang menurutmu paling memorable — santai atau yang sudah direncanain matang?",
-  "Kalau lagi nunggu balasan chat, kamu tipe yang sabar atau yang ngetik ulang pesannya berkali-kali?",
-  "Hal kecil apa yang dilakukan seseorang bisa langsung bikin kamu senyum tanpa alasan jelas?",
-  "Seberapa penting chemistry lewat chat sebelum ketemu langsung buat kamu?",
-  "Lagu apa yang akhir-akhir ini sering kamu dengerin, dan kenapa lagu itu yang nyangkut?",
-  "Pesan chat seperti apa yang paling bikin kamu deg-degan waktu menerimanya?",
-  "Kamu lebih suka ngobrol panjang sampai dini hari atau quality time pendek tapi intense?",
-  "Ada nggak momen di mana kamu ngerasa seseorang benar-benar ngerti kamu tanpa harus banyak dijelasin?",
-  "Hal apa yang paling kamu takutin dari proses saling mengenal seseorang secara serius?",
-  "Satu hal yang pasti bikin kamu jatuh lebih dalam ke seseorang itu apa?",
-  "Kalau bisa kirim satu lagu ke orang yang kamu suka malam ini tanpa perlu penjelasan, lagu apa yang kamu pilih?"
-];
+const CAT_EMOJI  = {city:'🏙',nature:'🌿',beach:'🌊',culture:'🏛',food:'🍜'};
+const CAT_LABEL  = {city:'Kota',nature:'Alam',beach:'Pantai',culture:'Budaya',food:'Kuliner'};
 
-const CAT_EMOJI = {city:'🏙',nature:'🌿',beach:'🌊',culture:'🏛',food:'🍜'};
-const CAT_LABEL = {city:'Kota',nature:'Alam',beach:'Pantai',culture:'Budaya',food:'Kuliner'};
-
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // HELPERS
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-function showSyncStatus(msg, color = 'var(--ink-light)') {
+function showSyncStatus(msg, color='var(--ink-light)') {
   ['sync-status','sync-status-m'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.textContent = msg; el.style.color = color; }
   });
 }
 
-function myAnswered()       { return WHO === 'bobby' ? S.bobbyAnswered    : S.yudditAnswered; }
-function myAnswer()         { return WHO === 'bobby' ? S.bobbyAnswer      : S.yudditAnswer; }
-function myAnsweredDate()   { return WHO === 'bobby' ? S.bobbyAnsweredDate : S.yudditAnsweredDate; }
-function partnerAnswered()  { return WHO === 'bobby' ? S.yudditAnswered   : S.bobbyAnswered; }
-function partnerAnswer()    { return WHO === 'bobby' ? S.yudditAnswer     : S.bobbyAnswer; }
+function myAnswered()      { return WHO === 'bobby' ? S.bobbyAnswered    : S.yudditAnswered; }
+function myAnswer()        { return WHO === 'bobby' ? S.bobbyAnswer      : S.yudditAnswer; }
+function myAnsweredDate()  { return WHO === 'bobby' ? S.bobbyAnsweredDate : S.yudditAnsweredDate; }
+function partnerAnswered() { return WHO === 'bobby' ? S.yudditAnswered   : S.bobbyAnswered; }
 
 function setMyAnswered(val, answer, date) {
   if (WHO === 'bobby') { S.bobbyAnswered = val; S.bobbyAnswer = answer; S.bobbyAnsweredDate = date; }
   else                 { S.yudditAnswered = val; S.yudditAnswer = answer; S.yudditAnsweredDate = date; }
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// CLOUD  (JSONBin)
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// CLOUD (JSONBin)
+// ═══════════════════════════════════════════════════════
 async function cloudLoad() {
   if (!BIN_ID) return false;
   try {
@@ -666,7 +642,6 @@ async function cloudSave() {
   showSyncStatus('Menyimpan...', 'var(--ink-light)');
   try {
     if (!BIN_ID) {
-      // First save — create the bin
       const r = await fetch(JBIN_BASE, {
         method: 'POST',
         headers: {'Content-Type':'application/json','X-Master-Key':JBIN_KEY,'X-Bin-Name':'LDTS-Bobby-Yuddit','X-Private':'true'},
@@ -677,61 +652,48 @@ async function cloudSave() {
       BIN_ID = d.metadata.id;
       localStorage.setItem('ldts_bin_id', BIN_ID);
     } else {
-      // ── Merge-before-write ─────────────────────────────────────────────────
-      // Fetch latest cloud record, merge our changes on top, then PUT.
-      // This prevents the race condition where two devices save simultaneously
-      // and the second write silently overwrites the first person's answer.
       let base = S;
       try {
-        const cr = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, {
-          headers: {'X-Master-Key': JBIN_KEY}
-        });
+        const cr = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, { headers: {'X-Master-Key': JBIN_KEY} });
         if (cr.ok) {
           const cloud = (await cr.json()).record || {};
-          // Start with cloud as the base, overlay local on top
           const merged = { ...cloud, ...S };
 
-          // Answered state: keep whichever side is true
           if (cloud.bobbyAnswered && !S.bobbyAnswered) {
-            merged.bobbyAnswered    = cloud.bobbyAnswered;
-            merged.bobbyAnswer      = cloud.bobbyAnswer;
+            merged.bobbyAnswered = cloud.bobbyAnswered;
+            merged.bobbyAnswer = cloud.bobbyAnswer;
             merged.bobbyAnsweredDate = cloud.bobbyAnsweredDate;
           }
           if (cloud.yudditAnswered && !S.yudditAnswered) {
-            merged.yudditAnswered    = cloud.yudditAnswered;
-            merged.yudditAnswer      = cloud.yudditAnswer;
+            merged.yudditAnswered = cloud.yudditAnswered;
+            merged.yudditAnswer = cloud.yudditAnswer;
             merged.yudditAnsweredDate = cloud.yudditAnsweredDate;
           }
 
-          // Archive: merge by dateKey, preserving both answers
           const aMap = {};
           (cloud.archive || []).forEach(a => { aMap[a.dateKey || a.date] = { ...a }; });
           (S.archive || []).forEach(a => {
             const k = a.dateKey || a.date;
             if (aMap[k]) {
-              aMap[k] = {
-                ...aMap[k], ...a,
+              aMap[k] = { ...aMap[k], ...a,
                 bobbyAns:  a.bobbyAns  || aMap[k].bobbyAns  || null,
                 yudditAns: a.yudditAns || aMap[k].yudditAns || null,
               };
-            } else {
-              aMap[k] = { ...a };
-            }
+            } else { aMap[k] = { ...a }; }
           });
           merged.archive = Object.values(aMap)
-            .sort((a, b) => (b.dateKey || b.date) > (a.dateKey || a.date) ? 1 : -1);
+            .sort((a,b) => (b.dateKey||b.date) > (a.dateKey||a.date) ? 1 : -1);
 
-          // todayQuestion: keep cloud's if local has none for today
           const todayK = todayKey();
           if (cloud.todayQuestion && cloud.todayQuestionDate === todayK && !S.todayQuestion) {
-            merged.todayQuestion     = cloud.todayQuestion;
+            merged.todayQuestion = cloud.todayQuestion;
             merged.todayQuestionDate = cloud.todayQuestionDate;
           }
 
           base = merged;
-          Object.assign(S, merged); // keep in-memory state in sync
+          Object.assign(S, merged);
         }
-      } catch(mergeErr) { /* merge fetch failed — write local S as-is */ }
+      } catch(e) {}
 
       const r = await fetch(`${JBIN_BASE}/${BIN_ID}`, {
         method: 'PUT',
@@ -751,19 +713,16 @@ async function cloudSave() {
 
 function loadState() {
   try {
-    // Migrate old v2 data if present
-    const old = localStorage.getItem('ldts_v2');
     const cur = localStorage.getItem('ldts_v3');
     if (cur) { Object.assign(S, JSON.parse(cur)); return; }
+    const old = localStorage.getItem('ldts_v2');
     if (old) {
       const o = JSON.parse(old);
-      // Map old myAns → bobbyAns in archive entries
       if (o.archive) o.archive.forEach(a => {
-        if (!a.bobbyAns && a.myAns)   a.bobbyAns  = a.myAns;
+        if (!a.bobbyAns && a.myAns) a.bobbyAns = a.myAns;
         if (!a.yudditAns && a.herAns) a.yudditAns = a.herAns;
         delete a.myAns; delete a.herAns;
       });
-      // Map old answered state
       if (o.answered) { S.bobbyAnswered = true; S.bobbyAnswer = o.answer || ''; S.bobbyAnsweredDate = o.answeredDate; }
       Object.assign(S, o);
     }
@@ -771,142 +730,78 @@ function loadState() {
 }
 function saveState() { clearTimeout(syncTimer); syncTimer = setTimeout(cloudSave, 600); }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// GEMINI PROMPT
-// ═════════════════════════════════════════════════════════════════════════════
-function buildPrompt(dateKey) {
-  return `Kamu membuat pertanyaan harian untuk aplikasi LDTS milik Bobby (Semarang) dan Yuddit (Bogor). Mereka sedang dalam fase talking stage — saling tertarik, belum resmi pacaran, sedang dalam proses saling mengenal lebih dalam.
+// ═══════════════════════════════════════════════════════
+// QUESTION UI — Bobby sets it, both answer it
+// ═══════════════════════════════════════════════════════
 
-Tanggal hari ini: ${dateKey}
-
-Buat SATU pertanyaan dengan aturan ketat berikut:
-
-WAJIB DIPENUHI:
-- Topik relevan dengan fase talking stage: perasaan awal, kebiasaan saat suka seseorang, ekspektasi hubungan, atau self-awareness soal jatuh cinta
-- Bahasa Indonesia yang natural dan hangat — bukan formal kaku, bukan lebay
-- Jika ada kata ganti orang pertama dalam pertanyaan, WAJIB gunakan "Saya" — contoh: "Saya biasanya...", "hal yang Saya perhatiin"
-- Satu kalimat, diakhiri tanda tanya
-- Relatable, sedikit witty, atau menyentuh secara psikologis
-
-DILARANG KERAS:
-- Kata "aku", "ku" dalam bentuk apapun: "aku rasa", "menurutku", "hatiku", "bagiku"
-- Ungkapan puitis atau romantis berlebihan: "bintang di langit", "detak jantung", "kamu adalah segalanya", "jatuh ke pelukanmu", "mimpi indah bersamamu"
-- Pertanyaan yang terdengar seperti lirik lagu galau atau caption foto sunset
-- Nada cringe, mellow berlebihan, atau sok dalam
-- Pertanyaan ya/tidak yang tidak memancing cerita
-- Selalu diawali "Kalau" atau "Apa"
-
-CONTOH NADA TEPAT (jangan salin, jadikan referensi nada):
-"Seberapa sering kamu cek HP cuma buat lihat apakah ada pesan dari orang tertentu?"
-"Hal kecil apa yang dilakukan seseorang bisa langsung bikin kamu senyum tanpa alasan jelas?"
-"Saat Saya mulai suka sama seseorang, hal pertama yang biasanya Saya perhatiin dari mereka itu apa?"
-
-CONTOH NADA SALAH:
-"Bintang mana yang kamu pilih untuk menemani malammu?" ← puitis murahan
-"Aku ingin selalu ada untukmu, kamu bagaimana?" ← lebay + pakai "aku"
-
-Kembalikan HANYA teks pertanyaannya saja. Tanpa tanda kutip, tanpa penjelasan, tanpa angka.`;
+// Toggle the editor panel open/closed (Bobby only)
+function toggleQuestionEditor() {
+  const wrap = document.getElementById('q-editor-wrap');
+  const isOpen = wrap.classList.contains('open');
+  if (isOpen) {
+    closeQuestionEditor();
+  } else {
+    // Pre-fill with today's question if one exists
+    const ta = document.getElementById('q-editor-textarea');
+    ta.value = S.todayQuestion && S.todayQuestionDate === todayKey() ? S.todayQuestion : '';
+    wrap.classList.add('open');
+    ta.focus();
+  }
 }
 
-async function callGemini(dateKey) {
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
-    { method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ contents:[{parts:[{text:buildPrompt(dateKey)}]}], generationConfig:{maxOutputTokens:150,temperature:1.0} }) }
-  );
-  if (!res.ok) throw new Error('Gemini HTTP ' + res.status);
-  const data = await res.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-  if (!text) throw new Error('Empty response');
-  return text;
+function closeQuestionEditor() {
+  document.getElementById('q-editor-wrap').classList.remove('open');
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// DAILY QUESTION  — cloud-first, single-generator
-// ═════════════════════════════════════════════════════════════════════════════
-async function fetchDailyQuestion(forceNew = false) {
-  const key      = todayKey();
-  const cacheKey = `ldts_q_${key}`;
-
-  // 1. Local cache
-  if (!forceNew) {
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) return cached;
+// Bobby saves the question — syncs to cloud so Yuddit sees it
+function saveQuestion() {
+  const text = document.getElementById('q-editor-textarea').value.trim();
+  if (!text) return;
+  const todayK = todayKey();
+  S.todayQuestion = text;
+  S.todayQuestionDate = todayK;
+  // Reset any stale answered state for today if the question changes
+  // (only if nobody has answered yet)
+  if (!S.bobbyAnswered && !S.yudditAnswered) {
+    S.bobbyAnsweredDate = null;
+    S.yudditAnsweredDate = null;
   }
-
-  // 2. Cloud — use it if today's question is already there
-  if (!forceNew && BIN_ID) {
-    try {
-      const r  = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, { headers: {'X-Master-Key': JBIN_KEY} });
-      if (r.ok) {
-        const d  = await r.json();
-        const cQ = d.record?.todayQuestion;
-        const cD = d.record?.todayQuestionDate;
-        if (cQ && cD === key) {
-          localStorage.setItem(cacheKey, cQ);
-          S.todayQuestion = cQ; S.todayQuestionDate = key;
-          return cQ;
-        }
-      }
-    } catch(e) { /* fall through */ }
-  }
-
-  // 3. Generate via Gemini (this device becomes leader for today)
-  try {
-    const question = await callGemini(key);
-    localStorage.setItem(cacheKey, question);
-    S.todayQuestion = question; S.todayQuestionDate = key;
-    saveState();
-    return question;
-  } catch(e) { console.warn('Gemini failed:', e); }
-
-  // 4. Static fallback
-  const idx      = forceNew
-    ? Math.floor(Math.random() * FALLBACK_QUESTIONS.length)
-    : parseInt(key.replace(/-/g,'')) % FALLBACK_QUESTIONS.length;
-  const fallback = FALLBACK_QUESTIONS[idx];
-  localStorage.setItem(cacheKey, fallback);
-  S.todayQuestion = fallback; S.todayQuestionDate = key;
   saveState();
-  return fallback;
+  closeQuestionEditor();
+  showQuestion(text);
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// QUESTION UI
-// ═════════════════════════════════════════════════════════════════════════════
 function showQuestion(text) {
-  document.getElementById('q-loading').style.display = 'none';
+  document.getElementById('q-loading').style.display  = 'none';
+  document.getElementById('q-empty').style.display    = 'none';
   const qText = document.getElementById('q-text');
-  qText.style.display  = 'block';
-  qText.textContent    = '\u201C' + text + '\u201D';
-  document.getElementById('q-hint').style.display = 'flex';
+  qText.style.display = 'block';
+  qText.textContent   = '\u201C' + text + '\u201D';
+  document.getElementById('q-hint').style.display     = 'flex';
 
   const d = new Date();
   document.getElementById('q-date-label').textContent =
     d.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'});
 
-  const todayK = todayKey();
-  const iAnswered   = myAnswered()      && myAnsweredDate()      === todayK;
-  const theyAnswered = partnerAnswered() && (WHO === 'bobby' ? S.yudditAnsweredDate : S.bobbyAnsweredDate) === todayK;
+  const todayK       = todayKey();
+  const iAnswered    = myAnswered()      && myAnsweredDate()      === todayK;
+  const theyAnswered = partnerAnswered() && (WHO==='bobby' ? S.yudditAnsweredDate : S.bobbyAnsweredDate) === todayK;
 
-  // Refresh button: only visible if nobody has answered yet
-  const rb = document.getElementById('q-refresh-btn');
-  if (iAnswered || theyAnswered) {
-    rb.style.display = 'none';
+  // Show "Atur pertanyaan" edit button only to Bobby, and only if nobody answered yet
+  const editBtn = document.getElementById('q-edit-btn');
+  if (WHO === 'bobby' && !iAnswered && !theyAnswered) {
+    editBtn.classList.add('visible');
   } else {
-    rb.style.display = 'flex';
-    rb.disabled = false;
-    rb.classList.remove('spinning');
+    editBtn.classList.remove('visible');
+    closeQuestionEditor();
   }
 
   if (iAnswered) {
-    // Show answered state
     document.getElementById('q-input-area').style.display  = 'none';
     document.getElementById('answered-wrap').style.display = 'block';
     document.getElementById('answered-bubble').textContent = myAnswer();
     renderPartnerStatus(theyAnswered);
   } else {
-    // Show input
     document.getElementById('q-input-area').style.display  = 'block';
     document.getElementById('answered-wrap').style.display = 'none';
     const ta  = document.getElementById('q-textarea');
@@ -915,6 +810,36 @@ function showQuestion(text) {
     ta.placeholder  = 'Tulis jawabanmu di sini...';
     btn.disabled    = false;
     btn.textContent = 'Kunci jawaban 🔒';
+  }
+}
+
+function showNoQuestion() {
+  document.getElementById('q-loading').style.display = 'none';
+  document.getElementById('q-text').style.display    = 'none';
+  document.getElementById('q-hint').style.display    = 'none';
+  document.getElementById('q-input-area').style.display  = 'block';
+  document.getElementById('answered-wrap').style.display = 'none';
+
+  const ta  = document.getElementById('q-textarea');
+  const btn = document.getElementById('submit-btn');
+  ta.disabled     = true;
+  ta.placeholder  = 'Menunggu Bobby menulis pertanyaan...';
+  btn.disabled    = true;
+  btn.textContent = 'Menunggu pertanyaan...';
+
+  const d = new Date();
+  document.getElementById('q-date-label').textContent =
+    d.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'});
+
+  if (WHO === 'bobby') {
+    document.getElementById('q-empty').style.display = 'none';
+    // Show edit button so Bobby can set the question
+    const editBtn = document.getElementById('q-edit-btn');
+    editBtn.classList.add('visible');
+    // Hint for Bobby
+    ta.placeholder  = 'Tulis pertanyaannya dulu lewat tombol di atas...';
+  } else {
+    document.getElementById('q-empty').style.display = 'block';
   }
 }
 
@@ -928,93 +853,65 @@ function renderPartnerStatus(theyAnswered) {
   }
 }
 
-async function refreshQuestion() {
-  const todayK = todayKey();
-  // Block refresh if either person has already answered
-  if ((myAnswered() && myAnsweredDate() === todayK) ||
-      (partnerAnswered() && (WHO==='bobby'?S.yudditAnsweredDate:S.bobbyAnsweredDate) === todayK)) return;
-
-  const rb = document.getElementById('q-refresh-btn');
-  rb.disabled = true; rb.classList.add('spinning');
-
-  document.getElementById('q-loading').style.display    = 'block';
-  document.getElementById('q-text').style.display       = 'none';
-  document.getElementById('q-hint').style.display       = 'none';
-  document.getElementById('q-textarea').value           = '';
-  document.getElementById('q-textarea').disabled        = true;
-  document.getElementById('submit-btn').disabled        = true;
-  document.getElementById('submit-btn').textContent     = 'Memuat pertanyaan...';
-
-  localStorage.removeItem(`ldts_q_${todayK}`);
-  S.todayQuestion = null; S.todayQuestionDate = null;
-
-  const question = await fetchDailyQuestion(true);
-  showQuestion(question);
-}
-
-// ═════════════════════════════════════════════════════════════════════════════
-// CROSS-DEVICE SYNC  (every 30 s — picks up partner's answer + question changes)
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// CROSS-DEVICE SYNC (every 30s)
+// ═══════════════════════════════════════════════════════
 function startSyncCheck() {
   setInterval(async () => {
     if (!BIN_ID) return;
     const key = todayKey();
     try {
-      const r  = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, { headers: {'X-Master-Key': JBIN_KEY} });
+      const r   = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, { headers: {'X-Master-Key': JBIN_KEY} });
       if (!r.ok) return;
-      const d  = await r.json();
-      const rec = d.record;
+      const rec = (await r.json()).record;
 
       let changed = false;
 
-      // Check if partner answered since we last loaded
-      const partnerKey     = partner();
-      const partnerAnsField = partnerKey + 'Answer';
+      // Check if partner answered
+      const partnerKey      = partner();
+      const partnerAnsField  = partnerKey + 'Answer';
       const partnerDoneField = partnerKey + 'Answered';
       const partnerDateField = partnerKey + 'AnsweredDate';
       if (rec[partnerDoneField] && rec[partnerDateField] === key && !S[partnerDoneField]) {
-        S[partnerDoneField]  = rec[partnerDoneField];
-        S[partnerAnsField]   = rec[partnerAnsField];
-        S[partnerDateField]  = rec[partnerDateField];
-        // Also update today's archive entry so it shows the partner's answer immediately
+        S[partnerDoneField] = rec[partnerDoneField];
+        S[partnerAnsField]  = rec[partnerAnsField];
+        S[partnerDateField] = rec[partnerDateField];
         const entry = S.archive.find(a => a.dateKey === key);
-        if (entry) entry[partnerKey + 'Ans'] = rec[partnerAnsField]; // 'bobbyAns' or 'yudditAns'
+        if (entry) entry[partnerKey + 'Ans'] = rec[partnerAnsField];
         changed = true;
       }
 
-      // Check if question changed (other device refreshed)
+      // Check if Bobby updated the question
       const cQ = rec?.todayQuestion;
       const cD = rec?.todayQuestionDate;
       if (cQ && cD === key && cQ !== S.todayQuestion) {
         S.todayQuestion = cQ; S.todayQuestionDate = key;
-        localStorage.setItem(`ldts_q_${key}`, cQ);
         changed = true;
       }
 
       if (changed) {
         localStorage.setItem('ldts_v3', JSON.stringify(S));
-        if (S.todayQuestion) showQuestion(S.todayQuestion);
+        if (S.todayQuestion && S.todayQuestionDate === key) showQuestion(S.todayQuestion);
+        else showNoQuestion();
         renderArchive(); renderUs();
       }
-    } catch(e) { /* silent */ }
+    } catch(e) {}
   }, 30_000);
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // INIT
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 async function init() {
   loadState();
   renderWishlist(); renderArchive(); renderUs(); fetchWeather();
   setTimeout(initHomeMap,    200);
   setTimeout(initLeafletMap, 300);
 
-  const todayK = todayKey();
-
   if (S.meetup) { updateMeetupUI(); startCountdown(); }
 
   showSyncStatus('Memuat...', 'var(--ink-light)');
-  const ok = await cloudLoad(); // always load cloud first — it has the authoritative state
+  const ok = await cloudLoad();
   if (ok) {
     renderWishlist(); renderArchive(); renderUs();
     showSyncStatus('Tersinkron ✓', '#3D6B56');
@@ -1024,41 +921,33 @@ async function init() {
     showSyncStatus('Offline', 'var(--ink-light)');
   }
 
-  // Date rollover — run AFTER cloudLoad so we don't wipe today's valid cloud state.
-  // Clears any answered state or cached question that belongs to a previous day.
-  const questionStale = S.todayQuestionDate && S.todayQuestionDate !== todayK;
-  if (questionStale) {
-    localStorage.removeItem(`ldts_q_${S.todayQuestionDate}`);
-    S.todayQuestion = null; S.todayQuestionDate = null;
+  // Date rollover
+  const todayK = todayKey();
+  let dirty = false;
+  if (S.todayQuestionDate && S.todayQuestionDate !== todayK) {
+    S.todayQuestion = null; S.todayQuestionDate = null; dirty = true;
   }
-  let rolloverDirty = questionStale;
   if (S.bobbyAnsweredDate  && S.bobbyAnsweredDate  !== todayK) {
-    S.bobbyAnswered  = false; S.bobbyAnswer  = ''; S.bobbyAnsweredDate  = null; rolloverDirty = true;
+    S.bobbyAnswered  = false; S.bobbyAnswer  = ''; S.bobbyAnsweredDate  = null; dirty = true;
   }
   if (S.yudditAnsweredDate && S.yudditAnsweredDate !== todayK) {
-    S.yudditAnswered = false; S.yudditAnswer = ''; S.yudditAnsweredDate = null; rolloverDirty = true;
+    S.yudditAnswered = false; S.yudditAnswer = ''; S.yudditAnsweredDate = null; dirty = true;
   }
-  if (rolloverDirty) saveState();
+  if (dirty) saveState();
 
-  // Show loading skeleton while question fetches
-  document.getElementById('q-loading').style.display    = 'block';
-  document.getElementById('q-text').style.display       = 'none';
-  document.getElementById('q-hint').style.display       = 'none';
-  document.getElementById('q-input-area').style.display = 'block';
-  document.getElementById('answered-wrap').style.display = 'none';
-  document.getElementById('q-textarea').disabled        = true;
-  document.getElementById('submit-btn').disabled        = true;
-  document.getElementById('submit-btn').textContent     = 'Memuat pertanyaan...';
-
-  const question = await fetchDailyQuestion();
-  showQuestion(question);
+  // Show question or empty state
+  if (S.todayQuestion && S.todayQuestionDate === todayK) {
+    showQuestion(S.todayQuestion);
+  } else {
+    showNoQuestion();
+  }
 
   startSyncCheck();
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // TAB SWITCHING
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function switchTab(tab) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn,.sidebar-btn').forEach(b => b.classList.remove('active'));
@@ -1068,66 +957,59 @@ function switchTab(tab) {
   if (tab === 'home')     setTimeout(() => { if (homeMap)    homeMap.invalidateSize();    }, 120);
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // ANSWER SUBMISSION
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function submitAnswer() {
   const val = document.getElementById('q-textarea').value.trim();
   if (!val || !WHO) return;
 
   const todayK = todayKey();
-  const todayQ = document.getElementById('q-text').textContent.replace(/^["""]|["""]$/g, '');
+  const todayQ = S.todayQuestion || '';
 
-  // Record this person's answer
   setMyAnswered(true, val, todayK);
 
-  // Find or create archive entry for today (keyed by dateKey string)
   let entry = S.archive.find(a => a.dateKey === todayK);
   if (!entry) {
     entry = {
       dateKey: todayK,
       date: new Date().toLocaleDateString('id-ID', {day:'numeric', month:'short'}),
       q: todayQ,
-      bobbyAns:  null,
-      yudditAns: null
+      bobbyAns: null, yudditAns: null
     };
     S.archive.unshift(entry);
   }
-  // Write into the correct field
   if (WHO === 'bobby') entry.bobbyAns  = val;
   else                 entry.yudditAns = val;
 
   saveState();
-  showQuestion(todayQ); // re-render card with answered state
+  showQuestion(todayQ);
   renderArchive(); renderUs();
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // COUNTDOWN
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function updateMeetupUI() {
   if (!S.meetup) return;
-  ['cd-title','cd-title-d'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = S.meetup.place; });
+  ['cd-title','cd-title-d'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = S.meetup.place; });
   const [my,mm,md] = S.meetup.date.split('-').map(Number);
-  const meetLocal = new Date(my, mm-1, md);
-  const ds = meetLocal.toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric'});
-  ['cd-sub','cd-sub-d'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ds; });
+  const ds = new Date(my,mm-1,md).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+  ['cd-sub','cd-sub-d'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = ds; });
 }
 let cdTimer = null;
 function startCountdown() { if (cdTimer) clearInterval(cdTimer); cdTimer = setInterval(tickCountdown, 1000); tickCountdown(); }
 function tickCountdown() {
   if (!S.meetup) return;
   const [ty,tm,td] = S.meetup.date.split('-').map(Number);
-  const diff = new Date(ty, tm-1, td) - new Date();
-  const v    = diff <= 0 ? [0,0,0,0] : [
-    Math.floor(diff / 86400000),
-    Math.floor((diff % 86400000) / 3600000),
-    Math.floor((diff % 3600000)  / 60000),
-    Math.floor((diff % 60000)    / 1000)
+  const diff = new Date(ty,tm-1,td) - new Date();
+  const v = diff <= 0 ? [0,0,0,0] : [
+    Math.floor(diff/86400000), Math.floor((diff%86400000)/3600000),
+    Math.floor((diff%3600000)/60000), Math.floor((diff%60000)/1000)
   ];
   ['cd-d','cd-h','cd-m','cd-s'].forEach((id,i) => {
-    const a = document.getElementById(id);      if (a) a.textContent = v[i];
-    const b = document.getElementById(id+'-d'); if (b) b.textContent = v[i];
+    const a = document.getElementById(id);      if(a) a.textContent = v[i];
+    const b = document.getElementById(id+'-d'); if(b) b.textContent = v[i];
   });
 }
 function openMeetupModal() {
@@ -1145,29 +1027,28 @@ function saveMeetup() {
   if (since) S.sinceDate = since;
   saveState();
   if (S.meetup) { updateMeetupUI(); startCountdown(); }
-  renderUs();
-  closeMeetupModal();
+  renderUs(); closeMeetupModal();
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // WEATHER
-// ═════════════════════════════════════════════════════════════════════════════
-const WMO_DESC={0:'Cerah',1:'Cerah berawan',2:'Berawan',3:'Mendung',45:'Berkabut',48:'Berkabut',51:'Gerimis ringan',53:'Gerimis',55:'Gerimis lebat',61:'Hujan ringan',63:'Hujan',65:'Hujan lebat',71:'Salju ringan',73:'Salju',75:'Salju lebat',80:'Hujan lokal',81:'Hujan deras',82:'Hujan sangat deras',95:'Hujan badai',96:'Badai petir',99:'Badai petir lebat'};
-const WMO_ICON={0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌦',63:'🌧',65:'🌧',71:'🌨',73:'❄️',75:'❄️',80:'🌦',81:'🌧',82:'🌧',95:'⛈',96:'⛈',99:'⛈'};
+// ═══════════════════════════════════════════════════════
+const WMO_DESC={0:'Cerah',1:'Cerah berawan',2:'Berawan',3:'Mendung',45:'Berkabut',48:'Berkabut',51:'Gerimis ringan',53:'Gerimis',55:'Gerimis lebat',61:'Hujan ringan',63:'Hujan',65:'Hujan lebat',80:'Hujan lokal',81:'Hujan deras',95:'Hujan badai'};
+const WMO_ICON={0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌦',63:'🌧',65:'🌧',80:'🌦',81:'🌧',95:'⛈'};
 function fetchWeather() {
   [{lat:-6.9932,lon:110.4203,t:'smg-temp',s:'smg-sky',i:'smg-icon'},{lat:-6.5971,lon:106.8060,t:'bgr-temp',s:'bgr-sky',i:'bgr-icon'}].forEach(c => {
     fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,weathercode&timezone=Asia%2FJakarta`)
       .then(r=>r.json()).then(d=>{
-        document.getElementById(c.t).textContent=Math.round(d.current.temperature_2m)+'°C';
-        document.getElementById(c.s).textContent=WMO_DESC[d.current.weathercode]||'Cerah';
-        document.getElementById(c.i).textContent=WMO_ICON[d.current.weathercode]||'🌤';
-      }).catch(()=>{document.getElementById(c.t).textContent='—';document.getElementById(c.s).textContent='Tidak tersedia';});
+        document.getElementById(c.t).textContent = Math.round(d.current.temperature_2m)+'°C';
+        document.getElementById(c.s).textContent = WMO_DESC[d.current.weathercode]||'Cerah';
+        document.getElementById(c.i).textContent = WMO_ICON[d.current.weathercode]||'🌤';
+      }).catch(()=>{ document.getElementById(c.t).textContent='—'; document.getElementById(c.s).textContent='Tidak tersedia'; });
   });
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // MAPS
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 let homeMap=null;
 function initHomeMap(){
   if(homeMap)return;
@@ -1176,7 +1057,7 @@ function initHomeMap(){
   const smgLL=[-6.993,110.420],bgrLL=[-6.597,106.806];
   L.polyline([bgrLL,smgLL],{color:'#C4607A',weight:2,dashArray:'6 5',opacity:0.85}).addTo(homeMap);
   const mk=(ll,lbl,col)=>L.marker(ll,{icon:L.divIcon({html:`<div style="display:flex;flex-direction:column;align-items:center"><div style="width:11px;height:11px;border-radius:50%;background:${col};border:2.5px solid white;box-shadow:0 1px 5px rgba(0,0,0,0.2)"></div><div style="font-size:9px;font-weight:600;margin-top:3px;padding:2px 7px;border-radius:8px;background:white;border:0.5px solid rgba(30,21,32,0.1);color:${col};white-space:nowrap;">${lbl}</div></div>`,className:'',iconAnchor:[5,5]})}).addTo(homeMap);
-  mk(smgLL,'Semarang · Bobby','#5C4E8A');mk(bgrLL,'Bogor · Yuddit','#C4607A');
+  mk(smgLL,'Semarang · Bobby','#5C4E8A'); mk(bgrLL,'Bogor · Yuddit','#C4607A');
   homeMap.fitBounds([bgrLL,smgLL],{padding:[28,28]});
   [100,300,600].forEach(t=>setTimeout(()=>homeMap.invalidateSize(),t));
 }
@@ -1191,12 +1072,12 @@ function initLeafletMap(){
   satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19});
   [100,300,600,1000].forEach(t=>setTimeout(()=>leafletMap.invalidateSize(),t));
   const sp=(ll,col,pop)=>L.marker(ll,{icon:L.divIcon({html:`<div style="width:10px;height:10px;border-radius:50%;background:${col};border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>`,className:'',iconSize:[10,10],iconAnchor:[5,5]})}).addTo(leafletMap).bindPopup(pop);
-  sp([-6.993,110.420],'#5C4E8A','Semarang · Bobby');sp([-6.597,106.806],'#C4607A','Bogor · Yuddit');
+  sp([-6.993,110.420],'#5C4E8A','Semarang · Bobby'); sp([-6.597,106.806],'#C4607A','Bogor · Yuddit');
   renderLeafletMarkers();
 }
 function renderLeafletMarkers(){
   if(!leafletMap)return;
-  leafletMarkers.forEach(m=>m.remove());leafletMarkers=[];
+  leafletMarkers.forEach(m=>m.remove()); leafletMarkers=[];
   S.places.forEach(p=>{if(!p.latlng)return;const m=L.marker(p.latlng,{icon:makePinIcon(p.done)}).addTo(leafletMap).bindPopup(`<b>${p.name}</b><br><span style="color:#A394A8">${p.done?'✓ Sudah ke sini':'Mau ke sini'}</span>`);leafletMarkers.push(m);});
   const v=S.places.filter(p=>p.latlng).map(p=>p.latlng);
   if(v.length>0)leafletMap.fitBounds(L.latLngBounds(v),{padding:[40,40],maxZoom:10});
@@ -1205,9 +1086,9 @@ async function geocode(name){
   try{const r=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1&countrycodes=id`,{headers:{'Accept-Language':'id','User-Agent':'LDTS-App/1.0'}});const d=await r.json();if(d&&d.length>0)return[parseFloat(d[0].lat),parseFloat(d[0].lon)];const r2=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1`,{headers:{'Accept-Language':'id','User-Agent':'LDTS-App/1.0'}});const d2=await r2.json();if(d2&&d2.length>0)return[parseFloat(d2[0].lat),parseFloat(d2[0].lon)];}catch(e){}return null;
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // WISHLIST
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function selectCat(el,cat){document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('selected'));el.classList.add('selected');S.selectedCat=cat;}
 async function addPlace(){
   const input=document.getElementById('place-input'),name=input.value.trim();if(!name)return;
@@ -1228,17 +1109,13 @@ function renderWishlist(){
   renderLeafletMarkers();
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// ARCHIVE  — always Bobby left, Yuddit right, regardless of who is viewing
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// ARCHIVE
+// ═══════════════════════════════════════════════════════
 function renderArchive(){
   const body=document.getElementById('archive-body'),empty=document.getElementById('archive-empty');
   const entries=S.archive.filter(a=>a.bobbyAns||a.yudditAns);
-  if(entries.length===0){
-    if(empty)empty.style.display='block';
-    body.querySelectorAll('.archive-item').forEach(el=>el.remove());
-    return;
-  }
+  if(entries.length===0){if(empty)empty.style.display='block';body.querySelectorAll('.archive-item').forEach(el=>el.remove());return;}
   if(empty)empty.style.display='none';
   body.querySelectorAll('.archive-item').forEach(el=>el.remove());
   entries.forEach(a=>{
@@ -1250,54 +1127,42 @@ function renderArchive(){
   });
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // US PAGE
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 function addMemory(){
   const t=document.getElementById('memory-input').value.trim();if(!t)return;
   S.memories.unshift({text:t,date:new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})});
   document.getElementById('memory-input').value='';saveState();renderUs();
 }
-
 function renderUs(){
-  // Hari bersama — calculated from sinceDate
-  const sincEl=document.getElementById('us-since');
-  const daysEl=document.getElementById('stat-days');
+  const sincEl=document.getElementById('us-since'),daysEl=document.getElementById('stat-days');
   if(S.sinceDate){
-    // Parse YYYY-MM-DD as LOCAL midnight (not UTC) to avoid the +7hr timezone offset
-    // causing the counter to show -1 day until 7am on the start date itself.
-    const [sy,sm,sd] = S.sinceDate.split('-').map(Number);
-    const sinceLocal = new Date(sy, sm-1, sd); // local midnight
-    const todayLocal = new Date(); todayLocal.setHours(0,0,0,0);
-    const diff = Math.floor((todayLocal - sinceLocal) / 86400000);
-    if(sincEl) sincEl.textContent='Sejak '+sinceLocal.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
-    if(daysEl) daysEl.textContent=Math.max(0,diff);
+    const [sy,sm,sd]=S.sinceDate.split('-').map(Number);
+    const sinceLocal=new Date(sy,sm-1,sd);
+    const todayLocal=new Date();todayLocal.setHours(0,0,0,0);
+    const diff=Math.floor((todayLocal-sinceLocal)/86400000);
+    if(sincEl)sincEl.textContent='Sejak '+sinceLocal.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+    if(daysEl)daysEl.textContent=Math.max(0,diff);
   } else {
-    if(sincEl) sincEl.textContent='Atur tanggal di pertemuan → Edit';
-    if(daysEl) daysEl.textContent='—';
+    if(sincEl)sincEl.textContent='Atur tanggal di pertemuan → Edit';
+    if(daysEl)daysEl.textContent='—';
   }
-
-  document.getElementById('stat-qs').textContent     = S.archive.filter(a=>a.bobbyAns||a.yudditAns).length;
-  document.getElementById('stat-places').textContent  = S.places.length;
-
+  document.getElementById('stat-qs').textContent    = S.archive.filter(a=>a.bobbyAns||a.yudditAns).length;
+  document.getElementById('stat-places').textContent = S.places.length;
   const mem=document.getElementById('us-memories');
-  if(S.memories.length===0){
-    mem.innerHTML='<div style="font-size:13px;color:var(--ink-light);padding:8px 0;font-weight:500;">Catat momen pertamamu di atas ✦</div>';
-    return;
-  }
+  if(S.memories.length===0){mem.innerHTML='<div style="font-size:13px;color:var(--ink-light);padding:8px 0;font-weight:500;">Catat momen pertamamu di atas ✦</div>';return;}
   mem.innerHTML=S.memories.map(m=>`<div class="memory-item"><div class="memory-dot"></div><div><div class="memory-date">${m.date}</div><div class="memory-text">${m.text}</div></div></div>`).join('');
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // BOOTSTRAP
-// ═════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 if (WHO) {
-  // Already identified — hide the identity screen and start
   document.getElementById('identity-screen').classList.add('hidden');
   applyIdentityUI();
   init();
 }
-// If WHO is null, identity screen remains visible; setIdentity() calls init()
 </script>
 </body>
 </html>
