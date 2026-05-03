@@ -3,568 +3,1178 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>LDTS</title>
+<title>LDTS · Bobby & Yuddit</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --rose:#F0B8C4;--rose-mid:#E294A8;--rose-deep:#C4607A;
-  --sage:#8BAF9A;--sage-light:#E8F2ED;--sage-deep:#3D6B56;
-  --warm:#FAF6F1;--warm-dark:#F0E8DF;--warm-card:#FFFFFF;
-  --ink:#1E1520;--ink-mid:#6B5870;--ink-light:#A394A8;
-  --border:rgba(30,21,32,0.08);--border-mid:rgba(30,21,32,0.14);
-  --gold:#C9A84C;
-}
-html,body{height:100%;background:#EDE5DD;}
-body{display:flex;justify-content:center;align-items:flex-start;padding:20px 0 48px;font-family:'Plus Jakarta Sans',sans-serif;}
-.app{background:var(--warm);width:100%;max-width:420px;min-height:100vh;border-radius:28px;overflow:hidden;border:0.5px solid var(--border-mid);display:flex;flex-direction:column;position:relative;box-shadow:0 8px 48px rgba(30,21,32,0.12);}
-.app::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--rose-mid),var(--gold),var(--sage));z-index:100;}
-
-/* ── Identity screen ── */
-.identity-screen{position:absolute;inset:0;background:var(--warm);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 28px;gap:0;border-radius:28px;overflow:hidden;}
-.identity-screen.hidden{display:none;}
-.id-inner{display:flex;flex-direction:column;align-items:center;width:100%;}
-.id-logo{font-family:'Lora',serif;font-size:28px;color:var(--ink);margin-bottom:4px;}
-.id-logo em{font-style:italic;color:var(--rose-deep);}
-.id-tagline{font-size:9px;font-weight:600;color:var(--ink-light);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:22px;}
-.id-prompt{font-family:'Lora',serif;font-size:16px;color:var(--ink);margin-bottom:18px;text-align:center;line-height:1.5;}
-.id-btns{display:flex;flex-direction:column;gap:10px;width:100%;}
-.id-btn{padding:13px 16px;border-radius:14px;border:0.5px solid var(--border-mid);background:var(--warm-card);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;transition:all 0.18s;display:flex;align-items:center;gap:12px;}
-.id-btn:hover{border-color:var(--rose-mid);background:linear-gradient(135deg,#fff8fa,#fff3f5);}
-.id-btn .id-avatar{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
-.id-btn.bobby .id-avatar{background:#EEE9F6;}
-.id-btn.yuddit .id-avatar{background:linear-gradient(135deg,#fff0f3,#fde8ed);}
-.id-btn-text{display:flex;flex-direction:column;gap:2px;text-align:left;}
-.id-btn-name{font-size:14px;font-weight:600;color:var(--ink);}
-.id-btn-city{font-size:11px;color:var(--ink-light);font-weight:500;}
-
-/* ── Header & nav ── */
-.header{padding:18px 20px 14px;background:var(--warm-card);border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.header-right{display:flex;align-items:center;gap:8px;}
-.tab-nav{display:flex;background:var(--warm-card);border-top:0.5px solid var(--border);flex-shrink:0;order:99;position:sticky;bottom:0;z-index:20;}
-.tab-btn{flex:1;padding:11px 4px 10px;text-align:center;background:transparent;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;color:var(--ink-light);cursor:pointer;transition:color 0.15s;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:500;}
-.tab-btn.active{color:var(--rose-deep);}
-.tab-btn svg{width:17px;height:17px;flex-shrink:0;}
-.tab-btn .tab-dot{width:4px;height:4px;border-radius:50%;background:var(--rose-deep);margin-top:1px;opacity:0;transition:opacity 0.2s;}
-.tab-btn.active .tab-dot{opacity:1;}
-.page{display:none;flex:1;overflow-y:auto;}
-.page.active{display:block;}
-.desktop-sidebar{display:none;}
-.content-area{display:contents;}
-
-/* ── Desktop layout ── */
-@media(min-width:768px){
-  html,body{height:100%;overflow:hidden;padding:0;}
-  body{align-items:stretch;}
-  .app{max-width:100%;width:100%;height:100vh;min-height:100vh;max-height:100vh;border-radius:0;flex-direction:row;overflow:hidden;border:none;box-shadow:none;}
-  .app::before{width:3px;height:100%;top:0;left:0;right:auto;background:linear-gradient(180deg,var(--rose-mid),var(--gold),var(--sage));}
-  .identity-screen{border-radius:0;}
-  .desktop-sidebar{display:flex;flex-direction:column;width:200px;min-width:200px;background:var(--warm-card);border-right:0.5px solid var(--border);padding:32px 0 24px;flex-shrink:0;}
-  .sidebar-nav{display:flex;flex-direction:column;gap:3px;flex:1;padding:0 12px;}
-  .sidebar-btn{display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:12px;border:none;background:transparent;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink-light);cursor:pointer;transition:all 0.15s;width:100%;text-align:left;font-weight:500;}
-  .sidebar-btn svg{width:15px;height:15px;flex-shrink:0;}
-  .sidebar-btn.active{background:linear-gradient(135deg,#fdf0f3,#fde8ed);color:var(--rose-deep);}
-  .sidebar-btn:hover:not(.active){background:var(--warm-dark);color:var(--ink);}
-  .sidebar-footer{padding:16px 22px 0;font-size:11px;color:var(--ink-light);line-height:1.8;}
-  .sidebar-footer strong{color:var(--ink);font-weight:600;}
-  .header{display:none;}
-  .tab-nav{display:none;}
-  .content-area{display:flex;flex:1;flex-direction:column;overflow:hidden;min-width:0;height:100vh;}
-  .page{flex:1;overflow:hidden;display:none;flex-direction:column;height:100%;}
-  .page.active{display:flex;}
-  #page-home{display:none;}
-  #page-home.active{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:190px auto 1fr;overflow:hidden;height:100%;}
-  .home-map-row{grid-column:1/-1;grid-row:1;height:190px;overflow:hidden;position:relative;}
-  #home-map{height:190px !important;width:100%;}
-  .weather-strip{grid-column:1/-1;grid-row:2;flex-shrink:0;}
-  #page-home .home-body{grid-column:1;grid-row:3;overflow-y:auto;padding:20px 16px 20px 24px;border-right:0.5px solid var(--border);min-height:0;}
-  .mobile-only{display:none;}
-  #desk-right-col{display:flex;grid-column:2;grid-row:3;overflow-y:auto;padding:20px 24px 20px 16px;flex-direction:column;gap:16px;min-height:0;}
-  #page-wishlist{display:none;}
-  #page-wishlist.active{display:flex;flex-direction:row;}
-  #page-wishlist .wishlist-map-col{flex:1;display:flex;flex-direction:column;position:relative;}
-  #page-wishlist #leaflet-map{flex:1;height:100% !important;min-height:0 !important;}
-  #page-wishlist .wishlist-body{width:340px;min-width:340px;overflow-y:auto;border-left:0.5px solid var(--border);}
-  #page-archive.active,#page-us.active{display:flex;flex-direction:column;overflow-y:auto;}
-  #page-archive .archive-body,#page-us .us-body{max-width:660px;width:100%;margin:0 auto;padding:28px 24px;}
+/* ══════════════════════════════════════════
+   TOKENS
+══════════════════════════════════════════ */
+:root {
+  --parchment: #F7F3EE;
+  --parchment-2: #EFE9E0;
+  --parchment-3: #E4DAC8;
+  --ink: #1A1410;
+  --ink-2: #5A4F46;
+  --ink-3: #9C8D82;
+  --blush: #D4728A;
+  --blush-light: #F2D5DC;
+  --blush-pale: #FBF0F2;
+  --sage: #5A7D6A;
+  --sage-light: #D6E8DD;
+  --sage-pale: #EDF5F0;
+  --gold: #B8903C;
+  --gold-light: #F0E0B4;
+  --divider: rgba(26,20,16,.08);
+  --divider-2: rgba(26,20,16,.14);
+  --shadow-sm: 0 1px 4px rgba(26,20,16,.06);
+  --shadow-md: 0 4px 24px rgba(26,20,16,.10);
+  --shadow-lg: 0 12px 48px rgba(26,20,16,.14);
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', sans-serif;
 }
 
-/* ── Weather ── */
-.weather-strip{display:flex;background:var(--warm-card);border-bottom:0.5px solid var(--border);}
-.w-cell{flex:1;padding:12px 16px;display:flex;align-items:center;gap:11px;}
-.w-cell+.w-cell{border-left:0.5px solid var(--border);}
-.w-icon{font-size:22px;line-height:1;flex-shrink:0;}
-.w-who{font-size:10px;color:var(--ink-light);font-weight:500;}
-.w-temp{font-size:16px;font-weight:600;color:var(--ink);}
-.w-sky{font-size:10px;color:var(--ink-light);}
+/* ══════════════════════════════════════════
+   RESET & BASE
+══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; font-size: 15px; }
+body {
+  height: 100%;
+  font-family: var(--font-body);
+  background: var(--parchment-2);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
 
-/* ── Home ── */
-.home-map-row{position:relative;width:100%;height:168px;flex-shrink:0;}
-#desk-right-col{display:none;}
-.home-body{padding:18px 16px;display:flex;flex-direction:column;gap:16px;}
-.section-label{font-size:10px;color:var(--ink-light);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-bottom:10px;}
+/* ══════════════════════════════════════════
+   IDENTITY SCREEN
+══════════════════════════════════════════ */
+.identity-screen {
+  position: fixed; inset: 0; z-index: 500;
+  background: var(--parchment);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  transition: opacity .4s, visibility .4s;
+}
+.identity-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
-/* ── Logo ── */
-.logo-lockup{display:flex;flex-direction:column;gap:1px;}
-.sidebar-logo-lockup{padding:0 22px 28px;display:flex;flex-direction:column;gap:2px;}
-.logo-mark{display:flex;align-items:baseline;gap:1px;line-height:1;}
-.logo-ld{font-family:'Lora',serif;font-size:22px;font-weight:500;color:var(--ink);letter-spacing:-0.5px;}
-.logo-ts{font-family:'Lora',serif;font-size:22px;font-weight:400;font-style:italic;color:var(--rose-deep);letter-spacing:-0.5px;}
-.logo-tagline{font-family:'Plus Jakarta Sans',sans-serif;font-size:8.5px;font-weight:500;color:var(--ink-light);letter-spacing:0.12em;text-transform:uppercase;}
-.sidebar-logo-lockup .logo-ld,.sidebar-logo-lockup .logo-ts{font-size:26px;}
-.sidebar-logo-lockup .logo-tagline{font-size:9px;}
+.id-box {
+  width: 100%; max-width: 340px;
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+}
 
-/* ── Question card ── */
-.q-card{background:var(--warm-card);border:0.5px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 2px 12px rgba(30,21,32,0.05);}
-.q-card-accent{height:2px;background:linear-gradient(90deg,var(--rose-mid),var(--gold));}
-.q-top{padding:16px 18px 14px;}
-.q-day-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-.q-day-label{font-size:11px;color:var(--rose-deep);font-weight:600;letter-spacing:0.02em;}
-.q-text{font-family:'Lora',serif;font-size:15px;color:var(--ink);line-height:1.65;margin-bottom:10px;font-style:italic;}
-.q-hint{font-size:11px;color:var(--ink-light);display:flex;align-items:center;gap:5px;font-weight:500;}
-.q-edit-btn{background:transparent;border:0.5px solid var(--rose-mid);color:var(--rose-deep);padding:3px 10px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s;display:none;}
-.q-edit-btn:hover{background:#fff0f3;}
-.q-edit-btn.visible{display:inline-flex;align-items:center;gap:4px;}
-.q-empty{font-family:'Lora',serif;font-size:14px;color:var(--ink-light);font-style:italic;line-height:1.6;}
+.id-wordmark {
+  font-family: var(--font-display);
+  font-size: 52px; font-weight: 300; letter-spacing: -.5px;
+  color: var(--ink); line-height: 1;
+  display: flex; align-items: baseline; gap: 2px;
+}
+.id-wordmark em { color: var(--blush); font-style: italic; }
 
-/* ── Bobby's question editor (only shown to Bobby) ── */
-.q-editor-wrap{display:none;padding:14px 18px;background:linear-gradient(135deg,#fdf8ff,#f8f0fb);border-top:0.5px solid var(--border);}
-.q-editor-wrap.open{display:block;}
-.q-editor-label{font-size:10px;font-weight:600;color:var(--ink-light);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
-.q-editor-textarea{width:100%;border:0.5px solid var(--border-mid);border-radius:12px;padding:11px 13px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--warm);resize:none;height:80px;outline:none;line-height:1.65;transition:border-color 0.2s;}
-.q-editor-textarea:focus{border-color:#A07AB8;background:#fff;}
-.q-editor-actions{display:flex;gap:8px;margin-top:10px;}
-.q-editor-cancel{flex:1;padding:9px;border:0.5px solid var(--border-mid);border-radius:10px;background:transparent;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:var(--ink-light);cursor:pointer;font-weight:600;}
-.q-editor-save{flex:2;padding:9px;background:linear-gradient(135deg,#7B5EA7,#5C4480);color:white;border:none;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:opacity 0.15s;}
-.q-editor-save:hover{opacity:0.88;}
+.id-eyebrow {
+  font-size: 10px; font-weight: 500; letter-spacing: .18em;
+  color: var(--ink-3); text-transform: uppercase;
+  margin: 8px 0 40px;
+}
 
-.q-skeleton{background:linear-gradient(90deg,var(--warm) 25%,var(--warm-dark) 50%,var(--warm) 75%);background-size:200% 100%;animation:shimmer 1.6s infinite;border-radius:6px;margin-bottom:8px;}
-.q-skeleton.long{width:92%;height:16px;}
-.q-skeleton.med{width:72%;height:16px;margin-top:6px;}
-@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
-.q-divider{height:0.5px;background:var(--border);margin:0 18px;}
-.q-body{padding:14px 18px;}
-.q-textarea{width:100%;border:0.5px solid var(--border-mid);border-radius:12px;padding:11px 13px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--warm);resize:none;height:78px;outline:none;line-height:1.65;transition:border-color 0.2s;}
-.q-textarea::placeholder{color:var(--ink-light);}
-.q-textarea:focus{border-color:var(--rose-mid);background:#fff;}
-.submit-btn{margin-top:10px;width:100%;padding:11px;background:linear-gradient(135deg,var(--rose-deep),#a84d66);color:white;border:none;border-radius:11px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity 0.15s,transform 0.1s;letter-spacing:0.01em;}
-.submit-btn:hover{opacity:0.9;transform:translateY(-1px);}
-.submit-btn:active{transform:translateY(0);}
-.submit-btn:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
-.answered-wrap{padding:14px 18px;display:none;}
-.answered-label{font-size:10px;color:var(--ink-light);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:7px;}
-.answered-bubble{font-size:13px;color:var(--ink);background:linear-gradient(135deg,#fff8fa,#fff3f5);border:0.5px solid rgba(196,96,122,0.18);border-radius:12px;padding:11px 13px;line-height:1.65;margin-bottom:10px;}
-.waiting-row{font-size:11px;color:var(--ink-light);display:flex;align-items:center;gap:6px;font-weight:500;}
-.partner-answered-note{font-size:12px;color:var(--sage-deep);font-weight:600;background:var(--sage-light);border-radius:10px;padding:9px 13px;margin-top:8px;}
-.dots span{display:inline-block;width:4px;height:4px;background:var(--rose-mid);border-radius:50%;animation:blink 1.4s infinite;}
-.dots span:nth-child(2){animation-delay:.22s;}.dots span:nth-child(3){animation-delay:.44s;}
-@keyframes blink{0%,80%,100%{opacity:.18;}40%{opacity:1;}}
+.id-prompt {
+  font-family: var(--font-display); font-size: 22px; font-style: italic;
+  color: var(--ink-2); margin-bottom: 24px; text-align: center;
+  font-weight: 300;
+}
 
-/* ── Countdown ── */
-.cd-card{background:var(--warm-card);border:0.5px solid var(--border);border-radius:18px;padding:16px 18px;box-shadow:0 2px 12px rgba(30,21,32,0.05);}
-.cd-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
-.cd-title{font-family:'Lora',serif;font-size:15px;color:var(--ink);}
-.cd-sub{font-size:11px;color:var(--ink-light);margin-top:3px;font-weight:500;}
-.edit-btn{font-size:11px;color:var(--rose-deep);border:0.5px solid var(--rose-mid);border-radius:8px;padding:4px 10px;background:transparent;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;transition:all 0.15s;}
-.edit-btn:hover{background:#fff0f3;}
-.cd-nums{display:flex;gap:8px;}
-.cd-box{flex:1;background:linear-gradient(135deg,var(--warm),var(--warm-dark));border-radius:12px;padding:11px 4px;text-align:center;border:0.5px solid var(--border);}
-.cd-num{font-family:'Lora',serif;font-size:26px;color:var(--ink);line-height:1;}
-.cd-lbl{font-size:9px;color:var(--ink-light);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.id-cards { display: flex; flex-direction: column; gap: 10px; width: 100%; }
 
-/* ── Wishlist ── */
-.wishlist-page{display:flex;flex-direction:column;}
-#leaflet-map{width:100%;height:250px;min-height:250px;flex-shrink:0;z-index:1;}
-.leaflet-container{font-family:'Plus Jakarta Sans',sans-serif;}
-.leaflet-popup-content-wrapper{border-radius:12px;border:0.5px solid rgba(30,21,32,0.1);box-shadow:0 4px 16px rgba(30,21,32,0.1);}
-.leaflet-popup-content{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:var(--ink);margin:9px 13px;font-weight:500;}
-.leaflet-popup-tip-container{display:none;}
-.wmap-legend{position:absolute;bottom:10px;right:10px;background:white;z-index:9;border:0.5px solid rgba(30,21,32,0.1);border-radius:10px;padding:7px 11px;display:flex;flex-direction:column;gap:5px;pointer-events:none;box-shadow:0 2px 8px rgba(30,21,32,0.08);}
-.legend-row{display:flex;align-items:center;gap:6px;font-size:9px;color:var(--ink-light);font-weight:600;}
-.legend-dot{width:8px;height:8px;border-radius:50%;}
-.legend-dot.done{background:var(--sage-deep);}.legend-dot.wish{background:var(--rose-deep);}
-.wishlist-body{padding:16px;display:flex;flex-direction:column;gap:12px;flex:1;}
-.add-place-card{background:var(--warm-card);border:0.5px solid var(--border);border-radius:16px;padding:14px 16px;box-shadow:0 1px 6px rgba(30,21,32,0.04);}
-.add-row{display:flex;gap:8px;margin-bottom:10px;}
-.place-input{flex:1;border:0.5px solid var(--border-mid);border-radius:10px;padding:9px 12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--warm);outline:none;transition:border-color 0.2s;font-weight:500;}
-.place-input:focus{border-color:var(--rose-mid);background:#fff;}
-.add-btn{padding:9px 15px;background:linear-gradient(135deg,var(--rose-deep),#a84d66);color:white;border:none;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity 0.15s;}
-.add-btn:hover{opacity:0.88;}
-.category-pills{display:flex;gap:6px;flex-wrap:wrap;}
-.cat-pill{font-size:11px;padding:5px 11px;border-radius:20px;border:0.5px solid var(--border-mid);background:transparent;color:var(--ink-light);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;font-weight:500;}
-.cat-pill.selected{background:linear-gradient(135deg,#fff0f3,#fde8ed);color:var(--rose-deep);border-color:var(--rose-mid);}
-.places-list{display:flex;flex-direction:column;gap:8px;}
-.place-item{background:var(--warm-card);border:0.5px solid var(--border);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;transition:box-shadow 0.15s;}
-.place-item:hover{box-shadow:0 2px 10px rgba(30,21,32,0.07);}
-.place-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;}
-.place-icon.food{background:#FFF4E0;}.place-icon.nature{background:#E6F5EC;}.place-icon.culture{background:#EEE9F6;}.place-icon.city{background:#E6EFF8;}.place-icon.beach{background:#E0F3FF;}
-.place-info{flex:1;min-width:0;}
-.place-name{font-size:13px;font-weight:600;color:var(--ink);}
-.place-meta{font-size:11px;color:var(--ink-light);font-weight:500;}
-.place-actions{display:flex;gap:6px;align-items:center;}
-.check-btn{width:28px;height:28px;border-radius:50%;border:0.5px solid var(--border-mid);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
-.check-btn:hover{background:var(--sage-light);border-color:var(--sage-deep);}
-.check-btn.done{background:var(--sage-light);border-color:var(--sage-deep);}
-.del-btn{width:28px;height:28px;border-radius:50%;border:0.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink-light);font-size:15px;transition:all .15s;}
-.del-btn:hover{background:#fff3f0;border-color:#e24b4a;color:#e24b4a;}
-.done-badge{font-size:9px;padding:3px 8px;background:var(--sage-light);color:var(--sage-deep);border-radius:10px;font-weight:600;}
+.id-card {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 18px; border-radius: var(--r-md);
+  background: var(--parchment-2); border: 1px solid var(--divider-2);
+  cursor: pointer; transition: all .2s; font-family: var(--font-body);
+  text-align: left; width: 100%;
+}
+.id-card:hover {
+  border-color: var(--blush); background: var(--blush-pale);
+  transform: translateY(-1px); box-shadow: var(--shadow-md);
+}
+.id-avatar {
+  width: 44px; height: 44px; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+  background: var(--parchment);
+}
+.id-info { display: flex; flex-direction: column; gap: 2px; }
+.id-name { font-size: 15px; font-weight: 500; color: var(--ink); }
+.id-city { font-size: 12px; color: var(--ink-3); font-weight: 400; }
 
-/* ── Archive ── */
-.archive-body{padding:16px;display:flex;flex-direction:column;gap:12px;}
-.archive-item{background:var(--warm-card);border:0.5px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 1px 6px rgba(30,21,32,0.04);}
-.archive-item-accent{height:2px;background:linear-gradient(90deg,var(--rose-mid),var(--gold));}
-.archive-q{padding:13px 16px 11px;}
-.archive-day{font-size:10px;color:var(--ink-light);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
-.archive-qtext{font-family:'Lora',serif;font-size:13px;color:var(--ink);line-height:1.55;font-style:italic;}
-.archive-answers{display:grid;grid-template-columns:1fr 1fr;}
-.archive-ans{padding:11px 14px;}
-.archive-ans+.archive-ans{border-left:0.5px solid var(--border);}
-.archive-who{font-size:9px;color:var(--ink-light);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
-.archive-atext{font-size:12px;color:var(--ink);line-height:1.55;font-weight:500;}
-.archive-empty{text-align:center;padding:48px 20px;color:var(--ink-light);}
-.archive-empty-title{font-family:'Lora',serif;font-size:20px;color:var(--ink);margin-bottom:8px;}
-.archive-empty-sub{font-size:13px;line-height:1.6;font-weight:500;}
+/* ══════════════════════════════════════════
+   SHELL
+══════════════════════════════════════════ */
+.shell {
+  display: flex; height: 100vh; overflow: hidden;
+}
 
-/* ── Us ── */
-.us-body{padding:18px 16px;display:flex;flex-direction:column;gap:16px;}
-.us-hero{background:var(--warm-card);border:0.5px solid var(--border);border-radius:20px;padding:24px 20px;text-align:center;position:relative;overflow:hidden;box-shadow:0 2px 16px rgba(30,21,32,0.06);}
-.us-hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at top,#fff8fa 0%,transparent 70%);pointer-events:none;}
-.us-heart{font-size:32px;margin-bottom:8px;display:block;}
-.us-names{font-family:'Lora',serif;font-size:22px;color:var(--ink);margin-bottom:5px;}
-.us-names em{font-style:italic;color:var(--rose-deep);}
-.us-since{font-size:12px;color:var(--ink-light);font-weight:500;}
-.us-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:18px;}
-.us-stat{background:var(--warm);border-radius:12px;padding:12px 8px;text-align:center;border:0.5px solid var(--border);}
-.us-stat-num{font-family:'Lora',serif;font-size:26px;color:var(--ink);}
-.us-stat-lbl{font-size:9px;color:var(--ink-light);text-transform:uppercase;letter-spacing:.06em;margin-top:3px;font-weight:600;}
-.us-memories{display:flex;flex-direction:column;gap:8px;}
-.memory-item{background:var(--warm-card);border:0.5px solid var(--border);border-radius:14px;padding:13px 15px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 1px 4px rgba(30,21,32,0.03);}
-.memory-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--rose-mid),var(--rose-deep));margin-top:4px;flex-shrink:0;}
-.memory-date{font-size:10px;color:var(--ink-light);margin-bottom:3px;font-weight:600;}
-.memory-text{font-size:13px;color:var(--ink);line-height:1.55;font-weight:500;}
-.add-memory-card{background:var(--warm-card);border:0.5px dashed var(--border-mid);border-radius:14px;padding:13px 15px;}
-.add-memory-row{display:flex;gap:8px;}
-.memory-input{flex:1;border:0.5px solid var(--border-mid);border-radius:10px;padding:9px 12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--warm);outline:none;font-weight:500;}
-.memory-input:focus{border-color:var(--rose-mid);background:#fff;}
-.memory-add-btn{padding:9px 14px;background:linear-gradient(135deg,var(--rose-deep),#a84d66);color:white;border:none;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity 0.15s;}
-.memory-add-btn:hover{opacity:0.88;}
+/* ══════════════════════════════════════════
+   SIDEBAR (desktop)
+══════════════════════════════════════════ */
+.sidebar {
+  width: 220px; flex-shrink: 0;
+  background: var(--parchment);
+  border-right: 1px solid var(--divider-2);
+  display: flex; flex-direction: column;
+  padding: 32px 0 24px;
+  overflow-y: auto;
+}
 
-/* ── Modals ── */
-.modal-backdrop{display:none;position:absolute;inset:0;background:rgba(30,21,32,0.42);border-radius:28px;z-index:50;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
-.modal-backdrop.open{display:flex;}
-.modal{background:var(--warm-card);border-radius:20px;padding:22px;width:300px;border:0.5px solid var(--border-mid);box-shadow:0 8px 40px rgba(30,21,32,0.16);}
-.modal-title{font-family:'Lora',serif;font-size:18px;color:var(--ink);margin-bottom:16px;}
-.modal label{font-size:11px;color:var(--ink-light);display:block;margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;}
-.modal input[type=text],.modal input[type=date]{width:100%;border:0.5px solid var(--border-mid);border-radius:10px;padding:9px 12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--warm);outline:none;margin-bottom:14px;font-weight:500;}
-.modal input:focus{border-color:var(--rose-mid);background:#fff;}
-.modal-btns{display:flex;gap:8px;}
-.modal-cancel{flex:1;padding:10px;border:0.5px solid var(--border-mid);border-radius:10px;background:transparent;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink-light);cursor:pointer;font-weight:600;}
-.modal-save{flex:1;padding:10px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--rose-deep),#a84d66);color:white;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.sidebar-brand {
+  padding: 0 24px 32px;
+}
+.sidebar-wordmark {
+  font-family: var(--font-display);
+  font-size: 34px; font-weight: 300; line-height: 1;
+  display: flex; align-items: baseline; gap: 1px;
+}
+.sidebar-wordmark em { color: var(--blush); font-style: italic; }
+.sidebar-eyebrow {
+  font-size: 9px; font-weight: 500; letter-spacing: .15em;
+  color: var(--ink-3); text-transform: uppercase; margin-top: 5px;
+}
 
-/* ── Misc ── */
-.page::-webkit-scrollbar{width:3px;}
-.page::-webkit-scrollbar-track{background:transparent;}
-.page::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:2px;}
-#sync-status,#sync-status-m{font-size:10px;font-weight:500;}
+.sidebar-nav {
+  display: flex; flex-direction: column; gap: 2px; padding: 0 12px; flex: 1;
+}
+
+.nav-btn {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border-radius: var(--r-sm);
+  background: transparent; border: none;
+  font-family: var(--font-body); font-size: 13.5px; font-weight: 400;
+  color: var(--ink-2); cursor: pointer;
+  transition: all .18s; width: 100%; text-align: left;
+}
+.nav-btn svg { flex-shrink: 0; opacity: .65; }
+.nav-btn:hover { background: var(--parchment-2); color: var(--ink); }
+.nav-btn.active {
+  background: var(--blush-pale);
+  color: var(--blush);
+  font-weight: 500;
+}
+.nav-btn.active svg { opacity: 1; }
+
+.sidebar-foot {
+  padding: 20px 24px 0;
+  font-size: 11px; color: var(--ink-3); line-height: 1.9;
+  border-top: 1px solid var(--divider);
+}
+.sidebar-foot strong { color: var(--ink-2); font-weight: 500; }
+#sync-status { display: block; margin-top: 2px; }
+
+/* ══════════════════════════════════════════
+   MAIN
+══════════════════════════════════════════ */
+.main-area {
+  flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden;
+}
+
+/* ── mobile topbar ── */
+.topbar {
+  display: none;
+  align-items: center; justify-content: space-between;
+  padding: 14px 18px;
+  background: var(--parchment);
+  border-bottom: 1px solid var(--divider-2);
+  flex-shrink: 0;
+}
+.topbar-brand {
+  font-family: var(--font-display); font-size: 26px; font-weight: 300; line-height: 1;
+  display: flex; align-items: baseline; gap: 1px;
+}
+.topbar-brand em { color: var(--blush); font-style: italic; }
+#sync-status-m { font-size: 11px; color: var(--ink-3); }
+
+/* ── pages ── */
+.pages { flex: 1; overflow: hidden; position: relative; }
+.page { display: none; height: 100%; overflow-y: auto; }
+.page.active { display: block; }
+
+/* ── mobile bottom nav ── */
+.bottom-nav {
+  display: none;
+  background: var(--parchment);
+  border-top: 1px solid var(--divider-2);
+  flex-shrink: 0;
+}
+.bottom-nav-inner {
+  display: flex;
+}
+.bot-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 4px; padding: 10px 4px 12px;
+  background: transparent; border: none;
+  font-family: var(--font-body); font-size: 10px; font-weight: 500;
+  color: var(--ink-3); cursor: pointer; transition: color .15s;
+}
+.bot-btn svg { width: 20px; height: 20px; }
+.bot-btn.active { color: var(--blush); }
+.bot-btn-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--blush); opacity: 0; transition: opacity .2s;
+}
+.bot-btn.active .bot-btn-dot { opacity: 1; }
+
+/* ══════════════════════════════════════════
+   HOME PAGE
+══════════════════════════════════════════ */
+#page-home { display: none; }
+#page-home.active { display: grid; height: 100%; overflow: hidden; }
+
+@media (min-width: 768px) {
+  #page-home.active {
+    grid-template-columns: 1fr 340px;
+    grid-template-rows: 1fr;
+  }
+  .home-left { overflow-y: auto; }
+  .home-right { border-left: 1px solid var(--divider-2); overflow-y: auto; }
+}
+
+.home-left, .home-right {
+  display: flex; flex-direction: column;
+}
+
+/* map strip */
+.map-strip {
+  height: 180px; flex-shrink: 0; position: relative; overflow: hidden;
+}
+#home-map { width: 100%; height: 100%; }
+
+.map-badge {
+  position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+  background: rgba(247,243,238,.92); backdrop-filter: blur(6px);
+  border: 1px solid var(--divider-2); border-radius: 30px;
+  padding: 4px 14px; font-size: 10.5px; font-weight: 500;
+  color: var(--ink-2); white-space: nowrap; z-index: 9;
+  box-shadow: var(--shadow-sm);
+}
+
+/* weather */
+.weather-row {
+  display: flex; flex-shrink: 0;
+  border-bottom: 1px solid var(--divider-2);
+}
+.w-cell {
+  flex: 1; display: flex; align-items: center; gap: 12px;
+  padding: 13px 18px;
+}
+.w-cell + .w-cell { border-left: 1px solid var(--divider-2); }
+.w-icon { font-size: 24px; line-height: 1; flex-shrink: 0; }
+.w-label { font-size: 10px; color: var(--ink-3); font-weight: 500; margin-bottom: 2px; }
+.w-temp { font-size: 18px; font-family: var(--font-display); font-weight: 400; color: var(--ink); line-height: 1; }
+.w-sky { font-size: 11px; color: var(--ink-3); margin-top: 1px; }
+
+/* home scroll area */
+.home-scroll { padding: 24px 20px; display: flex; flex-direction: column; gap: 20px; }
+
+/* section label */
+.eyebrow {
+  font-size: 10px; font-weight: 500; letter-spacing: .12em;
+  color: var(--ink-3); text-transform: uppercase; margin-bottom: 12px;
+}
+
+/* ── Q card ── */
+.q-card {
+  background: var(--parchment);
+  border: 1px solid var(--divider-2); border-radius: var(--r-lg);
+  overflow: hidden; box-shadow: var(--shadow-sm);
+}
+.q-card-bar {
+  height: 2px;
+  background: linear-gradient(90deg, var(--blush) 0%, var(--gold) 60%, var(--sage) 100%);
+}
+.q-head {
+  padding: 18px 20px 16px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.q-meta-row {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.q-date { font-size: 11px; color: var(--blush); font-weight: 500; }
+
+.q-edit-btn {
+  display: none; align-items: center; gap: 5px;
+  font-family: var(--font-body); font-size: 11px; font-weight: 500;
+  color: var(--blush); border: 1px solid var(--blush-light);
+  background: var(--blush-pale); border-radius: 20px;
+  padding: 4px 12px; cursor: pointer; transition: all .15s;
+}
+.q-edit-btn:hover { background: var(--blush-light); }
+.q-edit-btn.visible { display: flex; }
+
+/* skeleton */
+.q-skeleton { border-radius: 4px; margin-bottom: 8px; }
+.q-sk-line {
+  height: 14px; background: var(--parchment-2); border-radius: 4px;
+  background: linear-gradient(90deg, var(--parchment-2) 25%, var(--parchment-3) 50%, var(--parchment-2) 75%);
+  background-size: 200% 100%; animation: shimmer 1.6s infinite;
+}
+.q-sk-line + .q-sk-line { margin-top: 6px; }
+.q-sk-line:last-child { width: 70%; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+.q-text {
+  font-family: var(--font-display); font-size: 19px; font-style: italic;
+  font-weight: 300; color: var(--ink); line-height: 1.65;
+}
+.q-empty {
+  font-family: var(--font-display); font-size: 17px; font-style: italic;
+  font-weight: 300; color: var(--ink-3); line-height: 1.6;
+}
+.q-lock-note {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--ink-3); font-weight: 400;
+}
+
+/* question editor */
+.q-editor {
+  display: none; padding: 0 20px 18px;
+  border-top: 1px solid var(--divider); background: var(--parchment-2);
+}
+.q-editor.open { display: block; padding-top: 16px; }
+.q-editor-label { font-size: 10.5px; font-weight: 500; color: var(--ink-3); margin-bottom: 8px; }
+.q-editor-ta {
+  width: 100%; border: 1px solid var(--divider-2); border-radius: var(--r-sm);
+  padding: 11px 13px; font-family: var(--font-body); font-size: 13.5px;
+  color: var(--ink); background: var(--parchment); resize: none; height: 76px;
+  outline: none; line-height: 1.65; transition: border-color .2s;
+}
+.q-editor-ta:focus { border-color: var(--blush); }
+.q-editor-row { display: flex; gap: 8px; margin-top: 10px; }
+.btn-ghost {
+  flex: 1; padding: 10px; border: 1px solid var(--divider-2); border-radius: var(--r-sm);
+  background: transparent; font-family: var(--font-body); font-size: 12.5px;
+  color: var(--ink-2); cursor: pointer; font-weight: 500; transition: all .15s;
+}
+.btn-ghost:hover { background: var(--parchment-3); }
+.btn-solid {
+  flex: 2; padding: 10px; border: none; border-radius: var(--r-sm);
+  background: var(--blush); color: white;
+  font-family: var(--font-body); font-size: 12.5px; font-weight: 500;
+  cursor: pointer; transition: opacity .15s;
+}
+.btn-solid:hover { opacity: .85; }
+
+/* answer area */
+.q-divider { height: 1px; background: var(--divider); margin: 0 20px; }
+.q-answer-area { padding: 16px 20px; }
+.q-textarea {
+  width: 100%; border: 1px solid var(--divider-2); border-radius: var(--r-sm);
+  padding: 11px 13px; font-family: var(--font-body); font-size: 13.5px;
+  color: var(--ink); background: var(--parchment); resize: none; height: 78px;
+  outline: none; line-height: 1.65; transition: border-color .2s;
+}
+.q-textarea::placeholder { color: var(--ink-3); }
+.q-textarea:focus { border-color: var(--blush); }
+.q-submit {
+  width: 100%; margin-top: 10px; padding: 12px; border: none;
+  border-radius: var(--r-sm); background: var(--blush); color: white;
+  font-family: var(--font-body); font-size: 13.5px; font-weight: 500;
+  cursor: pointer; transition: opacity .15s, transform .1s; letter-spacing: .01em;
+}
+.q-submit:hover { opacity: .9; transform: translateY(-1px); }
+.q-submit:active { transform: none; }
+.q-submit:disabled { opacity: .38; cursor: not-allowed; transform: none; }
+
+/* answered state */
+.q-answered { padding: 16px 20px; display: none; }
+.q-answered-label {
+  font-size: 10px; font-weight: 500; color: var(--ink-3);
+  text-transform: uppercase; letter-spacing: .1em; margin-bottom: 8px;
+}
+.q-answered-bubble {
+  font-size: 13.5px; color: var(--ink); line-height: 1.65;
+  background: var(--blush-pale); border: 1px solid var(--blush-light);
+  border-radius: var(--r-sm); padding: 11px 13px; margin-bottom: 10px;
+}
+.partner-note {
+  font-size: 12px; color: var(--sage); font-weight: 500;
+  background: var(--sage-pale); border-radius: var(--r-sm);
+  padding: 9px 13px;
+}
+.waiting-row {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--ink-3); font-weight: 400;
+}
+.dots span {
+  display: inline-block; width: 4px; height: 4px;
+  background: var(--ink-3); border-radius: 50%;
+  animation: blink 1.4s infinite;
+}
+.dots span:nth-child(2){animation-delay:.22s}
+.dots span:nth-child(3){animation-delay:.44s}
+@keyframes blink{0%,80%,100%{opacity:.18}40%{opacity:1}}
+
+/* ── countdown card ── */
+.cd-card {
+  background: var(--parchment); border: 1px solid var(--divider-2);
+  border-radius: var(--r-lg); padding: 20px; box-shadow: var(--shadow-sm);
+}
+.cd-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 16px;
+}
+.cd-title {
+  font-family: var(--font-display); font-size: 20px; font-weight: 400;
+  color: var(--ink);
+}
+.cd-sub { font-size: 11px; color: var(--ink-3); margin-top: 3px; font-weight: 400; }
+.icon-btn {
+  font-family: var(--font-body); font-size: 11px; font-weight: 500;
+  color: var(--blush); border: 1px solid var(--blush-light);
+  background: var(--blush-pale); border-radius: 20px;
+  padding: 5px 13px; cursor: pointer; transition: all .15s; flex-shrink: 0;
+}
+.icon-btn:hover { background: var(--blush-light); }
+.cd-nums { display: flex; gap: 8px; }
+.cd-box {
+  flex: 1; background: var(--parchment-2); border: 1px solid var(--divider);
+  border-radius: var(--r-sm); padding: 12px 4px; text-align: center;
+}
+.cd-num {
+  font-family: var(--font-display); font-size: 30px; font-weight: 300;
+  color: var(--ink); line-height: 1;
+}
+.cd-lbl {
+  font-size: 9px; color: var(--ink-3); text-transform: uppercase;
+  letter-spacing: .08em; font-weight: 500; margin-top: 4px;
+}
+
+/* home right column */
+.home-right { padding: 24px 20px; display: flex; flex-direction: column; gap: 20px; }
+.love-panel {
+  background: var(--parchment); border: 1px solid var(--divider-2);
+  border-radius: var(--r-lg); padding: 32px 24px;
+  text-align: center; box-shadow: var(--shadow-sm);
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 8px;
+}
+.love-icon { font-size: 36px; }
+.love-title {
+  font-family: var(--font-display); font-size: 28px; font-weight: 300;
+  color: var(--ink); line-height: 1.2;
+}
+.love-title em { color: var(--blush); font-style: italic; }
+.love-sub { font-size: 12px; color: var(--ink-3); font-weight: 400; line-height: 1.6; }
+
+/* ══════════════════════════════════════════
+   WISHLIST PAGE
+══════════════════════════════════════════ */
+#page-wishlist.active {
+  display: flex; flex-direction: column; height: 100%; overflow: hidden;
+}
+@media (min-width: 768px) {
+  #page-wishlist.active { flex-direction: row; }
+  .wl-map-col { flex: 1; display: flex; flex-direction: column; position: relative; }
+  #leaflet-map { flex: 1 !important; height: auto !important; min-height: 0 !important; }
+  .wl-list-col { width: 340px; overflow-y: auto; border-left: 1px solid var(--divider-2); }
+}
+.wl-map-col { position: relative; }
+#leaflet-map { width: 100%; height: 260px; }
+
+.map-controls {
+  position: absolute; top: 10px; right: 10px; z-index: 9;
+  display: flex; gap: 6px;
+}
+.map-control-btn {
+  background: rgba(247,243,238,.93); backdrop-filter: blur(6px);
+  border: 1px solid var(--divider-2); border-radius: var(--r-sm);
+  padding: 7px 13px; font-family: var(--font-body); font-size: 11px;
+  font-weight: 500; cursor: pointer; color: var(--ink-2);
+  box-shadow: var(--shadow-sm); transition: all .15s;
+}
+.map-control-btn:hover { background: white; }
+
+.map-legend {
+  position: absolute; bottom: 10px; left: 10px; z-index: 9;
+  background: rgba(247,243,238,.93); backdrop-filter: blur(6px);
+  border: 1px solid var(--divider-2); border-radius: var(--r-sm);
+  padding: 8px 12px; display: flex; flex-direction: column; gap: 5px;
+  pointer-events: none; box-shadow: var(--shadow-sm);
+}
+.legend-row { display: flex; align-items: center; gap: 7px; font-size: 10px; color: var(--ink-3); font-weight: 500; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.wl-list-col { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+
+/* add place card */
+.add-card {
+  background: var(--parchment); border: 1px solid var(--divider-2);
+  border-radius: var(--r-md); padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+}
+.add-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.text-input {
+  flex: 1; border: 1px solid var(--divider-2); border-radius: var(--r-sm);
+  padding: 10px 13px; font-family: var(--font-body); font-size: 13.5px;
+  color: var(--ink); background: var(--parchment-2); outline: none;
+  transition: border-color .2s; font-weight: 400;
+}
+.text-input::placeholder { color: var(--ink-3); }
+.text-input:focus { border-color: var(--blush); background: white; }
+.add-btn-primary {
+  padding: 10px 16px; background: var(--blush); color: white;
+  border: none; border-radius: var(--r-sm); font-family: var(--font-body);
+  font-size: 13.5px; font-weight: 500; cursor: pointer; white-space: nowrap;
+  transition: opacity .15s;
+}
+.add-btn-primary:hover { opacity: .85; }
+
+.cat-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.cat-pill {
+  font-size: 11px; padding: 5px 12px; border-radius: 20px;
+  border: 1px solid var(--divider-2); background: transparent;
+  color: var(--ink-3); cursor: pointer; font-family: var(--font-body);
+  transition: all .15s; font-weight: 400;
+}
+.cat-pill:hover { border-color: var(--blush-light); color: var(--blush); }
+.cat-pill.selected {
+  background: var(--blush-pale); color: var(--blush);
+  border-color: var(--blush-light); font-weight: 500;
+}
+
+/* place items */
+.places-list { display: flex; flex-direction: column; gap: 8px; }
+.place-item {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--parchment); border: 1px solid var(--divider-2);
+  border-radius: var(--r-md); padding: 12px 14px;
+  transition: box-shadow .15s;
+}
+.place-item:hover { box-shadow: var(--shadow-sm); }
+.place-icon-wrap {
+  width: 36px; height: 36px; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.place-icon-wrap.city    { background: #EEF2F8; }
+.place-icon-wrap.nature  { background: #EAF3EC; }
+.place-icon-wrap.beach   { background: #E4F2FA; }
+.place-icon-wrap.culture { background: #F0EAF8; }
+.place-icon-wrap.food    { background: #FBF2E4; }
+
+.place-info { flex: 1; min-width: 0; }
+.place-name {
+  font-size: 13.5px; font-weight: 500; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.place-meta { font-size: 11px; color: var(--ink-3); margin-top: 1px; font-weight: 400; }
+.place-acts { display: flex; gap: 6px; align-items: center; }
+.done-badge {
+  font-size: 9.5px; padding: 3px 9px; background: var(--sage-pale);
+  color: var(--sage); border-radius: 20px; font-weight: 500;
+}
+.check-btn {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid var(--divider-2); background: transparent;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .15s; flex-shrink: 0;
+}
+.check-btn:hover { background: var(--sage-pale); border-color: var(--sage); }
+.check-btn.done { background: var(--sage-pale); border-color: var(--sage); }
+.del-btn {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid var(--divider); background: transparent;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: var(--ink-3); font-size: 16px; line-height: 1;
+  transition: all .15s; flex-shrink: 0;
+}
+.del-btn:hover { background: #FFF0EE; border-color: #E24B4A; color: #E24B4A; }
+
+.list-empty {
+  text-align: center; padding: 28px 16px;
+  font-size: 13px; color: var(--ink-3); font-weight: 400;
+}
+
+/* ══════════════════════════════════════════
+   ARCHIVE PAGE
+══════════════════════════════════════════ */
+#page-archive { background: var(--parchment-2); }
+.archive-body {
+  padding: 20px; display: flex; flex-direction: column; gap: 12px;
+  max-width: 680px; margin: 0 auto;
+}
+
+.archive-empty-state {
+  text-align: center; padding: 80px 20px;
+}
+.archive-empty-icon {
+  font-family: var(--font-display); font-size: 60px; color: var(--parchment-3);
+  line-height: 1;
+}
+.archive-empty-title {
+  font-family: var(--font-display); font-size: 26px; font-weight: 300;
+  color: var(--ink); margin: 12px 0 8px;
+}
+.archive-empty-sub { font-size: 13px; color: var(--ink-3); line-height: 1.7; font-weight: 400; }
+
+.archive-item {
+  background: var(--parchment); border: 1px solid var(--divider-2);
+  border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-sm);
+}
+.archive-bar {
+  height: 2px; background: linear-gradient(90deg, var(--blush), var(--gold));
+}
+.archive-q-block { padding: 14px 18px 12px; }
+.archive-date {
+  font-size: 10px; color: var(--ink-3); font-weight: 500;
+  text-transform: uppercase; letter-spacing: .08em; margin-bottom: 5px;
+}
+.archive-qtext {
+  font-family: var(--font-display); font-size: 15px; font-style: italic;
+  font-weight: 300; color: var(--ink); line-height: 1.55;
+}
+.archive-answers {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--divider);
+}
+.archive-ans { padding: 12px 16px; }
+.archive-ans + .archive-ans { border-left: 1px solid var(--divider); }
+.archive-who {
+  font-size: 9px; color: var(--ink-3); text-transform: uppercase;
+  letter-spacing: .1em; font-weight: 600; margin-bottom: 4px;
+}
+.archive-atext { font-size: 12.5px; color: var(--ink); line-height: 1.6; font-weight: 400; }
+
+/* ══════════════════════════════════════════
+   US PAGE
+══════════════════════════════════════════ */
+#page-us { background: var(--parchment-2); }
+.us-body {
+  padding: 24px 20px; display: flex; flex-direction: column; gap: 20px;
+  max-width: 580px; margin: 0 auto;
+}
+
+.us-hero {
+  background: var(--parchment); border: 1px solid var(--divider-2);
+  border-radius: var(--r-lg); padding: 32px 24px; text-align: center;
+  box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+}
+.us-hero::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--blush), var(--gold), var(--sage));
+}
+.us-hero-icon { font-size: 36px; margin-bottom: 10px; }
+.us-hero-title {
+  font-family: var(--font-display); font-size: 32px; font-weight: 300;
+  color: var(--ink); line-height: 1.1;
+}
+.us-hero-title em { color: var(--blush); font-style: italic; }
+.us-hero-since {
+  font-size: 12px; color: var(--ink-3); margin-top: 5px; font-weight: 400;
+}
+.us-stats {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 20px;
+}
+.us-stat {
+  background: var(--parchment-2); border: 1px solid var(--divider);
+  border-radius: var(--r-sm); padding: 14px 8px; text-align: center;
+}
+.us-stat-num {
+  font-family: var(--font-display); font-size: 30px; font-weight: 300;
+  color: var(--ink); line-height: 1;
+}
+.us-stat-lbl {
+  font-size: 9px; color: var(--ink-3); text-transform: uppercase;
+  letter-spacing: .08em; margin-top: 4px; font-weight: 500;
+}
+
+/* memories */
+.add-memory-card {
+  background: var(--parchment); border: 1px dashed var(--divider-2);
+  border-radius: var(--r-md); padding: 12px 14px;
+}
+.add-memory-row { display: flex; gap: 8px; }
+.memory-input {
+  flex: 1; border: 1px solid var(--divider-2); border-radius: var(--r-sm);
+  padding: 9px 13px; font-family: var(--font-body); font-size: 13.5px;
+  color: var(--ink); background: var(--parchment-2); outline: none;
+}
+.memory-input::placeholder { color: var(--ink-3); }
+.memory-input:focus { border-color: var(--blush); background: white; }
+.memory-add-btn {
+  padding: 9px 15px; background: var(--blush); color: white;
+  border: none; border-radius: var(--r-sm); font-family: var(--font-body);
+  font-size: 13.5px; font-weight: 500; cursor: pointer;
+  transition: opacity .15s; white-space: nowrap;
+}
+.memory-add-btn:hover { opacity: .85; }
+
+.memory-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: var(--parchment); border: 1px solid var(--divider-2);
+  border-radius: var(--r-md); padding: 12px 15px; box-shadow: var(--shadow-sm);
+}
+.memory-pip {
+  width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--blush), var(--gold));
+}
+.memory-date { font-size: 10px; color: var(--ink-3); margin-bottom: 2px; font-weight: 500; }
+.memory-text { font-size: 13.5px; color: var(--ink); line-height: 1.55; font-weight: 400; }
+.memories-list { display: flex; flex-direction: column; gap: 8px; }
+.memories-empty { font-size: 13px; color: var(--ink-3); padding: 8px 0; }
+
+/* ══════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════ */
+.modal-backdrop {
+  display: none; position: fixed; inset: 0; z-index: 300;
+  background: rgba(26,20,16,.4); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; padding: 20px;
+}
+.modal-backdrop.open { display: flex; }
+.modal-box {
+  background: var(--parchment); border-radius: var(--r-lg);
+  padding: 26px; width: 100%; max-width: 340px;
+  border: 1px solid var(--divider-2); box-shadow: var(--shadow-lg);
+}
+.modal-title {
+  font-family: var(--font-display); font-size: 22px; font-weight: 400;
+  color: var(--ink); margin-bottom: 20px;
+}
+.modal-label {
+  display: block; font-size: 10.5px; font-weight: 500;
+  color: var(--ink-3); text-transform: uppercase; letter-spacing: .08em;
+  margin-bottom: 5px;
+}
+.modal-input {
+  display: block; width: 100%; border: 1px solid var(--divider-2);
+  border-radius: var(--r-sm); padding: 10px 13px;
+  font-family: var(--font-body); font-size: 13.5px; color: var(--ink);
+  background: var(--parchment-2); outline: none; margin-bottom: 14px;
+}
+.modal-input:focus { border-color: var(--blush); background: white; }
+.modal-btns { display: flex; gap: 8px; }
+.modal-cancel {
+  flex: 1; padding: 11px; border: 1px solid var(--divider-2);
+  border-radius: var(--r-sm); background: transparent;
+  font-family: var(--font-body); font-size: 13px; color: var(--ink-2);
+  cursor: pointer; font-weight: 500; transition: background .15s;
+}
+.modal-cancel:hover { background: var(--parchment-2); }
+.modal-save {
+  flex: 1; padding: 11px; border: none; border-radius: var(--r-sm);
+  background: var(--blush); color: white;
+  font-family: var(--font-body); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: opacity .15s;
+}
+.modal-save:hover { opacity: .88; }
+
+/* ══════════════════════════════════════════
+   LEAFLET OVERRIDE
+══════════════════════════════════════════ */
+.leaflet-container { font-family: var(--font-body); }
+.leaflet-popup-content-wrapper {
+  border-radius: var(--r-sm); border: 1px solid var(--divider-2);
+  box-shadow: var(--shadow-md);
+}
+.leaflet-popup-content { font-size: 12px; color: var(--ink); margin: 8px 12px; font-weight: 500; }
+.leaflet-popup-tip-container { display: none; }
+
+/* ══════════════════════════════════════════
+   SCROLLBARS
+══════════════════════════════════════════ */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--parchment-3); border-radius: 2px; }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE — MOBILE
+══════════════════════════════════════════ */
+@media (max-width: 767px) {
+  .sidebar { display: none; }
+  .topbar { display: flex; }
+  .bottom-nav { display: block; }
+
+  .shell { flex-direction: column; }
+  .main-area { height: 100vh; display: flex; flex-direction: column; }
+  .pages { flex: 1; }
+  .page { height: 100%; }
+
+  #page-home.active {
+    display: flex; flex-direction: column; height: 100%;
+    overflow-y: auto; grid-template-columns: none; grid-template-rows: none;
+  }
+  .home-right { display: none; }
+
+  .archive-body, .us-body { padding: 16px; }
+}
 </style>
 </head>
 <body>
-<div class="app" id="app">
 
-  <!-- IDENTITY SCREEN -->
-  <div class="identity-screen" id="identity-screen">
-    <div class="id-inner">
-    <div class="id-logo">LD<em>TS</em></div>
-    <div class="id-tagline">long distance, talking stage</div>
+<!-- ══════════════ IDENTITY SCREEN ══════════════ -->
+<div class="identity-screen" id="identity-screen">
+  <div class="id-box">
+    <div class="id-wordmark">LD<em>TS</em></div>
+    <div class="id-eyebrow">long distance, talking stage</div>
     <div class="id-prompt">Hei — kamu siapa?</div>
-    <div class="id-btns">
-      <button class="id-btn bobby" onclick="setIdentity('bobby')">
+    <div class="id-cards">
+      <button class="id-card" onclick="setIdentity('bobby')">
         <div class="id-avatar">🎧</div>
-        <div class="id-btn-text">
-          <div class="id-btn-name">Bobby</div>
-          <div class="id-btn-city">Semarang</div>
+        <div class="id-info">
+          <div class="id-name">Bobby</div>
+          <div class="id-city">Semarang</div>
         </div>
       </button>
-      <button class="id-btn yuddit" onclick="setIdentity('yuddit')">
+      <button class="id-card" onclick="setIdentity('yuddit')">
         <div class="id-avatar">🌸</div>
-        <div class="id-btn-text">
-          <div class="id-btn-name">Yuddit</div>
-          <div class="id-btn-city">Bogor</div>
+        <div class="id-info">
+          <div class="id-name">Yuddit</div>
+          <div class="id-city">Bogor</div>
         </div>
       </button>
-      </div>
+    </div>
   </div>
-  </div>
+</div>
 
-  <!-- DESKTOP SIDEBAR -->
-  <aside class="desktop-sidebar">
-    <div class="sidebar-logo-lockup">
-      <div class="logo-mark"><span class="logo-ld">LD</span><span class="logo-ts">TS</span></div>
-      <div class="logo-tagline">long distance, talking stage</div>
+<!-- ══════════════ SHELL ══════════════ -->
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-wordmark">LD<em>TS</em></div>
+      <div class="sidebar-eyebrow">long distance, talking stage</div>
     </div>
     <nav class="sidebar-nav">
-      <button class="sidebar-btn active" data-tab="home" onclick="switchTab('home')">
-        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      <button class="nav-btn active" data-tab="home" onclick="switchTab('home')">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/>
+          <path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
         Beranda
       </button>
-      <button class="sidebar-btn" data-tab="wishlist" onclick="switchTab('wishlist')">
-        <svg viewBox="0 0 16 16" fill="none"><path d="M8 2C5.8 2 4 3.8 4 6c0 3.2 4 8 4 8s4-4.8 4-8c0-2.2-1.8-4-4-4z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
+      <button class="nav-btn" data-tab="wishlist" onclick="switchTab('wishlist')">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+          <path d="M8 2C5.8 2 4 3.8 4 6c0 3.2 4 8 4 8s4-4.8 4-8c0-2.2-1.8-4-4-4z" stroke="currentColor" stroke-width="1.3"/>
+          <circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/>
+        </svg>
         Wishlist
       </button>
-      <button class="sidebar-btn" data-tab="archive" onclick="switchTab('archive')">
-        <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      <button class="nav-btn" data-tab="archive" onclick="switchTab('archive')">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.3"/>
+          <path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
         Arsip
       </button>
-      <button class="sidebar-btn" data-tab="us" onclick="switchTab('us')">
-        <svg viewBox="0 0 16 16" fill="none"><path d="M8 13s-5-3.2-5-7a3 3 0 0 1 5-2.24A3 3 0 0 1 13 6c0 3.8-5 7-5 7z" stroke="currentColor" stroke-width="1.3"/></svg>
+      <button class="nav-btn" data-tab="us" onclick="switchTab('us')">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+          <path d="M8 13s-5-3.2-5-7a3 3 0 0 1 5-2.24A3 3 0 0 1 13 6c0 3.8-5 7-5 7z" stroke="currentColor" stroke-width="1.3"/>
+        </svg>
         Kita
       </button>
     </nav>
-    <div class="sidebar-footer">
-      <strong>Bobby &amp; Yuddit</strong> ✦<br>
+    <div class="sidebar-foot">
+      <strong>Bobby &amp; Yuddit</strong><br>
       Masuk sebagai: <strong id="sidebar-who">—</strong><br>
       <span id="sync-status"></span>
     </div>
   </aside>
 
-  <!-- MAIN CONTENT -->
-  <div class="content-area">
-    <div class="header">
-      <div class="logo-lockup">
-        <div class="logo-mark"><span class="logo-ld">LD</span><span class="logo-ts">TS</span></div>
-        <div class="logo-tagline">long distance, talking stage</div>
-      </div>
-      <div class="header-right"><span id="sync-status-m"></span></div>
+  <!-- MAIN AREA -->
+  <div class="main-area">
+
+    <!-- mobile topbar -->
+    <div class="topbar">
+      <div class="topbar-brand">LD<em>TS</em></div>
+      <span id="sync-status-m"></span>
     </div>
 
-    <nav class="tab-nav">
-      <button class="tab-btn active" data-tab="home" onclick="switchTab('home')">
-        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        Beranda<div class="tab-dot"></div>
-      </button>
-      <button class="tab-btn" data-tab="wishlist" onclick="switchTab('wishlist')">
-        <svg viewBox="0 0 16 16" fill="none"><path d="M8 2C5.8 2 4 3.8 4 6c0 3.2 4 8 4 8s4-4.8 4-8c0-2.2-1.8-4-4-4z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
-        Wishlist<div class="tab-dot"></div>
-      </button>
-      <button class="tab-btn" data-tab="archive" onclick="switchTab('archive')">
-        <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        Arsip<div class="tab-dot"></div>
-      </button>
-      <button class="tab-btn" data-tab="us" onclick="switchTab('us')">
-        <svg viewBox="0 0 16 16" fill="none"><path d="M8 13s-5-3.2-5-7a3 3 0 0 1 5-2.24A3 3 0 0 1 13 6c0 3.8-5 7-5 7z" stroke="currentColor" stroke-width="1.3"/></svg>
-        Kita<div class="tab-dot"></div>
-      </button>
-    </nav>
+    <!-- pages -->
+    <div class="pages">
 
-    <!-- HOME PAGE -->
-    <div class="page active" id="page-home">
-      <div class="home-map-row">
-        <div id="home-map" style="width:100%;height:168px;z-index:1;"></div>
-        <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:white;border:0.5px solid rgba(30,21,32,0.1);border-radius:12px;padding:4px 12px;font-size:10px;color:var(--ink-light);white-space:nowrap;z-index:9;pointer-events:none;font-weight:600;box-shadow:0 2px 8px rgba(30,21,32,0.07);">~450 km jaraknya 💌</div>
-      </div>
+      <!-- ── HOME ── -->
+      <div class="page active" id="page-home">
 
-      <div class="weather-strip">
-        <div class="w-cell">
-          <div class="w-icon" id="smg-icon">⛅</div>
-          <div>
-            <div class="w-who">Bobby · Semarang</div>
-            <div class="w-temp" id="smg-temp">—</div>
-            <div class="w-sky" id="smg-sky">Memuat...</div>
+        <div class="home-left">
+          <div class="map-strip">
+            <div id="home-map"></div>
+            <div class="map-badge">~450 km jaraknya 💌</div>
           </div>
-        </div>
-        <div class="w-cell">
-          <div class="w-icon" id="bgr-icon">🌧</div>
-          <div>
-            <div class="w-who">Yuddit · Bogor</div>
-            <div class="w-temp" id="bgr-temp">—</div>
-            <div class="w-sky" id="bgr-sky">Memuat...</div>
-          </div>
-        </div>
-      </div>
 
-      <div class="home-body">
-        <div>
-          <div class="section-label">Pertanyaan hari ini</div>
-          <div class="q-card">
-            <div class="q-card-accent"></div>
-            <div class="q-top">
-              <div class="q-day-row">
-                <span class="q-day-label" id="q-date-label">—</span>
-                <!-- Edit button: only visible to Bobby when nobody has answered yet -->
-                <button class="q-edit-btn" id="q-edit-btn" onclick="toggleQuestionEditor()">
-                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2L3 11H1v-2L8.5 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  Atur pertanyaan
-                </button>
-              </div>
-              <div id="q-loading"><div class="q-skeleton long"></div><div class="q-skeleton med"></div></div>
-              <div class="q-text" id="q-text" style="display:none;"></div>
-              <div class="q-empty" id="q-empty" style="display:none;">Belum ada pertanyaan untuk hari ini.<br>Bobby bisa mengaturnya di atas. 💌</div>
-              <div class="q-hint" id="q-hint" style="display:none;">
-                <svg width="10" height="12" viewBox="0 0 10 12" fill="none"><rect x="1" y="5" width="8" height="7" rx="1.5" stroke="#A394A8" stroke-width="1.2"/><path d="M3 5V3.5a2 2 0 0 1 4 0V5" stroke="#A394A8" stroke-width="1.2"/></svg>
-                Jawabanmu terkunci sebelum kamu lihat punya dia
+          <div class="weather-row">
+            <div class="w-cell">
+              <div class="w-icon" id="smg-icon">⛅</div>
+              <div>
+                <div class="w-label">Bobby · Semarang</div>
+                <div class="w-temp" id="smg-temp">—</div>
+                <div class="w-sky" id="smg-sky">Memuat...</div>
               </div>
             </div>
+            <div class="w-cell">
+              <div class="w-icon" id="bgr-icon">🌧</div>
+              <div>
+                <div class="w-label">Yuddit · Bogor</div>
+                <div class="w-temp" id="bgr-temp">—</div>
+                <div class="w-sky" id="bgr-sky">Memuat...</div>
+              </div>
+            </div>
+          </div>
 
-            <!-- Bobby-only question editor -->
-            <div class="q-editor-wrap" id="q-editor-wrap">
-              <div class="q-editor-label">✏️ Tulis pertanyaan untuk hari ini</div>
-              <textarea class="q-editor-textarea" id="q-editor-textarea" placeholder="Tulis pertanyaannya di sini..."></textarea>
-              <div class="q-editor-actions">
-                <button class="q-editor-cancel" onclick="closeQuestionEditor()">Batal</button>
-                <button class="q-editor-save" onclick="saveQuestion()">Simpan &amp; Kirim 💌</button>
+          <div class="home-scroll">
+
+            <!-- question -->
+            <div>
+              <div class="eyebrow">Pertanyaan hari ini</div>
+              <div class="q-card">
+                <div class="q-card-bar"></div>
+                <div class="q-head">
+                  <div class="q-meta-row">
+                    <span class="q-date" id="q-date-label">—</span>
+                    <button class="q-edit-btn" id="q-edit-btn" onclick="toggleQuestionEditor()">
+                      <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                        <path d="M8.5 1.5l2 2L3 11H1v-2L8.5 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      Atur pertanyaan
+                    </button>
+                  </div>
+                  <div id="q-loading">
+                    <div class="q-sk-line" style="width:92%"></div>
+                    <div class="q-sk-line" style="width:68%"></div>
+                  </div>
+                  <div class="q-text" id="q-text" style="display:none"></div>
+                  <div class="q-empty" id="q-empty" style="display:none">Belum ada pertanyaan untuk hari ini.<br>Bobby bisa mengaturnya di atas. 💌</div>
+                  <div class="q-lock-note" id="q-hint" style="display:none">
+                    <svg width="10" height="12" viewBox="0 0 10 12" fill="none">
+                      <rect x="1" y="5" width="8" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+                      <path d="M3 5V3.5a2 2 0 0 1 4 0V5" stroke="currentColor" stroke-width="1.2"/>
+                    </svg>
+                    Jawabanmu terkunci sebelum kamu lihat punya dia
+                  </div>
+                </div>
+
+                <!-- editor -->
+                <div class="q-editor" id="q-editor-wrap">
+                  <div class="q-editor-label">✏️ Tulis pertanyaan untuk hari ini</div>
+                  <textarea class="q-editor-ta" id="q-editor-textarea" placeholder="Tulis pertanyaannya di sini..."></textarea>
+                  <div class="q-editor-row">
+                    <button class="btn-ghost" onclick="closeQuestionEditor()">Batal</button>
+                    <button class="btn-solid" onclick="saveQuestion()">Simpan &amp; Kirim 💌</button>
+                  </div>
+                </div>
+
+                <div class="q-divider" id="q-divider"></div>
+                <div class="q-answer-area" id="q-input-area">
+                  <textarea class="q-textarea" id="q-textarea" placeholder="Tulis jawabanmu di sini..." disabled></textarea>
+                  <button class="q-submit" id="submit-btn" onclick="submitAnswer()" disabled>Menunggu pertanyaan...</button>
+                </div>
+                <div class="q-answered" id="answered-wrap">
+                  <div class="q-answered-label">Jawabanmu</div>
+                  <div class="q-answered-bubble" id="answered-bubble"></div>
+                  <div id="partner-status"></div>
+                </div>
               </div>
             </div>
 
-            <div class="q-divider" id="q-divider"></div>
-            <div class="q-body" id="q-input-area">
-              <textarea class="q-textarea" id="q-textarea" placeholder="Tulis jawabanmu di sini..." disabled></textarea>
-              <button class="submit-btn" id="submit-btn" onclick="submitAnswer()" disabled>Menunggu pertanyaan...</button>
+            <!-- countdown (mobile) -->
+            <div>
+              <div class="eyebrow">Pertemuan berikutnya</div>
+              <div class="cd-card">
+                <div class="cd-head">
+                  <div>
+                    <div class="cd-title" id="cd-title">Atur pertemuan</div>
+                    <div class="cd-sub" id="cd-sub">ketuk edit untuk tambah tanggal →</div>
+                  </div>
+                  <button class="icon-btn" onclick="openMeetupModal()">Edit</button>
+                </div>
+                <div class="cd-nums">
+                  <div class="cd-box"><div class="cd-num" id="cd-d">—</div><div class="cd-lbl">hari</div></div>
+                  <div class="cd-box"><div class="cd-num" id="cd-h">—</div><div class="cd-lbl">jam</div></div>
+                  <div class="cd-box"><div class="cd-num" id="cd-m">—</div><div class="cd-lbl">menit</div></div>
+                  <div class="cd-box"><div class="cd-num" id="cd-s">—</div><div class="cd-lbl">detik</div></div>
+                </div>
+              </div>
             </div>
-            <div class="answered-wrap" id="answered-wrap">
-              <div class="answered-label">Jawabanmu</div>
-              <div class="answered-bubble" id="answered-bubble"></div>
-              <div id="partner-status"></div>
-            </div>
+
           </div>
         </div>
 
-        <div class="mobile-only">
-          <div class="section-label">Pertemuan berikutnya</div>
+        <!-- right column (desktop only) -->
+        <div class="home-right">
+          <div class="eyebrow">Pertemuan berikutnya</div>
           <div class="cd-card">
-            <div class="cd-header">
-              <div><div class="cd-title" id="cd-title">Atur pertemuan</div><div class="cd-sub" id="cd-sub">ketuk edit untuk tambah tanggal →</div></div>
-              <button class="edit-btn" onclick="openMeetupModal()">Edit</button>
+            <div class="cd-head">
+              <div>
+                <div class="cd-title" id="cd-title-d">Atur pertemuan</div>
+                <div class="cd-sub" id="cd-sub-d">ketuk edit untuk tambah tanggal →</div>
+              </div>
+              <button class="icon-btn" onclick="openMeetupModal()">Edit</button>
             </div>
             <div class="cd-nums">
-              <div class="cd-box"><div class="cd-num" id="cd-d">—</div><div class="cd-lbl">hari</div></div>
-              <div class="cd-box"><div class="cd-num" id="cd-h">—</div><div class="cd-lbl">jam</div></div>
-              <div class="cd-box"><div class="cd-num" id="cd-m">—</div><div class="cd-lbl">menit</div></div>
-              <div class="cd-box"><div class="cd-num" id="cd-s">—</div><div class="cd-lbl">detik</div></div>
+              <div class="cd-box"><div class="cd-num" id="cd-d-d">—</div><div class="cd-lbl">hari</div></div>
+              <div class="cd-box"><div class="cd-num" id="cd-h-d">—</div><div class="cd-lbl">jam</div></div>
+              <div class="cd-box"><div class="cd-num" id="cd-m-d">—</div><div class="cd-lbl">menit</div></div>
+              <div class="cd-box"><div class="cd-num" id="cd-s-d">—</div><div class="cd-lbl">detik</div></div>
+            </div>
+          </div>
+          <div class="love-panel">
+            <div class="love-icon">💌</div>
+            <div class="love-title">Bobby &amp; <em>Yuddit</em></div>
+            <div class="love-sub">Jauh di mata, dekat di hati ✦</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── WISHLIST ── -->
+      <div class="page" id="page-wishlist">
+        <div class="wl-map-col">
+          <div id="leaflet-map"></div>
+          <div class="map-controls">
+            <button class="map-control-btn" id="sat-btn" onclick="toggleSatellite()">🛰 Satelit</button>
+          </div>
+          <div class="map-legend">
+            <div class="legend-row"><div class="legend-dot" style="background:var(--sage)"></div>Sudah ke sini</div>
+            <div class="legend-row"><div class="legend-dot" style="background:var(--blush)"></div>Mau ke sini</div>
+          </div>
+        </div>
+        <div class="wl-list-col">
+          <div class="add-card">
+            <div class="add-row">
+              <input class="text-input" id="place-input" placeholder="Tambah tempat... (mis. Bromo, Jogja)" onkeydown="if(event.key==='Enter')addPlace()"/>
+              <button class="add-btn-primary" onclick="addPlace()">Tambah</button>
+            </div>
+            <div class="cat-pills">
+              <button class="cat-pill selected" data-cat="city" onclick="selectCat(this,'city')">🏙 Kota</button>
+              <button class="cat-pill" data-cat="nature" onclick="selectCat(this,'nature')">🌿 Alam</button>
+              <button class="cat-pill" data-cat="beach" onclick="selectCat(this,'beach')">🌊 Pantai</button>
+              <button class="cat-pill" data-cat="culture" onclick="selectCat(this,'culture')">🏛 Budaya</button>
+              <button class="cat-pill" data-cat="food" onclick="selectCat(this,'food')">🍜 Kuliner</button>
+            </div>
+          </div>
+          <div class="places-list" id="places-list"></div>
+        </div>
+      </div>
+
+      <!-- ── ARCHIVE ── -->
+      <div class="page" id="page-archive">
+        <div class="archive-body" id="archive-body">
+          <div class="archive-empty-state" id="archive-empty">
+            <div class="archive-empty-icon">📖</div>
+            <div class="archive-empty-title">Belum ada kenangan</div>
+            <div class="archive-empty-sub">Jawab pertanyaan hari ini — setelah kalian berdua menjawab, akan tersimpan di sini sebagai kenangan. 💌</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── US ── -->
+      <div class="page" id="page-us">
+        <div class="us-body">
+          <div class="us-hero">
+            <div class="us-hero-icon">💌</div>
+            <div class="us-hero-title">Bobby &amp; <em>Yuddit</em></div>
+            <div class="us-hero-since" id="us-since">Mulai hari ini</div>
+            <div class="us-stats">
+              <div class="us-stat">
+                <div class="us-stat-num" id="stat-days">—</div>
+                <div class="us-stat-lbl">Hari</div>
+              </div>
+              <div class="us-stat">
+                <div class="us-stat-num" id="stat-qs">0</div>
+                <div class="us-stat-lbl">Pertanyaan</div>
+              </div>
+              <div class="us-stat">
+                <div class="us-stat-num" id="stat-places">0</div>
+                <div class="us-stat-lbl">Tempat</div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="eyebrow" style="margin-bottom:10px">Kenangan</div>
+            <div class="add-memory-card" style="margin-bottom:10px">
+              <div class="add-memory-row">
+                <input class="memory-input text-input" id="memory-input" placeholder="Catat momen penting..." onkeydown="if(event.key==='Enter')addMemory()"/>
+                <button class="memory-add-btn" onclick="addMemory()">Tambah</button>
+              </div>
+            </div>
+            <div class="memories-list" id="us-memories">
+              <div class="memories-empty">Catat momen pertamamu di atas ✦</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div id="desk-right-col">
-        <div class="section-label">Pertemuan berikutnya</div>
-        <div class="cd-card">
-          <div class="cd-header">
-            <div><div class="cd-title" id="cd-title-d">Atur pertemuan</div><div class="cd-sub" id="cd-sub-d">ketuk edit untuk tambah tanggal →</div></div>
-            <button class="edit-btn" onclick="openMeetupModal()">Edit</button>
-          </div>
-          <div class="cd-nums">
-            <div class="cd-box"><div class="cd-num" id="cd-d-d">—</div><div class="cd-lbl">hari</div></div>
-            <div class="cd-box"><div class="cd-num" id="cd-h-d">—</div><div class="cd-lbl">jam</div></div>
-            <div class="cd-box"><div class="cd-num" id="cd-m-d">—</div><div class="cd-lbl">menit</div></div>
-            <div class="cd-box"><div class="cd-num" id="cd-s-d">—</div><div class="cd-lbl">detik</div></div>
-          </div>
-        </div>
-        <div style="background:var(--warm-card);border:0.5px solid var(--border);border-radius:18px;padding:28px 20px;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;text-align:center;box-shadow:0 2px 12px rgba(30,21,32,0.05);">
-          <div style="font-size:36px;">💌</div>
-          <div style="font-family:'Lora',serif;font-size:22px;color:var(--ink);">Bobby &amp; <em style="font-style:italic;color:var(--rose-deep);">Yuddit</em></div>
-          <div style="font-size:12px;color:var(--ink-light);font-weight:500;line-height:1.6;">Jauh di mata, dekat di hati ✦</div>
-        </div>
-      </div>
-    </div>
+    </div><!-- /pages -->
 
-    <!-- WISHLIST PAGE -->
-    <div class="page wishlist-page" id="page-wishlist">
-      <div class="wishlist-map-col" style="position:relative;">
-        <div id="leaflet-map"></div>
-        <button id="sat-btn" onclick="toggleSatellite()" style="position:absolute;top:10px;right:10px;z-index:9;background:white;border:0.5px solid rgba(30,21,32,0.15);border-radius:9px;padding:6px 11px;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;cursor:pointer;color:var(--ink);font-weight:600;box-shadow:0 2px 6px rgba(30,21,32,0.08);">🛰 Satelit</button>
-        <div class="wmap-legend">
-          <div class="legend-row"><div class="legend-dot done"></div>Sudah ke sini</div>
-          <div class="legend-row"><div class="legend-dot wish"></div>Mau ke sini</div>
-        </div>
+    <!-- mobile bottom nav -->
+    <nav class="bottom-nav">
+      <div class="bottom-nav-inner">
+        <button class="bot-btn active" data-tab="home" onclick="switchTab('home')">
+          <svg viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+          Beranda<div class="bot-btn-dot"></div>
+        </button>
+        <button class="bot-btn" data-tab="wishlist" onclick="switchTab('wishlist')">
+          <svg viewBox="0 0 16 16" fill="none">
+            <path d="M8 2C5.8 2 4 3.8 4 6c0 3.2 4 8 4 8s4-4.8 4-8c0-2.2-1.8-4-4-4z" stroke="currentColor" stroke-width="1.3"/>
+            <circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/>
+          </svg>
+          Wishlist<div class="bot-btn-dot"></div>
+        </button>
+        <button class="bot-btn" data-tab="archive" onclick="switchTab('archive')">
+          <svg viewBox="0 0 16 16" fill="none">
+            <rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M5 7h6M5 9.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+          Arsip<div class="bot-btn-dot"></div>
+        </button>
+        <button class="bot-btn" data-tab="us" onclick="switchTab('us')">
+          <svg viewBox="0 0 16 16" fill="none">
+            <path d="M8 13s-5-3.2-5-7a3 3 0 0 1 5-2.24A3 3 0 0 1 13 6c0 3.8-5 7-5 7z" stroke="currentColor" stroke-width="1.3"/>
+          </svg>
+          Kita<div class="bot-btn-dot"></div>
+        </button>
       </div>
-      <div class="wishlist-body">
-        <div class="add-place-card">
-          <div class="add-row">
-            <input class="place-input" id="place-input" placeholder="Tambah tempat... (mis. Bromo, Jogja)" onkeydown="if(event.key==='Enter')addPlace()"/>
-            <button class="add-btn" onclick="addPlace()">Tambah</button>
-          </div>
-          <div class="category-pills">
-            <button class="cat-pill selected" data-cat="city" onclick="selectCat(this,'city')">🏙 Kota</button>
-            <button class="cat-pill" data-cat="nature" onclick="selectCat(this,'nature')">🌿 Alam</button>
-            <button class="cat-pill" data-cat="beach" onclick="selectCat(this,'beach')">🌊 Pantai</button>
-            <button class="cat-pill" data-cat="culture" onclick="selectCat(this,'culture')">🏛 Budaya</button>
-            <button class="cat-pill" data-cat="food" onclick="selectCat(this,'food')">🍜 Kuliner</button>
-          </div>
-        </div>
-        <div class="places-list" id="places-list"></div>
-      </div>
-    </div>
+    </nav>
 
-    <!-- ARCHIVE PAGE -->
-    <div class="page" id="page-archive">
-      <div class="archive-body" id="archive-body">
-        <div class="archive-empty" id="archive-empty">
-          <div class="archive-empty-title">Belum ada jawaban</div>
-          <div class="archive-empty-sub">Jawab pertanyaan hari ini — setelah kalian berdua menjawab, akan tersimpan di sini sebagai kenangan. 💌</div>
-        </div>
-      </div>
-    </div>
+  </div><!-- /main-area -->
+</div><!-- /shell -->
 
-    <!-- US PAGE -->
-    <div class="page" id="page-us">
-      <div class="us-body">
-        <div class="us-hero">
-          <div class="us-hero-bg"></div>
-          <span class="us-heart">💌</span>
-          <div class="us-names">Bobby &amp; <em>Yuddit</em></div>
-          <div class="us-since" id="us-since">Mulai hari ini</div>
-          <div class="us-stats">
-            <div class="us-stat"><div class="us-stat-num" id="stat-days">0</div><div class="us-stat-lbl">Hari</div></div>
-            <div class="us-stat"><div class="us-stat-num" id="stat-qs">0</div><div class="us-stat-lbl">Pertanyaan</div></div>
-            <div class="us-stat"><div class="us-stat-num" id="stat-places">0</div><div class="us-stat-lbl">Tempat</div></div>
-          </div>
-        </div>
-        <div>
-          <div class="section-label" style="margin-bottom:10px;">Kenangan</div>
-          <div class="add-memory-card" style="margin-bottom:10px;">
-            <div class="add-memory-row">
-              <input class="memory-input" id="memory-input" placeholder="Catat momen penting..." onkeydown="if(event.key==='Enter')addMemory()"/>
-              <button class="memory-add-btn" onclick="addMemory()">Tambah</button>
-            </div>
-          </div>
-          <div class="us-memories" id="us-memories"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MEETUP MODAL -->
-    <div class="modal-backdrop" id="meetup-modal" onclick="if(event.target===this)closeMeetupModal()">
-      <div class="modal">
-        <div class="modal-title">Rencanakan pertemuan</div>
-        <label>Di mana?</label>
-        <input type="text" id="modal-place" placeholder="mis. Yogyakarta"/>
-        <label>Kapan?</label>
-        <input type="date" id="modal-date"/>
-        <label>bertemu sejak? <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opsional)</span></label>
-        <input type="date" id="modal-since"/>
-        <div class="modal-btns">
-          <button class="modal-cancel" onclick="closeMeetupModal()">Batal</button>
-          <button class="modal-save" onclick="saveMeetup()">Simpan</button>
-        </div>
-      </div>
+<!-- MODAL -->
+<div class="modal-backdrop" id="meetup-modal" onclick="if(event.target===this)closeMeetupModal()">
+  <div class="modal-box">
+    <div class="modal-title">Rencanakan pertemuan</div>
+    <label class="modal-label">Di mana?</label>
+    <input class="modal-input" type="text" id="modal-place" placeholder="mis. Yogyakarta"/>
+    <label class="modal-label">Kapan?</label>
+    <input class="modal-input" type="date" id="modal-date"/>
+    <label class="modal-label">Bertemu sejak? <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opsional)</span></label>
+    <input class="modal-input" type="date" id="modal-since"/>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeMeetupModal()">Batal</button>
+      <button class="modal-save" onclick="saveMeetup()">Simpan</button>
     </div>
   </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════
 // CONFIG
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════
 const JBIN_KEY  = '$2a$10$aOMy.0xdjfpp1ly5ZZWtCuD65YDOf8msitXmJj2FDeS5XT1AQcN1y';
 const JBIN_BASE = 'https://api.jsonbin.io/v3/b';
 let   BIN_ID    = localStorage.getItem('ldts_bin_id') || '69f5a28536566621a817060f';
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════
 // IDENTITY
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════
 let WHO = localStorage.getItem('ldts_who');
 
 function partner()     { return WHO === 'bobby' ? 'yuddit' : 'bobby'; }
@@ -585,488 +1195,351 @@ function applyIdentityUI() {
   if (el) el.textContent = myName();
 }
 
-// ═══════════════════════════════════════════════════════
-// SHARED STATE
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════
+// STATE
+// ═══════════════════════════════════
 const S = {
-  bobbyAnswered: false, bobbyAnswer: '', bobbyAnsweredDate: null,
-  yudditAnswered: false, yudditAnswer: '', yudditAnsweredDate: null,
-  meetup: null, sinceDate: null,
-  places: [], archive: [], memories: [],
-  selectedCat: 'city',
-  todayQuestion: null, todayQuestionDate: null
+  bobbyAnswered:false,bobbyAnswer:'',bobbyAnsweredDate:null,
+  yudditAnswered:false,yudditAnswer:'',yudditAnsweredDate:null,
+  meetup:null,sinceDate:null,
+  places:[],archive:[],memories:[],
+  selectedCat:'city',
+  todayQuestion:null,todayQuestionDate:null
 };
 
 const CAT_EMOJI  = {city:'🏙',nature:'🌿',beach:'🌊',culture:'🏛',food:'🍜'};
 const CAT_LABEL  = {city:'Kota',nature:'Alam',beach:'Pantai',culture:'Budaya',food:'Kuliner'};
 
-// ═══════════════════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════════════════
-function todayKey() {
-  const d = new Date();
+function todayKey(){
+  const d=new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-function showSyncStatus(msg, color='var(--ink-light)') {
-  ['sync-status','sync-status-m'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = msg; el.style.color = color; }
+function showSyncStatus(msg,color='var(--ink-3)'){
+  ['sync-status','sync-status-m'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.textContent=msg;el.style.color=color;}
   });
 }
 
-function myAnswered()      { return WHO === 'bobby' ? S.bobbyAnswered    : S.yudditAnswered; }
-function myAnswer()        { return WHO === 'bobby' ? S.bobbyAnswer      : S.yudditAnswer; }
-function myAnsweredDate()  { return WHO === 'bobby' ? S.bobbyAnsweredDate : S.yudditAnsweredDate; }
-function partnerAnswered() { return WHO === 'bobby' ? S.yudditAnswered   : S.bobbyAnswered; }
+function myAnswered()      { return WHO==='bobby'?S.bobbyAnswered:S.yudditAnswered; }
+function myAnswer()        { return WHO==='bobby'?S.bobbyAnswer:S.yudditAnswer; }
+function myAnsweredDate()  { return WHO==='bobby'?S.bobbyAnsweredDate:S.yudditAnsweredDate; }
+function partnerAnswered() { return WHO==='bobby'?S.yudditAnswered:S.bobbyAnswered; }
 
-function setMyAnswered(val, answer, date) {
-  if (WHO === 'bobby') { S.bobbyAnswered = val; S.bobbyAnswer = answer; S.bobbyAnsweredDate = date; }
-  else                 { S.yudditAnswered = val; S.yudditAnswer = answer; S.yudditAnsweredDate = date; }
+function setMyAnswered(val,answer,date){
+  if(WHO==='bobby'){S.bobbyAnswered=val;S.bobbyAnswer=answer;S.bobbyAnsweredDate=date;}
+  else{S.yudditAnswered=val;S.yudditAnswer=answer;S.yudditAnsweredDate=date;}
 }
 
-// ═══════════════════════════════════════════════════════
-// CLOUD (JSONBin)
-// ═══════════════════════════════════════════════════════
-async function cloudLoad() {
-  if (!BIN_ID) return false;
-  try {
-    const r = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, { headers: {'X-Master-Key': JBIN_KEY} });
-    if (!r.ok) return false;
-    const d = await r.json();
-    Object.assign(S, d.record);
-    localStorage.setItem('ldts_v3', JSON.stringify(S));
+// ═══════════════════════════════════
+// CLOUD
+// ═══════════════════════════════════
+async function cloudLoad(){
+  if(!BIN_ID)return false;
+  try{
+    const r=await fetch(`${JBIN_BASE}/${BIN_ID}/latest`,{headers:{'X-Master-Key':JBIN_KEY}});
+    if(!r.ok)return false;
+    const d=await r.json();
+    Object.assign(S,d.record);
+    localStorage.setItem('ldts_v3',JSON.stringify(S));
     return true;
-  } catch(e) { return false; }
+  }catch(e){return false;}
 }
 
-let syncTimer = null;
-async function cloudSave() {
-  showSyncStatus('Menyimpan...', 'var(--ink-light)');
-  try {
-    if (!BIN_ID) {
-      const r = await fetch(JBIN_BASE, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json','X-Master-Key':JBIN_KEY,'X-Bin-Name':'LDTS-Bobby-Yuddit','X-Private':'true'},
-        body: JSON.stringify(S)
-      });
-      if (!r.ok) throw new Error('create failed');
-      const d = await r.json();
-      BIN_ID = d.metadata.id;
-      localStorage.setItem('ldts_bin_id', BIN_ID);
-    } else {
-      let base = S;
-      try {
-        const cr = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, { headers: {'X-Master-Key': JBIN_KEY} });
-        if (cr.ok) {
-          const cloud = (await cr.json()).record || {};
-          const merged = { ...cloud, ...S };
-
-          if (cloud.bobbyAnswered && !S.bobbyAnswered) {
-            merged.bobbyAnswered = cloud.bobbyAnswered;
-            merged.bobbyAnswer = cloud.bobbyAnswer;
-            merged.bobbyAnsweredDate = cloud.bobbyAnsweredDate;
-          }
-          if (cloud.yudditAnswered && !S.yudditAnswered) {
-            merged.yudditAnswered = cloud.yudditAnswered;
-            merged.yudditAnswer = cloud.yudditAnswer;
-            merged.yudditAnsweredDate = cloud.yudditAnsweredDate;
-          }
-
-          const aMap = {};
-          (cloud.archive || []).forEach(a => { aMap[a.dateKey || a.date] = { ...a }; });
-          (S.archive || []).forEach(a => {
-            const k = a.dateKey || a.date;
-            if (aMap[k]) {
-              aMap[k] = { ...aMap[k], ...a,
-                bobbyAns:  a.bobbyAns  || aMap[k].bobbyAns  || null,
-                yudditAns: a.yudditAns || aMap[k].yudditAns || null,
-              };
-            } else { aMap[k] = { ...a }; }
-          });
-          merged.archive = Object.values(aMap)
-            .sort((a,b) => (b.dateKey||b.date) > (a.dateKey||a.date) ? 1 : -1);
-
-          const todayK = todayKey();
-          if (cloud.todayQuestion && cloud.todayQuestionDate === todayK && !S.todayQuestion) {
-            merged.todayQuestion = cloud.todayQuestion;
-            merged.todayQuestionDate = cloud.todayQuestionDate;
-          }
-
-          base = merged;
-          Object.assign(S, merged);
+let syncTimer=null;
+async function cloudSave(){
+  showSyncStatus('Menyimpan...');
+  try{
+    if(!BIN_ID){
+      const r=await fetch(JBIN_BASE,{method:'POST',headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY,'X-Bin-Name':'LDTS-Bobby-Yuddit','X-Private':'true'},body:JSON.stringify(S)});
+      if(!r.ok)throw new Error('create failed');
+      const d=await r.json();BIN_ID=d.metadata.id;localStorage.setItem('ldts_bin_id',BIN_ID);
+    }else{
+      let base=S;
+      try{
+        const cr=await fetch(`${JBIN_BASE}/${BIN_ID}/latest`,{headers:{'X-Master-Key':JBIN_KEY}});
+        if(cr.ok){
+          const cloud=(await cr.json()).record||{};
+          const merged={...cloud,...S};
+          if(cloud.bobbyAnswered&&!S.bobbyAnswered){merged.bobbyAnswered=cloud.bobbyAnswered;merged.bobbyAnswer=cloud.bobbyAnswer;merged.bobbyAnsweredDate=cloud.bobbyAnsweredDate;}
+          if(cloud.yudditAnswered&&!S.yudditAnswered){merged.yudditAnswered=cloud.yudditAnswered;merged.yudditAnswer=cloud.yudditAnswer;merged.yudditAnsweredDate=cloud.yudditAnsweredDate;}
+          const aMap={};
+          (cloud.archive||[]).forEach(a=>{aMap[a.dateKey||a.date]={...a};});
+          (S.archive||[]).forEach(a=>{const k=a.dateKey||a.date;if(aMap[k]){aMap[k]={...aMap[k],...a,bobbyAns:a.bobbyAns||aMap[k].bobbyAns||null,yudditAns:a.yudditAns||aMap[k].yudditAns||null};}else{aMap[k]={...a};}});
+          merged.archive=Object.values(aMap).sort((a,b)=>(b.dateKey||b.date)>(a.dateKey||a.date)?1:-1);
+          const todayK=todayKey();
+          if(cloud.todayQuestion&&cloud.todayQuestionDate===todayK&&!S.todayQuestion){merged.todayQuestion=cloud.todayQuestion;merged.todayQuestionDate=cloud.todayQuestionDate;}
+          base=merged;Object.assign(S,merged);
         }
-      } catch(e) {}
-
-      const r = await fetch(`${JBIN_BASE}/${BIN_ID}`, {
-        method: 'PUT',
-        headers: {'Content-Type':'application/json','X-Master-Key':JBIN_KEY},
-        body: JSON.stringify(base)
-      });
-      if (!r.ok) throw new Error('save failed');
+      }catch(e){}
+      const r=await fetch(`${JBIN_BASE}/${BIN_ID}`,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY},body:JSON.stringify(base)});
+      if(!r.ok)throw new Error('save failed');
     }
-    localStorage.setItem('ldts_v3', JSON.stringify(S));
-    showSyncStatus('Tersinkron ✓', '#3D6B56');
-    setTimeout(() => showSyncStatus(''), 3000);
-  } catch(e) {
-    localStorage.setItem('ldts_v3', JSON.stringify(S));
-    showSyncStatus('Tersimpan lokal', 'var(--ink-light)');
+    localStorage.setItem('ldts_v3',JSON.stringify(S));
+    showSyncStatus('Tersinkron ✓','var(--sage)');
+    setTimeout(()=>showSyncStatus(''),3000);
+  }catch(e){
+    localStorage.setItem('ldts_v3',JSON.stringify(S));
+    showSyncStatus('Tersimpan lokal');
   }
 }
 
-function loadState() {
-  try {
-    const cur = localStorage.getItem('ldts_v3');
-    if (cur) { Object.assign(S, JSON.parse(cur)); return; }
-    const old = localStorage.getItem('ldts_v2');
-    if (old) {
-      const o = JSON.parse(old);
-      if (o.archive) o.archive.forEach(a => {
-        if (!a.bobbyAns && a.myAns) a.bobbyAns = a.myAns;
-        if (!a.yudditAns && a.herAns) a.yudditAns = a.herAns;
-        delete a.myAns; delete a.herAns;
-      });
-      if (o.answered) { S.bobbyAnswered = true; S.bobbyAnswer = o.answer || ''; S.bobbyAnsweredDate = o.answeredDate; }
-      Object.assign(S, o);
+function loadState(){
+  try{
+    const cur=localStorage.getItem('ldts_v3');
+    if(cur){Object.assign(S,JSON.parse(cur));return;}
+    const old=localStorage.getItem('ldts_v2');
+    if(old){
+      const o=JSON.parse(old);
+      if(o.archive)o.archive.forEach(a=>{if(!a.bobbyAns&&a.myAns)a.bobbyAns=a.myAns;if(!a.yudditAns&&a.herAns)a.yudditAns=a.herAns;delete a.myAns;delete a.herAns;});
+      if(o.answered){S.bobbyAnswered=true;S.bobbyAnswer=o.answer||'';S.bobbyAnsweredDate=o.answeredDate;}
+      Object.assign(S,o);
     }
-  } catch(e) {}
+  }catch(e){}
 }
-function saveState() { clearTimeout(syncTimer); syncTimer = setTimeout(cloudSave, 600); }
+function saveState(){clearTimeout(syncTimer);syncTimer=setTimeout(cloudSave,600);}
 
-// ═══════════════════════════════════════════════════════
-// QUESTION UI — Bobby sets it, both answer it
-// ═══════════════════════════════════════════════════════
-
-// Toggle the editor panel open/closed (Bobby only)
-function toggleQuestionEditor() {
-  const wrap = document.getElementById('q-editor-wrap');
-  const isOpen = wrap.classList.contains('open');
-  if (isOpen) {
-    closeQuestionEditor();
-  } else {
-    // Pre-fill with today's question if one exists
-    const ta = document.getElementById('q-editor-textarea');
-    ta.value = S.todayQuestion && S.todayQuestionDate === todayKey() ? S.todayQuestion : '';
-    wrap.classList.add('open');
-    ta.focus();
+// ═══════════════════════════════════
+// QUESTION UI
+// ═══════════════════════════════════
+function toggleQuestionEditor(){
+  const wrap=document.getElementById('q-editor-wrap');
+  const isOpen=wrap.classList.contains('open');
+  if(isOpen){closeQuestionEditor();}
+  else{
+    const ta=document.getElementById('q-editor-textarea');
+    ta.value=S.todayQuestion&&S.todayQuestionDate===todayKey()?S.todayQuestion:'';
+    wrap.classList.add('open');ta.focus();
   }
 }
+function closeQuestionEditor(){document.getElementById('q-editor-wrap').classList.remove('open');}
 
-function closeQuestionEditor() {
-  document.getElementById('q-editor-wrap').classList.remove('open');
+function saveQuestion(){
+  const text=document.getElementById('q-editor-textarea').value.trim();
+  if(!text)return;
+  const todayK=todayKey();
+  S.todayQuestion=text;S.todayQuestionDate=todayK;
+  if(!S.bobbyAnswered&&!S.yudditAnswered){S.bobbyAnsweredDate=null;S.yudditAnsweredDate=null;}
+  saveState();closeQuestionEditor();showQuestion(text);
 }
 
-// Bobby saves the question — syncs to cloud so Yuddit sees it
-function saveQuestion() {
-  const text = document.getElementById('q-editor-textarea').value.trim();
-  if (!text) return;
-  const todayK = todayKey();
-  S.todayQuestion = text;
-  S.todayQuestionDate = todayK;
-  // Reset any stale answered state for today if the question changes
-  // (only if nobody has answered yet)
-  if (!S.bobbyAnswered && !S.yudditAnswered) {
-    S.bobbyAnsweredDate = null;
-    S.yudditAnsweredDate = null;
-  }
-  saveState();
-  closeQuestionEditor();
-  showQuestion(text);
-}
-
-function showQuestion(text) {
-  document.getElementById('q-loading').style.display  = 'none';
-  document.getElementById('q-empty').style.display    = 'none';
-  const qText = document.getElementById('q-text');
-  qText.style.display = 'block';
-  qText.textContent   = '\u201C' + text + '\u201D';
-  document.getElementById('q-hint').style.display     = 'flex';
-
-  const d = new Date();
-  document.getElementById('q-date-label').textContent =
-    d.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'});
-
-  const todayK       = todayKey();
-  const iAnswered    = myAnswered()      && myAnsweredDate()      === todayK;
-  const theyAnswered = partnerAnswered() && (WHO==='bobby' ? S.yudditAnsweredDate : S.bobbyAnsweredDate) === todayK;
-
-  // Show "Atur pertanyaan" edit button only to Bobby, and only if nobody answered yet
-  const editBtn = document.getElementById('q-edit-btn');
-  if (WHO === 'bobby' && !iAnswered && !theyAnswered) {
-    editBtn.classList.add('visible');
-  } else {
-    editBtn.classList.remove('visible');
-    closeQuestionEditor();
-  }
-
-  if (iAnswered) {
-    document.getElementById('q-input-area').style.display  = 'none';
-    document.getElementById('answered-wrap').style.display = 'block';
-    document.getElementById('answered-bubble').textContent = myAnswer();
+function showQuestion(text){
+  document.getElementById('q-loading').style.display='none';
+  document.getElementById('q-empty').style.display='none';
+  const qText=document.getElementById('q-text');
+  qText.style.display='block';
+  qText.textContent='\u201C'+text+'\u201D';
+  document.getElementById('q-hint').style.display='flex';
+  const d=new Date();
+  document.getElementById('q-date-label').textContent=d.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long'});
+  const todayK=todayKey();
+  const iAnswered=myAnswered()&&myAnsweredDate()===todayK;
+  const theyAnswered=partnerAnswered()&&(WHO==='bobby'?S.yudditAnsweredDate:S.bobbyAnsweredDate)===todayK;
+  const editBtn=document.getElementById('q-edit-btn');
+  if(WHO==='bobby'&&!iAnswered&&!theyAnswered){editBtn.classList.add('visible');}
+  else{editBtn.classList.remove('visible');closeQuestionEditor();}
+  if(iAnswered){
+    document.getElementById('q-input-area').style.display='none';
+    document.getElementById('answered-wrap').style.display='block';
+    document.getElementById('answered-bubble').textContent=myAnswer();
     renderPartnerStatus(theyAnswered);
-  } else {
-    document.getElementById('q-input-area').style.display  = 'block';
-    document.getElementById('answered-wrap').style.display = 'none';
-    const ta  = document.getElementById('q-textarea');
-    const btn = document.getElementById('submit-btn');
-    ta.disabled     = false;
-    ta.placeholder  = 'Tulis jawabanmu di sini...';
-    btn.disabled    = false;
-    btn.textContent = 'Kunci jawaban 🔒';
+  }else{
+    document.getElementById('q-input-area').style.display='block';
+    document.getElementById('answered-wrap').style.display='none';
+    const ta=document.getElementById('q-textarea');
+    const btn=document.getElementById('submit-btn');
+    ta.disabled=false;ta.placeholder='Tulis jawabanmu di sini...';
+    btn.disabled=false;btn.textContent='Kunci jawaban 🔒';
   }
 }
 
-function showNoQuestion() {
-  document.getElementById('q-loading').style.display = 'none';
-  document.getElementById('q-text').style.display    = 'none';
-  document.getElementById('q-hint').style.display    = 'none';
-  document.getElementById('q-input-area').style.display  = 'block';
-  document.getElementById('answered-wrap').style.display = 'none';
-
-  const ta  = document.getElementById('q-textarea');
-  const btn = document.getElementById('submit-btn');
-  ta.disabled     = true;
-  ta.placeholder  = 'Menunggu Bobby menulis pertanyaan...';
-  btn.disabled    = true;
-  btn.textContent = 'Menunggu pertanyaan...';
-
-  const d = new Date();
-  document.getElementById('q-date-label').textContent =
-    d.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'});
-
-  if (WHO === 'bobby') {
-    document.getElementById('q-empty').style.display = 'none';
-    // Show edit button so Bobby can set the question
-    const editBtn = document.getElementById('q-edit-btn');
-    editBtn.classList.add('visible');
-    // Hint for Bobby
-    ta.placeholder  = 'Tulis pertanyaannya dulu lewat tombol di atas...';
-  } else {
-    document.getElementById('q-empty').style.display = 'block';
+function showNoQuestion(){
+  document.getElementById('q-loading').style.display='none';
+  document.getElementById('q-text').style.display='none';
+  document.getElementById('q-hint').style.display='none';
+  document.getElementById('q-input-area').style.display='block';
+  document.getElementById('answered-wrap').style.display='none';
+  const ta=document.getElementById('q-textarea');
+  const btn=document.getElementById('submit-btn');
+  ta.disabled=true;btn.disabled=true;btn.textContent='Menunggu pertanyaan...';
+  const d=new Date();
+  document.getElementById('q-date-label').textContent=d.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long'});
+  if(WHO==='bobby'){
+    document.getElementById('q-empty').style.display='none';
+    document.getElementById('q-edit-btn').classList.add('visible');
+    ta.placeholder='Tulis pertanyaannya dulu lewat tombol di atas...';
+  }else{
+    document.getElementById('q-empty').style.display='block';
   }
 }
 
-function renderPartnerStatus(theyAnswered) {
-  const el = document.getElementById('partner-status');
-  if (!el) return;
-  if (theyAnswered) {
-    el.innerHTML = `<div class="partner-answered-note">✓ ${partnerName()} sudah menjawab — lihat di Arsip!</div>`;
-  } else {
-    el.innerHTML = `<div class="waiting-row">Menunggu ${partnerName()} <div class="dots"><span></span><span></span><span></span></div></div>`;
-  }
+function renderPartnerStatus(theyAnswered){
+  const el=document.getElementById('partner-status');
+  if(!el)return;
+  if(theyAnswered){el.innerHTML=`<div class="partner-note">✓ ${partnerName()} sudah menjawab — lihat di Arsip!</div>`;}
+  else{el.innerHTML=`<div class="waiting-row">Menunggu ${partnerName()} <div class="dots"><span></span><span></span><span></span></div></div>`;}
 }
 
-// ═══════════════════════════════════════════════════════
-// CROSS-DEVICE SYNC (every 30s)
-// ═══════════════════════════════════════════════════════
-function startSyncCheck() {
-  setInterval(async () => {
-    if (!BIN_ID) return;
-    const key = todayKey();
-    try {
-      const r   = await fetch(`${JBIN_BASE}/${BIN_ID}/latest`, { headers: {'X-Master-Key': JBIN_KEY} });
-      if (!r.ok) return;
-      const rec = (await r.json()).record;
-
-      let changed = false;
-
-      // Check if partner answered
-      const partnerKey      = partner();
-      const partnerAnsField  = partnerKey + 'Answer';
-      const partnerDoneField = partnerKey + 'Answered';
-      const partnerDateField = partnerKey + 'AnsweredDate';
-      if (rec[partnerDoneField] && rec[partnerDateField] === key && !S[partnerDoneField]) {
-        S[partnerDoneField] = rec[partnerDoneField];
-        S[partnerAnsField]  = rec[partnerAnsField];
-        S[partnerDateField] = rec[partnerDateField];
-        const entry = S.archive.find(a => a.dateKey === key);
-        if (entry) entry[partnerKey + 'Ans'] = rec[partnerAnsField];
-        changed = true;
+// ═══════════════════════════════════
+// SYNC CHECK
+// ═══════════════════════════════════
+function startSyncCheck(){
+  setInterval(async()=>{
+    if(!BIN_ID)return;
+    const key=todayKey();
+    try{
+      const r=await fetch(`${JBIN_BASE}/${BIN_ID}/latest`,{headers:{'X-Master-Key':JBIN_KEY}});
+      if(!r.ok)return;
+      const rec=(await r.json()).record;
+      let changed=false;
+      const partnerKey=partner();
+      const pAns=partnerKey+'Answer',pDone=partnerKey+'Answered',pDate=partnerKey+'AnsweredDate';
+      if(rec[pDone]&&rec[pDate]===key&&!S[pDone]){
+        S[pDone]=rec[pDone];S[pAns]=rec[pAns];S[pDate]=rec[pDate];
+        const entry=S.archive.find(a=>a.dateKey===key);
+        if(entry)entry[partnerKey+'Ans']=rec[pAns];
+        changed=true;
       }
-
-      // Check if Bobby updated the question
-      const cQ = rec?.todayQuestion;
-      const cD = rec?.todayQuestionDate;
-      if (cQ && cD === key && cQ !== S.todayQuestion) {
-        S.todayQuestion = cQ; S.todayQuestionDate = key;
-        changed = true;
-      }
-
-      if (changed) {
-        localStorage.setItem('ldts_v3', JSON.stringify(S));
-        if (S.todayQuestion && S.todayQuestionDate === key) showQuestion(S.todayQuestion);
+      const cQ=rec?.todayQuestion,cD=rec?.todayQuestionDate;
+      if(cQ&&cD===key&&cQ!==S.todayQuestion){S.todayQuestion=cQ;S.todayQuestionDate=key;changed=true;}
+      if(changed){
+        localStorage.setItem('ldts_v3',JSON.stringify(S));
+        if(S.todayQuestion&&S.todayQuestionDate===key)showQuestion(S.todayQuestion);
         else showNoQuestion();
-        renderArchive(); renderUs();
+        renderArchive();renderUs();
       }
-    } catch(e) {}
-  }, 30_000);
+    }catch(e){}
+  },30_000);
 }
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════════════
-async function init() {
+// ═══════════════════════════════════
+async function init(){
   loadState();
-  renderWishlist(); renderArchive(); renderUs(); fetchWeather();
-  setTimeout(initHomeMap,    200);
-  setTimeout(initLeafletMap, 300);
-
-  if (S.meetup) { updateMeetupUI(); startCountdown(); }
-
-  showSyncStatus('Memuat...', 'var(--ink-light)');
-  const ok = await cloudLoad();
-  if (ok) {
-    renderWishlist(); renderArchive(); renderUs();
-    showSyncStatus('Tersinkron ✓', '#3D6B56');
-    setTimeout(() => showSyncStatus(''), 3000);
-    if (S.meetup) { updateMeetupUI(); startCountdown(); }
-  } else {
-    showSyncStatus('Offline', 'var(--ink-light)');
-  }
-
-  // Date rollover
-  const todayK = todayKey();
-  let dirty = false;
-  if (S.todayQuestionDate && S.todayQuestionDate !== todayK) {
-    S.todayQuestion = null; S.todayQuestionDate = null; dirty = true;
-  }
-  if (S.bobbyAnsweredDate  && S.bobbyAnsweredDate  !== todayK) {
-    S.bobbyAnswered  = false; S.bobbyAnswer  = ''; S.bobbyAnsweredDate  = null; dirty = true;
-  }
-  if (S.yudditAnsweredDate && S.yudditAnsweredDate !== todayK) {
-    S.yudditAnswered = false; S.yudditAnswer = ''; S.yudditAnsweredDate = null; dirty = true;
-  }
-  if (dirty) saveState();
-
-  // Show question or empty state
-  if (S.todayQuestion && S.todayQuestionDate === todayK) {
-    showQuestion(S.todayQuestion);
-  } else {
-    showNoQuestion();
-  }
-
+  renderWishlist();renderArchive();renderUs();fetchWeather();
+  setTimeout(initHomeMap,200);
+  setTimeout(initLeafletMap,300);
+  if(S.meetup){updateMeetupUI();startCountdown();}
+  showSyncStatus('Memuat...');
+  const ok=await cloudLoad();
+  if(ok){
+    renderWishlist();renderArchive();renderUs();
+    showSyncStatus('Tersinkron ✓','var(--sage)');
+    setTimeout(()=>showSyncStatus(''),3000);
+    if(S.meetup){updateMeetupUI();startCountdown();}
+  }else{showSyncStatus('Offline');}
+  const todayK=todayKey();let dirty=false;
+  if(S.todayQuestionDate&&S.todayQuestionDate!==todayK){S.todayQuestion=null;S.todayQuestionDate=null;dirty=true;}
+  if(S.bobbyAnsweredDate&&S.bobbyAnsweredDate!==todayK){S.bobbyAnswered=false;S.bobbyAnswer='';S.bobbyAnsweredDate=null;dirty=true;}
+  if(S.yudditAnsweredDate&&S.yudditAnsweredDate!==todayK){S.yudditAnswered=false;S.yudditAnswer='';S.yudditAnsweredDate=null;dirty=true;}
+  if(dirty)saveState();
+  if(S.todayQuestion&&S.todayQuestionDate===todayK)showQuestion(S.todayQuestion);
+  else showNoQuestion();
   startSyncCheck();
 }
 
-// ═══════════════════════════════════════════════════════
-// TAB SWITCHING
-// ═══════════════════════════════════════════════════════
-function switchTab(tab) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn,.sidebar-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + tab).classList.add('active');
-  document.querySelectorAll('[data-tab=' + tab + ']').forEach(b => b.classList.add('active'));
-  if (tab === 'wishlist') setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 120);
-  if (tab === 'home')     setTimeout(() => { if (homeMap)    homeMap.invalidateSize();    }, 120);
+// ═══════════════════════════════════
+// TABS
+// ═══════════════════════════════════
+function switchTab(tab){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn,.bot-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  document.querySelectorAll('[data-tab='+tab+']').forEach(b=>b.classList.add('active'));
+  if(tab==='wishlist')setTimeout(()=>{if(leafletMap)leafletMap.invalidateSize();},120);
+  if(tab==='home')setTimeout(()=>{if(homeMap)homeMap.invalidateSize();},120);
 }
 
-// ═══════════════════════════════════════════════════════
-// ANSWER SUBMISSION
-// ═══════════════════════════════════════════════════════
-function submitAnswer() {
-  const val = document.getElementById('q-textarea').value.trim();
-  if (!val || !WHO) return;
-
-  const todayK = todayKey();
-  const todayQ = S.todayQuestion || '';
-
-  setMyAnswered(true, val, todayK);
-
-  let entry = S.archive.find(a => a.dateKey === todayK);
-  if (!entry) {
-    entry = {
-      dateKey: todayK,
-      date: new Date().toLocaleDateString('id-ID', {day:'numeric', month:'short'}),
-      q: todayQ,
-      bobbyAns: null, yudditAns: null
-    };
+// ═══════════════════════════════════
+// SUBMIT ANSWER
+// ═══════════════════════════════════
+function submitAnswer(){
+  const val=document.getElementById('q-textarea').value.trim();
+  if(!val||!WHO)return;
+  const todayK=todayKey();
+  const todayQ=S.todayQuestion||'';
+  setMyAnswered(true,val,todayK);
+  let entry=S.archive.find(a=>a.dateKey===todayK);
+  if(!entry){
+    entry={dateKey:todayK,date:new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short'}),q:todayQ,bobbyAns:null,yudditAns:null};
     S.archive.unshift(entry);
   }
-  if (WHO === 'bobby') entry.bobbyAns  = val;
-  else                 entry.yudditAns = val;
-
-  saveState();
-  showQuestion(todayQ);
-  renderArchive(); renderUs();
+  if(WHO==='bobby')entry.bobbyAns=val;else entry.yudditAns=val;
+  saveState();showQuestion(todayQ);renderArchive();renderUs();
 }
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════
 // COUNTDOWN
-// ═══════════════════════════════════════════════════════
-function updateMeetupUI() {
-  if (!S.meetup) return;
-  ['cd-title','cd-title-d'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = S.meetup.place; });
-  const [my,mm,md] = S.meetup.date.split('-').map(Number);
-  const ds = new Date(my,mm-1,md).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
-  ['cd-sub','cd-sub-d'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = ds; });
+// ═══════════════════════════════════
+function updateMeetupUI(){
+  if(!S.meetup)return;
+  ['cd-title','cd-title-d'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=S.meetup.place;});
+  const[my,mm,md]=S.meetup.date.split('-').map(Number);
+  const ds=new Date(my,mm-1,md).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+  ['cd-sub','cd-sub-d'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=ds;});
 }
-let cdTimer = null;
-function startCountdown() { if (cdTimer) clearInterval(cdTimer); cdTimer = setInterval(tickCountdown, 1000); tickCountdown(); }
-function tickCountdown() {
-  if (!S.meetup) return;
-  const [ty,tm,td] = S.meetup.date.split('-').map(Number);
-  const diff = new Date(ty,tm-1,td) - new Date();
-  const v = diff <= 0 ? [0,0,0,0] : [
-    Math.floor(diff/86400000), Math.floor((diff%86400000)/3600000),
-    Math.floor((diff%3600000)/60000), Math.floor((diff%60000)/1000)
-  ];
-  ['cd-d','cd-h','cd-m','cd-s'].forEach((id,i) => {
-    const a = document.getElementById(id);      if(a) a.textContent = v[i];
-    const b = document.getElementById(id+'-d'); if(b) b.textContent = v[i];
-  });
+let cdTimer=null;
+function startCountdown(){if(cdTimer)clearInterval(cdTimer);cdTimer=setInterval(tickCountdown,1000);tickCountdown();}
+function tickCountdown(){
+  if(!S.meetup)return;
+  const[ty,tm,td]=S.meetup.date.split('-').map(Number);
+  const diff=new Date(ty,tm-1,td)-new Date();
+  const v=diff<=0?[0,0,0,0]:[Math.floor(diff/86400000),Math.floor((diff%86400000)/3600000),Math.floor((diff%3600000)/60000),Math.floor((diff%60000)/1000)];
+  ['cd-d','cd-h','cd-m','cd-s'].forEach((id,i)=>{const a=document.getElementById(id);if(a)a.textContent=v[i];const b=document.getElementById(id+'-d');if(b)b.textContent=v[i];});
 }
-function openMeetupModal() {
-  if (S.meetup)    document.getElementById('modal-place').value = S.meetup.place;
-  if (S.meetup)    document.getElementById('modal-date').value  = S.meetup.date;
-  if (S.sinceDate) document.getElementById('modal-since').value = S.sinceDate;
+function openMeetupModal(){
+  if(S.meetup)document.getElementById('modal-place').value=S.meetup.place;
+  if(S.meetup)document.getElementById('modal-date').value=S.meetup.date;
+  if(S.sinceDate)document.getElementById('modal-since').value=S.sinceDate;
   document.getElementById('meetup-modal').classList.add('open');
 }
-function closeMeetupModal() { document.getElementById('meetup-modal').classList.remove('open'); }
-function saveMeetup() {
-  const place = document.getElementById('modal-place').value.trim() || 'Pertemuan kita';
-  const date  = document.getElementById('modal-date').value;
-  const since = document.getElementById('modal-since').value;
-  if (date)  S.meetup    = {place, date};
-  if (since) S.sinceDate = since;
-  saveState();
-  if (S.meetup) { updateMeetupUI(); startCountdown(); }
-  renderUs(); closeMeetupModal();
+function closeMeetupModal(){document.getElementById('meetup-modal').classList.remove('open');}
+function saveMeetup(){
+  const place=document.getElementById('modal-place').value.trim()||'Pertemuan kita';
+  const date=document.getElementById('modal-date').value;
+  const since=document.getElementById('modal-since').value;
+  if(date)S.meetup={place,date};
+  if(since)S.sinceDate=since;
+  saveState();if(S.meetup){updateMeetupUI();startCountdown();}
+  renderUs();closeMeetupModal();
 }
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════
 // WEATHER
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════
 const WMO_DESC={0:'Cerah',1:'Cerah berawan',2:'Berawan',3:'Mendung',45:'Berkabut',48:'Berkabut',51:'Gerimis ringan',53:'Gerimis',55:'Gerimis lebat',61:'Hujan ringan',63:'Hujan',65:'Hujan lebat',80:'Hujan lokal',81:'Hujan deras',95:'Hujan badai'};
 const WMO_ICON={0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌦',63:'🌧',65:'🌧',80:'🌦',81:'🌧',95:'⛈'};
-function fetchWeather() {
-  [{lat:-6.9932,lon:110.4203,t:'smg-temp',s:'smg-sky',i:'smg-icon'},{lat:-6.5971,lon:106.8060,t:'bgr-temp',s:'bgr-sky',i:'bgr-icon'}].forEach(c => {
+function fetchWeather(){
+  [{lat:-6.9932,lon:110.4203,t:'smg-temp',s:'smg-sky',i:'smg-icon'},{lat:-6.5971,lon:106.8060,t:'bgr-temp',s:'bgr-sky',i:'bgr-icon'}].forEach(c=>{
     fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,weathercode&timezone=Asia%2FJakarta`)
       .then(r=>r.json()).then(d=>{
-        document.getElementById(c.t).textContent = Math.round(d.current.temperature_2m)+'°C';
-        document.getElementById(c.s).textContent = WMO_DESC[d.current.weathercode]||'Cerah';
-        document.getElementById(c.i).textContent = WMO_ICON[d.current.weathercode]||'🌤';
-      }).catch(()=>{ document.getElementById(c.t).textContent='—'; document.getElementById(c.s).textContent='Tidak tersedia'; });
+        document.getElementById(c.t).textContent=Math.round(d.current.temperature_2m)+'°C';
+        document.getElementById(c.s).textContent=WMO_DESC[d.current.weathercode]||'Cerah';
+        document.getElementById(c.i).textContent=WMO_ICON[d.current.weathercode]||'🌤';
+      }).catch(()=>{document.getElementById(c.t).textContent='—';document.getElementById(c.s).textContent='Tidak tersedia';});
   });
 }
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════
 // MAPS
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════
 let homeMap=null;
 function initHomeMap(){
   if(homeMap)return;
   homeMap=L.map('home-map',{center:[-7.2,108.6],zoom:7,zoomControl:true,attributionControl:false,dragging:true,touchZoom:true,scrollWheelZoom:true});
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd'}).addTo(homeMap);
   const smgLL=[-6.993,110.420],bgrLL=[-6.597,106.806];
-  L.polyline([bgrLL,smgLL],{color:'#C4607A',weight:2,dashArray:'6 5',opacity:0.85}).addTo(homeMap);
-  const mk=(ll,lbl,col)=>L.marker(ll,{icon:L.divIcon({html:`<div style="display:flex;flex-direction:column;align-items:center"><div style="width:11px;height:11px;border-radius:50%;background:${col};border:2.5px solid white;box-shadow:0 1px 5px rgba(0,0,0,0.2)"></div><div style="font-size:9px;font-weight:600;margin-top:3px;padding:2px 7px;border-radius:8px;background:white;border:0.5px solid rgba(30,21,32,0.1);color:${col};white-space:nowrap;">${lbl}</div></div>`,className:'',iconAnchor:[5,5]})}).addTo(homeMap);
-  mk(smgLL,'Semarang · Bobby','#5C4E8A'); mk(bgrLL,'Bogor · Yuddit','#C4607A');
+  L.polyline([bgrLL,smgLL],{color:'#D4728A',weight:2,dashArray:'6 5',opacity:.85}).addTo(homeMap);
+  const mk=(ll,lbl,col)=>L.marker(ll,{icon:L.divIcon({html:`<div style="display:flex;flex-direction:column;align-items:center"><div style="width:11px;height:11px;border-radius:50%;background:${col};border:2.5px solid white;box-shadow:0 1px 5px rgba(0,0,0,0.2)"></div><div style="font-size:9px;font-weight:500;margin-top:3px;padding:2px 7px;border-radius:8px;background:white;border:1px solid rgba(26,20,16,.1);color:${col};white-space:nowrap;font-family:DM Sans,sans-serif">${lbl}</div></div>`,className:'',iconAnchor:[5,5]})}).addTo(homeMap);
+  mk(smgLL,'Semarang · Bobby','#5A4F9A');mk(bgrLL,'Bogor · Yuddit','#D4728A');
   homeMap.fitBounds([bgrLL,smgLL],{padding:[28,28]});
   [100,300,600].forEach(t=>setTimeout(()=>homeMap.invalidateSize(),t));
 }
 
 let leafletMap=null,leafletMarkers=[],satelliteMode=false,baseLayer=null,satLayer=null;
-function makePinIcon(done){const c=done?'#3D6B56':'#C4607A';return L.divIcon({html:`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="30" viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 18 12 18s12-9 12-18C24 5.4 18.6 0 12 0z" fill="${c}"/><circle cx="12" cy="12" r="5" fill="white"/></svg>`,className:'',iconSize:[24,30],iconAnchor:[12,30],popupAnchor:[0,-32]});}
+function makePinIcon(done){const c=done?'#5A7D6A':'#D4728A';return L.divIcon({html:`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="30" viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 18 12 18s12-9 12-18C24 5.4 18.6 0 12 0z" fill="${c}"/><circle cx="12" cy="12" r="5" fill="white"/></svg>`,className:'',iconSize:[24,30],iconAnchor:[12,30],popupAnchor:[0,-32]});}
 function toggleSatellite(){satelliteMode=!satelliteMode;if(satelliteMode){leafletMap.removeLayer(baseLayer);satLayer.addTo(leafletMap);}else{leafletMap.removeLayer(satLayer);baseLayer.addTo(leafletMap);}leafletMap.invalidateSize();document.getElementById('sat-btn').textContent=satelliteMode?'🗺 Peta':'🛰 Satelit';}
 function initLeafletMap(){
   if(leafletMap)return;
@@ -1074,14 +1547,14 @@ function initLeafletMap(){
   baseLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd'}).addTo(leafletMap);
   satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19});
   [100,300,600,1000].forEach(t=>setTimeout(()=>leafletMap.invalidateSize(),t));
-  const sp=(ll,col,pop)=>L.marker(ll,{icon:L.divIcon({html:`<div style="width:10px;height:10px;border-radius:50%;background:${col};border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>`,className:'',iconSize:[10,10],iconAnchor:[5,5]})}).addTo(leafletMap).bindPopup(pop);
-  sp([-6.993,110.420],'#5C4E8A','Semarang · Bobby'); sp([-6.597,106.806],'#C4607A','Bogor · Yuddit');
+  const sp=(ll,col,pop)=>L.marker(ll,{icon:L.divIcon({html:`<div style="width:10px;height:10px;border-radius:50%;background:${col};border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.2)"></div>`,className:'',iconSize:[10,10],iconAnchor:[5,5]})}).addTo(leafletMap).bindPopup(pop);
+  sp([-6.993,110.420],'#5A4F9A','Semarang · Bobby');sp([-6.597,106.806],'#D4728A','Bogor · Yuddit');
   renderLeafletMarkers();
 }
 function renderLeafletMarkers(){
   if(!leafletMap)return;
-  leafletMarkers.forEach(m=>m.remove()); leafletMarkers=[];
-  S.places.forEach(p=>{if(!p.latlng)return;const m=L.marker(p.latlng,{icon:makePinIcon(p.done)}).addTo(leafletMap).bindPopup(`<b>${p.name}</b><br><span style="color:#A394A8">${p.done?'✓ Sudah ke sini':'Mau ke sini'}</span>`);leafletMarkers.push(m);});
+  leafletMarkers.forEach(m=>m.remove());leafletMarkers=[];
+  S.places.forEach(p=>{if(!p.latlng)return;const m=L.marker(p.latlng,{icon:makePinIcon(p.done)}).addTo(leafletMap).bindPopup(`<b>${p.name}</b><br><span style="color:#9C8D82">${p.done?'✓ Sudah ke sini':'Mau ke sini'}</span>`);leafletMarkers.push(m);});
   const v=S.places.filter(p=>p.latlng).map(p=>p.latlng);
   if(v.length>0)leafletMap.fitBounds(L.latLngBounds(v),{padding:[40,40],maxZoom:10});
 }
@@ -1089,32 +1562,48 @@ async function geocode(name){
   try{const r=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1&countrycodes=id`,{headers:{'Accept-Language':'id','User-Agent':'LDTS-App/1.0'}});const d=await r.json();if(d&&d.length>0)return[parseFloat(d[0].lat),parseFloat(d[0].lon)];const r2=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(name)}&format=json&limit=1`,{headers:{'Accept-Language':'id','User-Agent':'LDTS-App/1.0'}});const d2=await r2.json();if(d2&&d2.length>0)return[parseFloat(d2[0].lat),parseFloat(d2[0].lon)];}catch(e){}return null;
 }
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════
 // WISHLIST
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════
 function selectCat(el,cat){document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('selected'));el.classList.add('selected');S.selectedCat=cat;}
 async function addPlace(){
   const input=document.getElementById('place-input'),name=input.value.trim();if(!name)return;
-  const ab=document.querySelector('.add-btn');ab.textContent='Mencari...';ab.disabled=true;
+  const ab=document.querySelector('.add-btn-primary');ab.textContent='Mencari...';ab.disabled=true;
   const ll=await geocode(name);
   S.places.unshift({id:Date.now(),name,cat:S.selectedCat,done:false,latlng:ll});
   input.value='';saveState();renderWishlist();renderUs();
   ab.textContent='Tambah';ab.disabled=false;
   if(ll&&leafletMap)leafletMap.flyTo(ll,10,{duration:1.2});
-  else if(!ll){showSyncStatus('Tempat tidak ditemukan di peta','#C4607A');setTimeout(()=>showSyncStatus(''),3000);}
+  else if(!ll){showSyncStatus('Tempat tidak ditemukan di peta','var(--blush)');setTimeout(()=>showSyncStatus(''),3000);}
 }
-function toggleDone(id){const p=S.places.find(p=>p.id===id);if(p){p.done=!p.done;saveState();renderWishlist();}}
-function deletePlace(id){S.places=S.places.filter(p=>p.id!==id);saveState();renderWishlist();renderUs();}
+function toggleDone(id){const p=S.places.find(p=>p.id===id);if(p){p.done=!p.done;saveState();renderWishlist();renderLeafletMarkers();}}
+function deletePlace(id){S.places=S.places.filter(p=>p.id!==id);saveState();renderWishlist();renderUs();renderLeafletMarkers();}
 function renderWishlist(){
   const list=document.getElementById('places-list');
-  if(S.places.length===0){list.innerHTML='<div style="text-align:center;padding:28px 0;color:var(--ink-light);font-size:13px;font-weight:500;">Tambah tempat yang ingin kalian kunjungi bersama ✦</div>';return;}
-  list.innerHTML=S.places.map(p=>`<div class="place-item"><div class="place-icon ${p.cat}">${CAT_EMOJI[p.cat]||'📍'}</div><div class="place-info"><div class="place-name" style="${p.done?'text-decoration:line-through;opacity:.5':''}">${p.name}</div><div class="place-meta">${CAT_LABEL[p.cat]||p.cat} · ${p.done?'sudah dikunjungi':'mau ke sini'}</div></div><div class="place-actions">${p.done?'<span class="done-badge">✓ Selesai</span>':''}<button class="check-btn ${p.done?'done':''}" onclick="toggleDone(${p.id})"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="${p.done?'#3D6B56':'#A394A8'}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="del-btn" onclick="deletePlace(${p.id})">×</button></div></div>`).join('');
+  if(S.places.length===0){list.innerHTML='<div class="list-empty">Tambah tempat yang ingin kalian kunjungi bersama ✦</div>';return;}
+  list.innerHTML=S.places.map(p=>`
+    <div class="place-item">
+      <div class="place-icon-wrap ${p.cat}">${CAT_EMOJI[p.cat]||'📍'}</div>
+      <div class="place-info">
+        <div class="place-name" style="${p.done?'text-decoration:line-through;opacity:.45':''}">${p.name}</div>
+        <div class="place-meta">${CAT_LABEL[p.cat]||p.cat} · ${p.done?'sudah dikunjungi':'mau ke sini'}</div>
+      </div>
+      <div class="place-acts">
+        ${p.done?'<span class="done-badge">✓ Selesai</span>':''}
+        <button class="check-btn ${p.done?'done':''}" onclick="toggleDone(${p.id})">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M2 6l3 3 5-5" stroke="${p.done?'var(--sage)':'var(--ink-3)'}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="del-btn" onclick="deletePlace(${p.id})">×</button>
+      </div>
+    </div>`).join('');
   renderLeafletMarkers();
 }
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════
 // ARCHIVE
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════
 function renderArchive(){
   const body=document.getElementById('archive-body'),empty=document.getElementById('archive-empty');
   const entries=S.archive.filter(a=>a.bobbyAns||a.yudditAns);
@@ -1123,16 +1612,16 @@ function renderArchive(){
   body.querySelectorAll('.archive-item').forEach(el=>el.remove());
   entries.forEach(a=>{
     const el=document.createElement('div');el.className='archive-item';
-    const bobbyTxt  = a.bobbyAns  || '<em style="color:var(--ink-light)">Menunggu jawabannya...</em>';
-    const yudditTxt = a.yudditAns || '<em style="color:var(--ink-light)">Menunggu jawabannya...</em>';
-    el.innerHTML=`<div class="archive-item-accent"></div><div class="archive-q"><div class="archive-day">${a.date||''}</div><div class="archive-qtext">\u201C${a.q}\u201D</div></div><div class="archive-answers"><div class="archive-ans"><div class="archive-who">Bobby</div><div class="archive-atext">${bobbyTxt}</div></div><div class="archive-ans"><div class="archive-who">Yuddit</div><div class="archive-atext">${yudditTxt}</div></div></div>`;
+    const bobbyTxt=a.bobbyAns||'<em style="color:var(--ink-3)">Menunggu jawabannya...</em>';
+    const yudditTxt=a.yudditAns||'<em style="color:var(--ink-3)">Menunggu jawabannya...</em>';
+    el.innerHTML=`<div class="archive-bar"></div><div class="archive-q-block"><div class="archive-date">${a.date||''}</div><div class="archive-qtext">\u201C${a.q}\u201D</div></div><div class="archive-answers"><div class="archive-ans"><div class="archive-who">Bobby</div><div class="archive-atext">${bobbyTxt}</div></div><div class="archive-ans"><div class="archive-who">Yuddit</div><div class="archive-atext">${yudditTxt}</div></div></div>`;
     body.appendChild(el);
   });
 }
 
-// ═══════════════════════════════════════════════════════
-// US PAGE
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════
+// US
+// ═══════════════════════════════════
 function addMemory(){
   const t=document.getElementById('memory-input').value.trim();if(!t)return;
   S.memories.unshift({text:t,date:new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})});
@@ -1141,27 +1630,24 @@ function addMemory(){
 function renderUs(){
   const sincEl=document.getElementById('us-since'),daysEl=document.getElementById('stat-days');
   if(S.sinceDate){
-    const [sy,sm,sd]=S.sinceDate.split('-').map(Number);
+    const[sy,sm,sd]=S.sinceDate.split('-').map(Number);
     const sinceLocal=new Date(sy,sm-1,sd);
     const todayLocal=new Date();todayLocal.setHours(0,0,0,0);
     const diff=Math.floor((todayLocal-sinceLocal)/86400000);
     if(sincEl)sincEl.textContent='Sejak '+sinceLocal.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
     if(daysEl)daysEl.textContent=Math.max(0,diff);
-  } else {
-    if(sincEl)sincEl.textContent='Atur tanggal di pertemuan → Edit';
-    if(daysEl)daysEl.textContent='—';
-  }
-  document.getElementById('stat-qs').textContent    = S.archive.filter(a=>a.bobbyAns||a.yudditAns).length;
-  document.getElementById('stat-places').textContent = S.places.length;
+  }else{if(sincEl)sincEl.textContent='Atur tanggal di pertemuan → Edit';if(daysEl)daysEl.textContent='—';}
+  document.getElementById('stat-qs').textContent=S.archive.filter(a=>a.bobbyAns||a.yudditAns).length;
+  document.getElementById('stat-places').textContent=S.places.length;
   const mem=document.getElementById('us-memories');
-  if(S.memories.length===0){mem.innerHTML='<div style="font-size:13px;color:var(--ink-light);padding:8px 0;font-weight:500;">Catat momen pertamamu di atas ✦</div>';return;}
-  mem.innerHTML=S.memories.map(m=>`<div class="memory-item"><div class="memory-dot"></div><div><div class="memory-date">${m.date}</div><div class="memory-text">${m.text}</div></div></div>`).join('');
+  if(S.memories.length===0){mem.innerHTML='<div class="memories-empty">Catat momen pertamamu di atas ✦</div>';return;}
+  mem.innerHTML=S.memories.map(m=>`<div class="memory-item"><div class="memory-pip"></div><div><div class="memory-date">${m.date}</div><div class="memory-text">${m.text}</div></div></div>`).join('');
 }
 
-// ═══════════════════════════════════════════════════════
-// BOOTSTRAP
-// ═══════════════════════════════════════════════════════
-if (WHO) {
+// ═══════════════════════════════════
+// BOOT
+// ═══════════════════════════════════
+if(WHO){
   document.getElementById('identity-screen').classList.add('hidden');
   applyIdentityUI();
   init();
